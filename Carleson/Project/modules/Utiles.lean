@@ -29,7 +29,7 @@ theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
 Kernel function for binary powers `N = 2^m`.
 -/
 theorem kernel_two_pow (m : ℕ) (x y : ℝ) : kernel (2^m) x y = 1 + ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y) := by
-  simp[kernel]
+  simp only [kernel, add_right_inj]
   sorry
 
 
@@ -79,8 +79,8 @@ theorem walshRademacherRelation (n : ℕ) (x : ℝ) :
   induction' n using Nat.strong_induction_on with n ih
   set k := n/2 with h_k
   by_cases hzero :n = 0
-  sorry
-  sorry
+  · sorry
+  · sorry
 /--
 Special case of Walsh-Rademacher relation for powers of two.
 -/
@@ -124,9 +124,10 @@ theorem lemma1_2 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
   Walsh.walshFourierPartialSum f (2^M) x =
   ∑ k in Finset.range (2^M),(∫ y in Set.Icc 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1]
-  sorry
-  sorry
-  sorry
+  · sorry
+  · sorry
+  · sorry
+  · sorry
 
 /--
 Lemma 3
