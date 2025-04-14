@@ -517,7 +517,25 @@ Removing an element from the binary representation set.
 -/
 
 theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
-  rw [mem_binaryRepresentationSet_iff ] at h
+  rw [mem_binaryRepresentationSet_iff] at h
+  have h1 : (N - 2^M).testBit M = false := by
+    set N' := N - 2^M with hs
+    have hs: N' + 2^M = N := by
+      rw[hs]
+      sorry
+    rw[← hs] at h
+
+
+
+    sorry
+  ext x
+  simp only [Finset.mem_sdiff, Finset.mem_singleton, mem_binaryRepresentationSet_iff]
+  constructor
+  · sorry
+  · sorry
+  --Nat.testBit_two_pow_add_eq
+  --Nat.testBit_two_pow_add_gt
+ /- rw [mem_binaryRepresentationSet_iff ] at h
   ext x
   simp only [Finset.mem_sdiff, Finset.mem_singleton]
   constructor
@@ -528,7 +546,7 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
       apply (mem_binaryRepresentationSet_iff (N - 2 ^ M) x).mpr ?h.mp.intro.a
       apply Nat.testBit_implies_ge at hr
       sorry
-  · sorry
+  · sorry-/
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
