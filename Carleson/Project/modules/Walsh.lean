@@ -341,7 +341,109 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
           · exact h
           · let h2:= hx.2
             exact h2
+--ten dowód jest taki sam jak wcześniejszy - to nie ma sensu -> wcześniejsze twierdzenie powinno korzystać z wcześniejszego
+theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(walsh n x) =1 := by
+  induction' n using Nat.strong_induction_on with n ih
+  intro x hx
+  set k := n/2 with h_k
+  by_cases hzero :n = 0
+  · rw[hzero, walsh_zero]
+    · linarith
+    · let h1:= hx.1
+      exact h1
+    · let h2:= hx.2
+      exact h2
+  · by_cases hone : n = 1
+    · rw[hone]
+      by_cases h : x< 1/2
+      · rw[walsh_one_left]
+        · linarith
+        · linarith
+        · exact h
+      · push_neg at h
+        rw[walsh_one_right]
+        · linarith
+        · exact h
+        · linarith
+    · have hk2 : k < n := by
+        push_neg at hzero
+        rw[h_k]
+        apply Nat.div2Induction.proof_2
+        apply Nat.pos_of_ne_zero hzero
+      by_cases h0 : Odd n
+      · have hk1 : 2*k+1 = n := by
+          rw[h_k]
+          rw[mul_comm]
+          apply Nat.div_two_mul_two_add_one_of_odd
+          exact h0
+        rw[← hk1]
+        by_cases h : x<1/2
+        · rw[walsh_odd_left]
+          · set y:= 2* x with h_y
+            have hy : 0≤ y ∧ y<1 := by
+              rw[h_y]
+              constructor
+              · linarith
+              · linarith
+            exact ih k hk2 y hy
+          · let h1:= hx.1
+            exact h1
+          · exact h
+        · push_neg at h
+          rw[walsh_odd_right]
+          · set y:= 2* x -1 with h_y
+            have hy : 0≤ y ∧ y<1 := by
+              rw[h_y]
+              constructor
+              · linarith
+              · linarith
+            simp only [mul_neg, neg_mul, neg_neg]
+            exact ih k hk2 y hy
+          · exact h
+          · let h2:= hx.2
+            exact h2
+      · push_neg at h0
+        simp only [Nat.not_odd_iff_even] at h0
+        have hk1 : 2*k = n := by
+          rw[h_k]
+          rw[mul_comm]
+          apply Nat.div_two_mul_two_of_even
+          exact h0
+        rw[← hk1]
+        by_cases h : x<1/2
+        · rw[walsh_even_left]
+          · set y:= 2* x with h_y
+            have hy : 0≤ y ∧ y<1 := by
+              rw[h_y]
+              constructor
+              · linarith
+              · linarith
+            exact ih k hk2 y hy
+          · let h1:= hx.1
+            exact h1
+          · exact h
+        · push_neg at h
+          rw[walsh_even_right]
+          · set y:= 2* x -1 with h_y
+            have hy : 0≤ y ∧ y<1 := by
+              rw[h_y]
+              constructor
+              · linarith
+              · linarith
+            exact ih k hk2 y hy
+          · exact h
+          · let h2:= hx.2
+            exact h2
 
+/--
+Squere of Wlash functions is 1 on `[0,1).`
+-/
+
+theorem sqr_walsh {n : ℕ} (x : ℝ) (h1 : 0 ≤ x)(h2: x < 1) : (walsh n x)*(walsh n x) = 1 := by
+  apply walsh_sqr1
+  constructor
+  · exact h1
+  · exact h2
 
  /--
 Walsh function is zero outside the interval `[0, 1)`.
@@ -352,8 +454,16 @@ simp [walsh, h]
 
 
 
+
+
+
+
 theorem walsh_values {n : ℕ} {x : ℝ} (h1 : 0 ≤ x)(h2: x < 1) : walsh n x = 1 ∨ walsh n x =-1 := by
-  sorry
+  rw[← sq_eq_one_iff, pow_two]
+  apply sqr_walsh
+  · exact h1
+  exact h2
+
 
 /--
 Product of Wlash functions of fixed `n` and different arguments is 0 outside `[0, 1)`.
@@ -369,19 +479,10 @@ theorem mul_walsh_outside' {n : ℕ} (x y : ℝ ) (h : x <0 ∨  1 ≤  x) : (wa
   exact  h
 
 
-/--**ToDo** : Prove the statement about the product of Wlash functions of fixed `n` and different arguments in `[0, 1)`-/
-theorem mul_walsh {n : ℕ} (x y : ℝ ): (walsh n x)*(walsh n y ) =  (if (x <0 ∨  1 ≤  x) ∨ (y <0 ∨  1 ≤  y) then 0 else if (x < 0.5 ∧ y < 0.5) ∨ (x ≥  0.5 ∧ y ≥ 0.5) then 1 else -1) := by
-  sorry
+--**ToDo** : Prove the statement about the product of Wlash functions of fixed `n` and different arguments in `[0, 1)`-/
+--theorem mul_walsh {n : ℕ} (x y : ℝ ): (walsh n x)*(walsh n y ) =
 
 
-
-/--
-Squere of Wlash functions is 1 on `[0,1).`
--/
-
-theorem sqr_walsh {n : ℕ} (x : ℝ) (h1 : 0 ≤ x)(h2: x < 1) : (walsh n x)*(walsh n x) = 1 := by
-  rw[mul_self_eq_one_iff]
-  apply walsh_values h1 h2
 
 
 /--
