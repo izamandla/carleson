@@ -481,6 +481,7 @@ theorem mul_walsh_outside' {n : ℕ} (x y : ℝ ) (h : x <0 ∨  1 ≤  x) : (wa
 
 --**ToDo** : Prove the statement about the product of Wlash functions of fixed `n` and different arguments in `[0, 1)`-/
 --theorem mul_walsh {n : ℕ} (x y : ℝ ): (walsh n x)*(walsh n y ) =
+--this has to be done from walsh redamacher relation
 
 
 
@@ -594,6 +595,7 @@ Binary representation set of `0` is empty.
 -/
 theorem binaryRepresentationSet_zero : binaryRepresentationSet 0 = ∅ := by
   simp [binaryRepresentationSet, Nat.testBit_zero]
+
 
 
 /--

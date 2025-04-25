@@ -73,13 +73,14 @@ theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
 /--
 Walsh functions expressed using products of Rademacher functions.
 -/
-
-theorem walshRademacherRelation (n : ℕ) (x : ℝ) :
+-- co z 0 tutaj? ewidentnie nie działa bo wychodzi zbiór pusty ale no xd
+theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n>0 ):
   Walsh.walsh n x = ∏ m in Walsh.binaryRepresentationSet n , Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih
   set k := n/2 with h_k
-  by_cases hzero :n = 0
-  · sorry
+  by_cases hone :n = 1
+  · rw[hone]
+    sorry
   · sorry
 /--
 Special case of Walsh-Rademacher relation for powers of two.
