@@ -3,6 +3,7 @@ import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 
 open Function Set Classical
+open unitInterval
 noncomputable section
 
 
@@ -73,15 +74,20 @@ theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
 /--
 Walsh functions expressed using products of Rademacher functions.
 -/
--- co z 0 tutaj? ewidentnie nie działa bo wychodzi zbiór pusty ale no xd
-theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n>0 ):
+
+theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n= 0 → x ∈ Ico 0 1):
   Walsh.walsh n x = ∏ m in Walsh.binaryRepresentationSet n , Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih
   set k := n/2 with h_k
-  by_cases hone :n = 1
-  · rw[hone]
-    sorry
+  by_cases hzero :n = 0
+  · rw[hzero] at hn
+    simp only [mem_Icc, forall_const] at hn
+    rw[hzero, Walsh.walsh_zero, Walsh.binaryRepresentationSet_zero]
+    · simp only [Finset.prod_empty]
+    · exact hn.1
+    · exact hn.2
   · sorry
+
 /--
 Special case of Walsh-Rademacher relation for powers of two.
 -/
