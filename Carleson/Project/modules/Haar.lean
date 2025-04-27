@@ -409,6 +409,73 @@ theorem haarFunctionScaled_normalization (k n : ℤ ) : ∫ x in Set.Ico (2^k*n 
     apply zpow_pos
     simp only [Nat.ofNat_pos]
 
+theorem helphaarzero1 (n k: ℕ) (x : ℝ ) (hn : n ∈ Finset.range (2^(k+1))\ Finset.range (2^k)) (hx : x ∈ Ico 0 0.5 ) : (2^(k+1)*x - n ) ∉ Ico 0 1 := by
+  simp only [Finset.mem_sdiff, Finset.mem_range, not_lt] at hn
+  simp only [mem_Ico] at hx
+  simp only [mem_Ico, Decidable.not_and_iff_or_not]
+  left
+  push_neg
+  calc 2 ^ (k + 1) * x - ↑n < 2 ^ (k + 1) * 0.5 - ↑n := by sorry
+  _= 2^k - n := by
+    simp only [sub_left_inj]
+    ring
+  _≤ 2^k - 2^k := sorry
+  _= 0 := by simp
+
+
+theorem helphaarzero2 (n k: ℕ) (x : ℝ ) (hn : n ∈ Finset.range (2^k)) (hx : x ∈ Ico 0.5 1 ) : (2^(k+1)*x - n ) ∉ Ico 0 1 := by
+  simp only [Finset.mem_range] at hn
+  simp only [mem_Ico] at hx
+  simp only [mem_Ico, Decidable.not_and_iff_or_not]
+  right
+  push_neg
+  calc 2 ^ (k + 1) * x - ↑n ≥  2 ^ (k + 1) * 0.5 - ↑n := by sorry
+  _= 2^k - n := by
+    simp only [sub_left_inj]
+    ring
+  _≥  2^k - 2^k +1 := sorry
+  _= 1 := by simp
+
+theorem haarzero1 (n k: ℕ) (x : ℝ ) (hn : n ∈ Finset.range (2^(k+1))\ Finset.range (2^k)) (hx : x ∈ Ico 0 0.5 ) : haarFunctionScaled (-(k+1))  n x = 0 := by
+have h : (2^(k+1)*x - n ) < 0 ∨ (2^(k+1)*x - n ) ≥ 1 := by
+  by_contra hf
+  push_neg at hf
+  rw[← mem_Ico] at hf
+  apply helphaarzero1
+  exact hn
+  exact hx
+  exact hf
+rw[haarFunctionScaled_outside ]
+exact h
+
+
+
+theorem haarzero2 (n k: ℕ) (x : ℝ ) (hn : n ∈ Finset.range (2^k)) (hx : x ∈ Ico 0.5 1 ) : haarFunctionScaled (-(k+1))  n x = 0 := by
+have h : (2^(k+1)*x - n ) < 0 ∨ (2^(k+1)*x - n ) ≥ 1 := by
+  by_contra hf
+  push_neg at hf
+  rw[← mem_Ico] at hf
+  apply helphaarzero2
+  exact hn
+  exact hx
+  exact hf
+rw[haarFunctionScaled_outside ]
+exact h
+
+theorem haarsumzero1 (k : ℕ ) (x : ℝ ) (hx : x ∈ Ico 0 0.5 ) : ∑ n in Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x = 0 := by
+  apply Finset.sum_eq_zero
+  intro n hn
+  apply haarzero1
+  · exact hn
+  · exact hx
+
+
+theorem haarsumzero2 (k : ℕ ) (x : ℝ ) (hx : x ∈ Ico 0.5 1 ) : ∑ n in Finset.range (2^k), haarFunctionScaled (-(k+1)) n x = 0 := by
+  apply Finset.sum_eq_zero
+  intro n hn
+  apply haarzero2
+  · exact hn
+  · exact hx
 
 
 /--
@@ -439,6 +506,22 @@ theorem rademacherFunction_outside (k : ℕ) (t : ℝ) (h : t < 0 ∨ t ≥ 1) :
   apply haarFunctionScaled_outside_zero_one h (Int.ofNat_zero_le l)
   simp only [Int.cast_natCast, neg_neg, zpow_natCast]
   exact_mod_cast h1
+
+theorem rademacherassumofhaar (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x = 2^(- (k+1) / 2 : ℝ ) * ∑ n in Finset.range (2^k), haarFunctionScaled (-(k+1)) n x + 2^(- (k+1) / 2 : ℝ ) * ∑ n in Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
+  unfold rademacherFunction
+  push_cast
+  rw[← left_distrib]
+  simp only [ Int.reduceNeg, mul_eq_mul_left_iff, Nat.ofNat_nonneg]
+  left
+  sorry
+
+theorem rademacher2assumofhaar (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2*x) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n in Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
+  unfold rademacherFunction
+  unfold haarFunctionScaled
+  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
+    Int.cast_add, Int.cast_one]
+
+  sorry
 
 /- **ToDo** : Prove statements about product of Rademacher functions and its integrals. -/
 end Haar

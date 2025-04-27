@@ -86,7 +86,19 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n= 0 → x ∈ Ico 0 
     · simp only [Finset.prod_empty]
     · exact hn.1
     · exact hn.2
-  · sorry
+  · by_cases h0 : Odd n
+    · have hk1 : 2*k+1 = n := by
+        rw[h_k]
+        rw[mul_comm]
+        apply Nat.div_two_mul_two_add_one_of_odd
+        exact h0
+      rw[← hk1]
+      by_cases h : x<1/2
+      · sorry
+      · push_neg at h
+        sorry
+    · sorry
+
 
 /--
 Special case of Walsh-Rademacher relation for powers of two.
