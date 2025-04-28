@@ -598,6 +598,9 @@ theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : 
   rw[mul_comm]
   sorry
 
+theorem rademachernextsecondhalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0.5 1) : rademacherFunction (k+1) x  = rademacherFunction k (2*x - 1) := by
+  sorry
+
 
 
 /- **ToDo** : Prove statements about product of Rademacher functions and its integrals. -/
