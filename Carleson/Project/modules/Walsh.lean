@@ -612,7 +612,9 @@ theorem binaryRepresentationSet_not_zero (n : ℕ ) (h : n >0 )  : binaryReprese
   rw [h] at h_i
   exact Finset.not_mem_empty i h_i
 
-
+theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = { M } := by
+  rw[h]
+  sorry
 
 
 /--
@@ -621,21 +623,19 @@ Removing an element from the binary representation set.
 
 theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
   rw [mem_binaryRepresentationSet_iff] at h
+  have h0 : 2^M ≤ N := by
+    apply Nat.testBit_implies_ge h
   have h1 : (N - 2^M).testBit M = false := by
     set N' := N - 2^M with hs
     have hs: N' + 2^M = N := by
-      rw[hs]
-      sorry
-    rw[← hs] at h
-
-
-
-    sorry
+      rw[hs, Nat.sub_add_cancel]
+      exact h0
+    rw[← hs, add_comm, Nat.testBit_two_pow_add_eq ]at h
+    simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
+    exact h
   ext x
-  simp only [Finset.mem_sdiff, Finset.mem_singleton, mem_binaryRepresentationSet_iff]
-  constructor
-  · sorry
-  · sorry
+
+  sorry
   --Nat.testBit_two_pow_add_eq
   --Nat.testBit_two_pow_add_gt
  /- rw [mem_binaryRepresentationSet_iff ] at h
