@@ -543,9 +543,15 @@ theorem rademacher2assumofhaar1 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
     Int.cast_add, Int.cast_one]
-  rw[Finset.mul_sum, Finset.mul_sum, ← mul_assoc ]
+  rw[Finset.mul_sum, Finset.mul_sum, ← mul_assoc]
+  apply Finset.sum_equiv
+  · sorry
+  · intro i hi
+    rw[← mul_assoc, neg_eq_neg_one_mul]
 
-  sorry
+    sorry
+  · exact Denumerable.eqv ℕ
+
 
 theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2*x -1 ) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
@@ -568,8 +574,28 @@ theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : 
   ring_nf
   rw[mul_assoc, ← pow_succ 2 k]
   simp_rw [neg_sub_left]
+  rw[Finset.sum_eq_zero]
+  intro i hi
+  set j:= 2 ^ k + i with hj
+  have hj0 : j ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) :=by
+    sorry
+  norm_cast
+  rw[← hj]
+  push_cast
+  have h : haarFunctionScaled (-(k + 1)) j x = 0 := by
+    apply haarzero1
+    · exact hj0
+    · exact hx
+  unfold haarFunctionScaled at h
+  simp only [neg_add_rev, Int.reduceNeg, Int.cast_add, Int.cast_neg, Int.cast_one, Int.cast_natCast,
+    neg_neg, mul_eq_zero, Nat.ofNat_nonneg] at h
+  have h1 : 2 ^ ((↑k + 1) / 2) ≠ 0 := by simp
+  have h2 : haarFunction (2 ^ (↑k + 1) * x - ↑j) = 0 := by
 
-
+    sorry
+  simp only [one_div, mul_eq_zero, Nat.ofNat_nonneg]
+  right
+  rw[mul_comm]
   sorry
 
 
