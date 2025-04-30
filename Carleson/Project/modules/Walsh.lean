@@ -613,8 +613,24 @@ theorem binaryRepresentationSet_not_zero (n : ℕ ) (h : n >0 )  : binaryReprese
   exact Finset.not_mem_empty i h_i
 
 theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = { M } := by
-  rw[h]
-  sorry
+  rw[h,binaryRepresentationSet]
+  ext x
+  constructor
+  · simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
+    intro h0
+    obtain ⟨ h1, h2 ⟩ := h0
+    by_contra hx
+    rw[eq_comm] at hx
+    push_neg at hx
+    apply Nat.testBit_two_pow_of_ne at hx
+    exact Std.Tactic.BVDecide.Reflect.Bool.false_of_eq_true_of_eq_false h2 hx
+  · simp only [Finset.mem_singleton, Finset.mem_filter, Finset.mem_range]
+    intro h0
+    rw[h0]
+    constructor
+    · rw[Nat.size_pow]
+      linarith
+    · apply Nat.testBit_two_pow_self
 
 
 /--
@@ -634,8 +650,11 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
     simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
     exact h
   ext x
+  constructor
+  · intro hx
 
-  sorry
+    sorry
+  · sorry
   --Nat.testBit_two_pow_add_eq
   --Nat.testBit_two_pow_add_gt
  /- rw [mem_binaryRepresentationSet_iff ] at h
