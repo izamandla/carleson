@@ -543,21 +543,57 @@ theorem rademacher2assumofhaar1 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
     Int.cast_add, Int.cast_one]
-  rw[Finset.mul_sum, Finset.mul_sum, ← mul_assoc]
-  apply Finset.sum_equiv
-  · sorry
-  · intro i hi
-    rw[← mul_assoc, neg_eq_neg_one_mul]
-
-    sorry
-  · exact Denumerable.eqv ℕ
-
+  rw[Finset.mul_sum, Finset.mul_sum, ← mul_assoc, ← pow_succ]
+  apply Finset.sum_congr rfl
+  intro n hn
+  rw[← mul_assoc, ← mul_assoc]
+  congrm ?_ * haarFunction (?_)
+  · have h1 : (2 : ℝ) ^ ((k : ℝ ) / 2) ≠ 0 := by
+      by_cases hk : k = 0
+      · rw[hk]
+        simp only [CharP.cast_eq_zero, zero_div, Real.rpow_zero, ne_eq, one_ne_zero,
+          not_false_eq_true]
+      rw[Real.rpow_ne_zero]
+      · simp
+      · simp
+      · simp only [ne_eq, div_eq_zero_iff, Nat.cast_eq_zero, OfNat.ofNat_ne_zero, or_false]
+        exact hk
+    have h2 : (2 : ℝ) ^ (((k : ℝ ) +1)/ 2) ≠ 0 := by
+      rw[Real.rpow_ne_zero]
+      · simp
+      · simp
+      · simp only [ne_eq, div_eq_zero_iff, OfNat.ofNat_ne_zero, or_false]
+        exact Nat.cast_add_one_ne_zero k
+    simp_rw [neg_div, Real.rpow_neg zero_le_two]
+    rw [mul_comm, GroupWithZero.mul_inv_cancel _ h1, mul_comm, GroupWithZero.mul_inv_cancel _ h2]
+  · norm_cast
 
 theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2*x -1 ) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
     Int.cast_add, Int.cast_one]
+  rw[Finset.mul_sum, Finset.mul_sum]
+  have hj0 (i : ℕ ): 2 ^ k + i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i ∈ Finset.range (2 ^ k) ):=by
+    simp only [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
+      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]
+  have hj1 (i : ℕ ): i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i - 2 ^ k ∈ Finset.range (2 ^ k) ):=by
+    simp only [Finset.mem_sdiff, Finset.mem_range, not_lt]
+    constructor
+    · sorry
+    · sorry
+  let e : Finset.range (2 ^ k) ≃ ((Finset.range (2 ^ (k+1)))\Finset.range (2 ^ k) : Finset _) := {
+    toFun := fun i ↦ ⟨2 ^ k + i, (hj0 i).2 i.2⟩
+    invFun := fun i ↦ ⟨i - 2 ^ k, (hj1 i).1 i.2⟩
+    left_inv := sorry
+    right_inv := sorry
+  }
+
+  apply Finset.sum_equiv (fun )
+  · intro i
+    simp [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
+      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]
+    sorry
   sorry
 
 theorem rademachernext (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) + rademacherFunction k (2*x -1 ) := by
