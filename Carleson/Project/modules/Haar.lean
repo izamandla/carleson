@@ -578,7 +578,11 @@ theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : 
   intro i hi
   set j:= 2 ^ k + i with hj
   have hj0 : j ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) :=by
-    sorry
+    rw[hj]
+    simp only [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
+      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]
+    simp only [Finset.mem_range] at hi
+    exact hi
   norm_cast
   rw[← hj]
   push_cast
@@ -589,17 +593,47 @@ theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : 
   unfold haarFunctionScaled at h
   simp only [neg_add_rev, Int.reduceNeg, Int.cast_add, Int.cast_neg, Int.cast_one, Int.cast_natCast,
     neg_neg, mul_eq_zero, Nat.ofNat_nonneg] at h
-  have h1 : 2 ^ ((↑k + 1) / 2) ≠ 0 := by simp
-  have h2 : haarFunction (2 ^ (↑k + 1) * x - ↑j) = 0 := by
-
-    sorry
   simp only [one_div, mul_eq_zero, Nat.ofNat_nonneg]
   right
   rw[mul_comm]
-  sorry
+  apply Or.resolve_left h
+  push_neg
+  refine (Real.rpow_ne_zero ?_ ?_).mpr ?_
+  · linarith
+  · simp only [ne_eq, div_eq_zero_iff, OfNat.ofNat_ne_zero, or_false]
+    linarith
+  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
+
 
 theorem rademachernextsecondhalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0.5 1) : rademacherFunction (k+1) x  = rademacherFunction k (2*x - 1) := by
-  sorry
+  rw[rademachernext]
+  simp only [add_left_eq_self]
+  unfold rademacherFunction
+  simp only [mul_eq_zero, Nat.ofNat_nonneg]
+  right
+  unfold haarFunctionScaled
+  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast]
+  ring_nf
+  rw[mul_assoc, ← pow_succ 2 k]
+  rw[Finset.sum_eq_zero]
+  intro i hi
+  have h : haarFunctionScaled (-(k + 1)) i x = 0 := by
+    apply haarzero2
+    · exact hi
+    · exact hx
+  unfold haarFunctionScaled at h
+  simp only [neg_add_rev, Int.reduceNeg, Int.cast_add, Int.cast_neg, Int.cast_one, Int.cast_natCast,
+    neg_neg, mul_eq_zero, Nat.ofNat_nonneg] at h
+  simp only [one_div, mul_eq_zero, Nat.ofNat_nonneg]
+  right
+  rw[mul_comm]
+  apply Or.resolve_left h
+  push_neg
+  refine (Real.rpow_ne_zero ?_ ?_).mpr ?_
+  · linarith
+  · simp only [ne_eq, div_eq_zero_iff, OfNat.ofNat_ne_zero, or_false]
+    linarith
+  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
 
 
 
