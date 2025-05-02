@@ -1,7 +1,7 @@
 import Carleson.Project.modules.DyadicStructures
 import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
-import Carleson.Projecet.BinaryRepresentationSet
+import Carleson.Project.modules.BinaryRepresentationSet
 open Function Set Classical
 open unitInterval
 noncomputable section
