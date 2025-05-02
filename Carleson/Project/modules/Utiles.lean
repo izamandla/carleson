@@ -1,7 +1,7 @@
 import Carleson.Project.modules.DyadicStructures
 import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
-
+import Carleson.Projecet.BinaryRepresentationSet
 open Function Set Classical
 open unitInterval
 noncomputable section
@@ -37,6 +37,13 @@ theorem kernel_two_pow (m : ℕ) (x y : ℝ) : kernel (2^m) x y = 1 + ∑ n in F
 end Kernel
 
 /- **ToDo** : Connect the facts about scaled Haar, Rademacher and Walsh functions with dyadic structures. -/
+
+theorem wlashradhelp0 (n m : ℕ)(h: m ∈ Walsh.binaryRepresentationSet n) : (m+1) ∈ Walsh.binaryRepresentationSet (2*n) := by
+  rw[mem_binaryRepresentationSet_iff] at h
+  rw[mem_binaryRepresentationSet_iff]
+  rw[← Nat.testBit_div_two]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_left₀]
+  rw[h]
 
 /--
 Relation between Haar function and Walsh functions.
