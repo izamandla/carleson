@@ -2,7 +2,7 @@ import Mathlib
 open Function Set Classical
 noncomputable section
 
-/- ## Walsh Functions and Walsh-Fourier Series -/
+/- ## Binary representation set -/
 namespace BinaryRepresentationSet
 
 /--
@@ -111,6 +111,22 @@ Natural number can be written using the sum of two to the power of element of bi
 
 theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^k = n := by
   induction' n using Nat.strong_induction_on with n ih
+  sorry
+
+
+
+theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) = 2*n := by
+  conv_rhs => rw[← binaryRepresentationSet_explicit n, Finset.mul_sum]
+  apply Finset.sum_congr
+  · simp
+  · intro k hk
+    rw[pow_succ, mul_comm]
+
+theorem binaryRepresentationSet_equiv2help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
+  rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
+
+
+theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
   sorry
 
 /--

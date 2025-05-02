@@ -574,27 +574,42 @@ theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
     Int.cast_add, Int.cast_one]
   rw[Finset.mul_sum, Finset.mul_sum]
-  have hj0 (i : ℕ ): 2 ^ k + i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i ∈ Finset.range (2 ^ k) ):=by
+  /-have hj0 (i : ℕ ): 2 ^ k + i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i ∈ Finset.range (2 ^ k) ):=by
     simp only [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
-      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]
-  have hj1 (i : ℕ ): i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i - 2 ^ k ∈ Finset.range (2 ^ k) ):=by
-    simp only [Finset.mem_sdiff, Finset.mem_range, not_lt]
+      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]-/
+  let i : ℕ → ℕ  := fun i ↦ i + 2^k
+  apply Finset.sum_nbij i
+  · intro m
+    simp only [Finset.mem_range, Finset.mem_sdiff, not_lt, i,le_add_iff_nonneg_left, zero_le, and_true, pow_succ, mul_comm, two_mul, add_lt_add_iff_right, imp_self]
+  · unfold InjOn
+    simp only [Finset.coe_range, mem_Iio]
+    intro z hz
+    intro y hy
+    intro h
+    simp only [add_left_inj, i] at h
+    exact h
+  · simp only [Finset.coe_range, Finset.coe_sdiff, Iio_diff_Iio]
+    unfold SurjOn
+    intro y hy
+    simp only [mem_image, mem_Iio,i]
+    simp only [mem_Ico] at hy
+    use  y - 2^k
     constructor
+    · refine Nat.sub_lt_left_of_lt_add ?_ ?_
+      · exact hy.1
+      · rw[← mul_two, mul_comm, ← Nat.pow_add_one' ]
+        exact hy.2
+    · refine Nat.sub_add_cancel ?_
+      exact hy.1
+  · intro a ha
+    rw[← mul_assoc]
+    simp only [i]
+    push_cast
+    rw[mul_sub, ← mul_assoc, mul_comm (2^k), mul_one, ← pow_succ']
+    ring_nf
+    congrm ?_ * haarFunction (?_)
     · sorry
-    · sorry
-  let e : Finset.range (2 ^ k) ≃ ((Finset.range (2 ^ (k+1)))\Finset.range (2 ^ k) : Finset _) := {
-    toFun := fun i ↦ ⟨2 ^ k + i, (hj0 i).2 i.2⟩
-    invFun := fun i ↦ ⟨i - 2 ^ k, (hj1 i).1 i.2⟩
-    left_inv := sorry
-    right_inv := sorry
-  }
-
-  apply Finset.sum_equiv (fun )
-  · intro i
-    simp [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
-      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]
     sorry
-  sorry
 
 theorem rademachernext (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) + rademacherFunction k (2*x -1 ) := by
   rw[rademacherassumofhaar, rademacher2assumofhaar1, rademacher2assumofhaar2]
