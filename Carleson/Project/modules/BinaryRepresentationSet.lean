@@ -65,8 +65,38 @@ theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = 
       linarith
     · apply Nat.testBit_two_pow_self
 
+theorem remove_bithelp (N M a : ℕ ) (ha1 : a ∈ binaryRepresentationSet N)
+(ha2 : a ≠  M) (h : M ∈ binaryRepresentationSet N) : a ∈ binaryRepresentationSet (N - 2 ^ M) := by
+  refine (mem_binaryRepresentationSet_iff (N - 2 ^ M) a).mpr ?_
+  simp only [mem_binaryRepresentationSet_iff] at h
+  have h0 : 2^M ≤ N := by
+    apply Nat.testBit_implies_ge h
+  set N' := N - 2^M with hs
+  have hs1: N' + 2^M = N := by
+    rw[hs, Nat.sub_add_cancel]
+    exact h0
+  simp only [mem_binaryRepresentationSet_iff] at ha1
+  rw[← hs1, add_comm] at ha1
+  rw[← hs1, add_comm] at h
+  rw[Nat.testBit_two_pow_add_eq] at h
+  simp at h
 
+  sorry
 
+theorem remove_bit2 (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
+  refine Finset.ext_iff.mpr ?_
+  intro a
+  constructor
+  · intro ha
+    simp only [Finset.mem_sdiff, Finset.mem_singleton] at ha
+    obtain ⟨ ha1, ha2 ⟩ := ha
+    sorry
+  · intro ha
+    simp only [Finset.mem_sdiff, Finset.mem_singleton]
+    constructor
+    · sorry
+    ·
+      sorry
 
 /--
 Removing an element from the binary representation set.
@@ -76,20 +106,28 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
   rw [mem_binaryRepresentationSet_iff] at h
   have h0 : 2^M ≤ N := by
     apply Nat.testBit_implies_ge h
+  set N' := N - 2^M with hs
+  have hs1: N' + 2^M = N := by
+    rw[hs, Nat.sub_add_cancel]
+    exact h0
   have h1 : (N - 2^M).testBit M = false := by
-    set N' := N - 2^M with hs
-    have hs: N' + 2^M = N := by
-      rw[hs, Nat.sub_add_cancel]
-      exact h0
-    rw[← hs, add_comm, Nat.testBit_two_pow_add_eq ]at h
+    rw[← hs1, add_comm, Nat.testBit_two_pow_add_eq ]at h
     simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
     exact h
+  rw[hs]
   ext x
+  simp only [Finset.mem_sdiff, Finset.mem_singleton, mem_binaryRepresentationSet_iff]
   constructor
   · intro hx
-
+    obtain ⟨hx1,hx2⟩ := hx
+    push_neg at hx2
+    apply Nat.testBit_implies_ge at hx1
     sorry
-  · sorry
+  · intro hx
+    constructor
+    · sorry
+    · sorry
+
   --Nat.testBit_two_pow_add_eq
   --Nat.testBit_two_pow_add_gt
  /- rw [mem_binaryRepresentationSet_iff ] at h
@@ -104,6 +142,9 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
       apply Nat.testBit_implies_ge at hr
       sorry
   · sorry-/
+
+
+
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
