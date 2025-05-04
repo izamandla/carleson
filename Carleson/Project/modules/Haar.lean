@@ -574,9 +574,29 @@ theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
     Int.cast_add, Int.cast_one]
   rw[Finset.mul_sum, Finset.mul_sum]
-  /-have hj0 (i : ℕ ): 2 ^ k + i ∈ Finset.range (2 ^ (k+1))\Finset.range (2 ^ k) ↔ (i ∈ Finset.range (2 ^ k) ):=by
-    simp only [Finset.mem_sdiff, Finset.mem_range, add_lt_iff_neg_left, not_lt_zero',
-      not_false_eq_true, and_true, pow_add, Nat.pow_one, Nat.mul_two, add_lt_add_iff_left]-/
+  have h1 : (2 : ℝ) ^ ((k : ℝ ) * (1/2)) ≠ 0 := by
+    by_cases hk : k = 0
+    · rw[hk]
+      simp only [CharP.cast_eq_zero, one_div, zero_mul, Real.rpow_zero, ne_eq, one_ne_zero,
+        not_false_eq_true]
+    · rw[Real.rpow_ne_zero]
+      · simp
+      · simp
+      · simp only [one_div, ne_eq, mul_eq_zero, Nat.cast_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero,
+        or_false]
+        exact hk
+  have h2 : (2 : ℝ) ^ ((1/2) + ((k : ℝ )* (1/2))) ≠ 0 := by
+    rw[Real.rpow_ne_zero]
+    · simp
+    · simp
+    · simp only [one_div, ne_eq]
+      push_neg
+      ring_nf
+      rw[ne_iff_lt_or_gt]
+      right
+      calc
+        ((1/2) :ℝ ) + ↑k * (1 / 2) ≥  1/2 := by linarith
+        _>0 := by linarith
   let i : ℕ → ℕ  := fun i ↦ i + 2^k
   apply Finset.sum_nbij i
   · intro m
@@ -608,8 +628,19 @@ theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
     rw[mul_sub, ← mul_assoc, mul_comm (2^k), mul_one, ← pow_succ']
     ring_nf
     congrm ?_ * haarFunction (?_)
-    · sorry
-    sorry
+    · simp_rw [neg_div]
+      have h0 : -1 * (1 / 2) + -((k:ℝ) * (1 / 2)) = -(1 / 2 + ↑k * (1 / 2)) :=by
+        rw[← neg_eq_neg_one_mul, neg_add]
+      rw[neg_eq_neg_one_mul, ← mul_assoc, mul_neg_one, neg_eq_neg_one_mul, mul_assoc, neg_one_mul, h0, Real.rpow_neg zero_le_two, Real.rpow_neg zero_le_two]
+      rw [mul_comm, GroupWithZero.mul_inv_cancel _ h1, mul_comm, GroupWithZero.mul_inv_cancel _ h2]
+    simp only [add_left_inj]
+    rw[mul_assoc, ← pow_succ]
+    simp only [mul_eq_mul_left_iff]
+    left
+    norm_cast
+    simp only [Nat.ofNat_pos, ne_eq, OfNat.ofNat_ne_one, not_false_eq_true, pow_right_inj₀]
+    linarith
+
 
 theorem rademachernext (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) + rademacherFunction k (2*x -1 ) := by
   rw[rademacherassumofhaar, rademacher2assumofhaar1, rademacher2assumofhaar2]
