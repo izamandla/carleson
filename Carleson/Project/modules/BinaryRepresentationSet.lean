@@ -165,10 +165,15 @@ theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentat
 
 theorem binaryRepresentationSet_equiv2help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
   rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
+--to mozna z tego kolejnego --moze tak by bylo lepiej??
 
 
 theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
-  sorry
+  simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
+  rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
+  simp
+
+
 
 /--
 Binary representation set has maximal element.

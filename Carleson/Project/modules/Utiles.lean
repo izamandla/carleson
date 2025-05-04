@@ -31,6 +31,7 @@ Kernel function for binary powers `N = 2^m`.
 -/
 theorem kernel_two_pow (m : ℕ) (x y : ℝ) : kernel (2^m) x y = 1 + ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y) := by
   simp only [kernel, add_right_inj]
+
   sorry
 
 
@@ -82,18 +83,22 @@ theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
 Walsh functions expressed using products of Rademacher functions.
 -/
 
-theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n= 0 → x ∈ Ico 0 1):
+theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
   Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih
-  set k := n/2 with h_k
   by_cases hzero :n = 0
-  · rw[hzero] at hn
-    simp only [mem_Icc, forall_const] at hn
-    rw[hzero, Walsh.walsh_zero, BinaryRepresentationSet.binaryRepresentationSet_zero]
+  · rw[hzero]
+    rw[BinaryRepresentationSet.binaryRepresentationSet_zero, Walsh.walsh_zero]
     · simp only [Finset.prod_empty]
-    · exact hn.1
-    · exact hn.2
-  · by_cases h0 : Odd n
+    · exact hx1
+    · exact hx2
+  · set k := n/2 with h_k
+    have hk0 : k < n := by
+      rw[h_k]
+      refine Nat.bitwise_rec_lemma ?_
+      push_neg at hzero
+      exact hzero
+    by_cases h0 : Odd n
     · have hk1 : 2*k+1 = n := by
         rw[h_k]
         rw[mul_comm]
@@ -101,10 +106,51 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n= 0 → x ∈ Ico 0 
         exact h0
       rw[← hk1]
       by_cases h : x<1/2
-      · sorry
-      · push_neg at h
+      · rw[Walsh.walsh_odd_left hx1 h]
+        set y:= 2* x with h_y
+        have hy : 0≤ y ∧ y<1 := by
+          rw[h_y]
+          constructor
+          · linarith
+          · linarith
+        -- brakuje relacji miedzy bin rep set n i bin rep set 2n+1
         sorry
-    · sorry
+      · push_neg at h
+        rw[Walsh.walsh_odd_right h hx2]
+        set y:= 2* x -1 with h_y
+        have hy : 0≤ y ∧ y<1 := by
+          rw[h_y]
+          constructor
+          · linarith
+          · linarith
+        sorry
+    · rw[Nat.not_odd_iff_even ] at h0
+      have hk1 : 2*k = n := by
+        rw[h_k]
+        rw[mul_comm]
+        apply Nat.div_two_mul_two_of_even
+        exact h0
+      rw[← hk1]
+      by_cases h : x<1/2
+      · rw[Walsh.walsh_even_left hx1 h]
+        set y:= 2* x with h_y
+        have hy : 0≤ y ∧ y<1 := by
+          rw[h_y]
+          constructor
+          · linarith
+          · linarith
+        --exact ih k hk0 y hy
+        sorry
+      · push_neg at h
+        rw[Walsh.walsh_even_right h hx2]
+        set y:= 2* x -1 with h_y
+        have hy : 0≤ y ∧ y<1 := by
+          rw[h_y]
+          constructor
+          · linarith
+          · linarith
+        sorry
+
 
 
 /--
