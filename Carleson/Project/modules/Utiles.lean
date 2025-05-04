@@ -14,7 +14,7 @@ namespace Kernel
 Kernel function defined using Haar functions and binary representation sets.
 -/
 def kernel (N : ℕ) (x y : ℝ) : ℝ :=
-    1 + ∑ m in Walsh.binaryRepresentationSet N, ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y)
+    1 + ∑ m in BinaryRepresentationSet.binaryRepresentationSet N, ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y)
 
 
 /--
@@ -22,7 +22,7 @@ The kernel function at `N = 0` is constant 1.
 -/
 theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
   simp only [kernel, add_right_eq_self]
-  rw[Walsh.binaryRepresentationSet_zero]
+  rw[BinaryRepresentationSet.binaryRepresentationSet_zero]
   exact rfl
 
 
@@ -38,9 +38,9 @@ end Kernel
 
 /- **ToDo** : Connect the facts about scaled Haar, Rademacher and Walsh functions with dyadic structures. -/
 
-theorem wlashradhelp0 (n m : ℕ)(h: m ∈ Walsh.binaryRepresentationSet n) : (m+1) ∈ Walsh.binaryRepresentationSet (2*n) := by
-  rw[mem_binaryRepresentationSet_iff] at h
-  rw[mem_binaryRepresentationSet_iff]
+theorem wlashradhelp0 (n m : ℕ)(h: m ∈ BinaryRepresentationSet.binaryRepresentationSet n) : (m+1) ∈ BinaryRepresentationSet.binaryRepresentationSet (2*n) := by
+  rw[BinaryRepresentationSet.mem_binaryRepresentationSet_iff] at h
+  rw[BinaryRepresentationSet.mem_binaryRepresentationSet_iff]
   rw[← Nat.testBit_div_two]
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_left₀]
   rw[h]
@@ -83,13 +83,13 @@ Walsh functions expressed using products of Rademacher functions.
 -/
 
 theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hn : n= 0 → x ∈ Ico 0 1):
-  Walsh.walsh n x = ∏ m in Walsh.binaryRepresentationSet n , Haar.rademacherFunction m x := by
+  Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih
   set k := n/2 with h_k
   by_cases hzero :n = 0
   · rw[hzero] at hn
     simp only [mem_Icc, forall_const] at hn
-    rw[hzero, Walsh.walsh_zero, Walsh.binaryRepresentationSet_zero]
+    rw[hzero, Walsh.walsh_zero, BinaryRepresentationSet.binaryRepresentationSet_zero]
     · simp only [Finset.prod_empty]
     · exact hn.1
     · exact hn.2
@@ -118,11 +118,11 @@ theorem differentwalshRademacherRelation (n : ℕ) (x : ℝ) :
 Walsh-Rademacher relation.
 -/
 theorem walshRademacherRelationresult {M N : ℕ} (h : 2^M ≤ N) (x : ℝ) :
-  Walsh.walsh N x = Walsh.walsh (2^M) x * ∏ m in Walsh.binaryRepresentationSet (N - (2^M)) , Haar.rademacherFunction m x := by
+  Walsh.walsh N x = Walsh.walsh (2^M) x * ∏ m in BinaryRepresentationSet.binaryRepresentationSet (N - (2^M)) , Haar.rademacherFunction m x := by
   simp [walshRademacherRelation]
-  have h1: Walsh.binaryRepresentationSet (2 ^ M) ∪ Walsh.binaryRepresentationSet (N - 2 ^ M)= Walsh.binaryRepresentationSet N := by
-    rw[← Walsh.remove_bit]
-    unfold Walsh.binaryRepresentationSet
+  have h1: BinaryRepresentationSet.binaryRepresentationSet (2 ^ M) ∪ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)= BinaryRepresentationSet.binaryRepresentationSet N := by
+    rw[← BinaryRepresentationSet.remove_bit]
+    unfold BinaryRepresentationSet.binaryRepresentationSet
     sorry
     sorry
   sorry
