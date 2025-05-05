@@ -143,7 +143,48 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
   · sorry-/
 
 
+theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
+  simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
+  rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
+  simp
 
+theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
+  let i : ℕ → ℕ  := fun i ↦ i + 1
+  apply Finset.sum_nbij i
+  · intro a ha
+    simp only [i]
+    rw[← binaryRepresentationSet_equiv2]
+    exact ha
+  · unfold InjOn
+    simp only [Finset.mem_coe]
+    intro z hz
+    intro y hy
+    intro h
+    simp only [add_left_inj, i] at h
+    exact h
+  · unfold SurjOn
+    intro y hy
+    simp only [mem_image, Finset.mem_coe, i]
+    set s:= y -1 with hs --needed that bin rep set of doesnt consist 0
+    sorry
+  · simp
+
+
+
+theorem binaryRepresentationSet_equiv2plus1 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1) := by
+  simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
+  rw[Nat.testBit_succ]
+  have h : (2 * n + 1) / 2 = n := by
+    set l:= 2 * n + 1 with hl
+    rw[← Nat.mul_left_inj two_ne_zero, ← Nat.add_right_inj (n := 1), add_comm]
+    have : Odd l := by
+      exact odd_two_mul_add_one n
+    rw[Nat.div_two_mul_two_add_one_of_odd this, hl]
+    linarith
+  rw[h]
+
+theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
+  sorry
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
@@ -170,10 +211,14 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
         apply Nat.div_two_mul_two_add_one_of_odd
         exact h
       rw[← hl0]
-      rw[← ih l] -- jak zrobic zeby sie zmienilo tylko po lewej?
-      ·
-        sorry
-      · exact hl1
+      conv_rhs => rw[← ih l hl1]
+      rw[Finset.mul_sum]
+      rw[← binaryRepresentationSet_equiv2plus1result]
+      simp only [add_left_inj]
+      rw[Finset.sum_congr]
+      · simp
+      · intro x hx
+        rw[pow_succ, mul_comm]
     · rw[Nat.not_odd_iff_even] at h
       have hl0 : 2*l = n := by
         rw[hl]
@@ -181,9 +226,14 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
         apply Nat.div_two_mul_two_of_even
         exact h
       rw[← hl0]
-      rw[← ih l]
-      · sorry
-      · exact hl1
+      conv_rhs => rw[← ih l hl1]
+      rw[Finset.mul_sum]
+      rw[← binaryRepresentationSet_equiv2result]
+      rw[Finset.sum_congr]
+      · simp
+      · intro x hx
+        rw[pow_succ, mul_comm]
+
 
 
 
@@ -203,12 +253,6 @@ theorem binaryRepresentationSet_equiv2help (n :ℕ ) : ∑ k in binaryRepresenta
 theorem binaryRepresentationSet_equiv2plus1help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
   rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
 
-
-theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
-  simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
-  rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
-  simp
----jak niby zrobić tą wersję dla 2k+1???
 
 
 
