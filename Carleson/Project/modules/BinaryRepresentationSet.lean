@@ -80,7 +80,6 @@ theorem remove_bithelp (N M a : ℕ ) (ha1 : a ∈ binaryRepresentationSet N)
   rw[← hs1, add_comm] at h
   rw[Nat.testBit_two_pow_add_eq] at h
   simp at h
-
   sorry
 
 theorem remove_bit2 (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
@@ -152,7 +151,40 @@ Natural number can be written using the sum of two to the power of element of bi
 
 theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^k = n := by
   induction' n using Nat.strong_induction_on with n ih
-  sorry
+  by_cases hzero :n = 0
+  · rw[hzero]
+    simp only [Finset.sum_eq_zero_iff, pow_eq_zero_iff', OfNat.ofNat_ne_zero, ne_eq, false_and,
+      imp_false]
+    rw[ binaryRepresentationSet_zero]
+    simp
+  · set l := n/2 with hl
+    have hl1 : l< n := by
+      push_neg at hzero
+      rw[hl]
+      apply Nat.div2Induction.proof_2
+      apply Nat.pos_of_ne_zero hzero
+    by_cases h : Odd n
+    · have  hl0 : 2*l + 1=n  := by
+        rw[hl]
+        rw[mul_comm]
+        apply Nat.div_two_mul_two_add_one_of_odd
+        exact h
+      rw[← hl0]
+      rw[← ih l] -- jak zrobic zeby sie zmienilo tylko po lewej?
+      ·
+        sorry
+      · exact hl1
+    · rw[Nat.not_odd_iff_even] at h
+      have hl0 : 2*l = n := by
+        rw[hl]
+        rw[mul_comm]
+        apply Nat.div_two_mul_two_of_even
+        exact h
+      rw[← hl0]
+      rw[← ih l]
+      · sorry
+      · exact hl1
+
 
 
 
@@ -168,10 +200,15 @@ theorem binaryRepresentationSet_equiv2help (n :ℕ ) : ∑ k in binaryRepresenta
 --to mozna z tego kolejnego --moze tak by bylo lepiej??
 
 
+theorem binaryRepresentationSet_equiv2plus1help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
+  rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
+
+
 theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
   rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
   simp
+---jak niby zrobić tą wersję dla 2k+1???
 
 
 
