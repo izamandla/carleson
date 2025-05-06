@@ -64,7 +64,7 @@ theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = 
     · rw[Nat.size_pow]
       linarith
     · apply Nat.testBit_two_pow_self
-
+/--
 theorem remove_bithelp (N M a : ℕ ) (ha1 : a ∈ binaryRepresentationSet N)
 (ha2 : a ≠  M) (h : M ∈ binaryRepresentationSet N) : a ∈ binaryRepresentationSet (N - 2 ^ M) := by
   refine (mem_binaryRepresentationSet_iff (N - 2 ^ M) a).mpr ?_
@@ -129,7 +129,7 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
 
   --Nat.testBit_two_pow_add_eq
   --Nat.testBit_two_pow_add_gt
- /- rw [mem_binaryRepresentationSet_iff ] at h
+  rw [mem_binaryRepresentationSet_iff ] at h
   ext x
   simp only [Finset.mem_sdiff, Finset.mem_singleton]
   constructor
@@ -148,6 +148,9 @@ theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationS
   rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
   simp
 
+theorem lackofzeroin2 (n : ℕ) : 0 ∉ binaryRepresentationSet (2*n) := by
+  simp[mem_binaryRepresentationSet_iff]
+
 theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
   let i : ℕ → ℕ  := fun i ↦ i + 1
   apply Finset.sum_nbij i
@@ -165,8 +168,18 @@ theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresen
   · unfold SurjOn
     intro y hy
     simp only [mem_image, Finset.mem_coe, i]
-    set s:= y -1 with hs --needed that bin rep set of doesnt consist 0
-    sorry
+    have hy0 : y ≥ 1 := by
+      refine Nat.one_le_iff_ne_zero.mpr ?_
+      by_contra a
+      rw[a] at hy
+      apply lackofzeroin2 at hy
+      exact hy
+    set s:= y -1 with hs
+    use s
+    constructor
+    · rw[binaryRepresentationSet_equiv2, hs, Nat.sub_one_add_one_eq_of_pos hy0]
+      exact hy
+    · rw [Nat.sub_one_add_one_eq_of_pos hy0]
   · simp
 
 
@@ -183,8 +196,58 @@ theorem binaryRepresentationSet_equiv2plus1 (n k :ℕ ) : k ∈ binaryRepresenta
     linarith
   rw[h]
 
+theorem exofzeroin2plus1 (n : ℕ) : 0 ∈  binaryRepresentationSet (2*n +1) := by
+  simp only [mem_binaryRepresentationSet_iff, Nat.testBit_zero, decide_eq_true_eq]
+  refine Nat.succ_mod_two_eq_one_iff.mpr ?_
+  simp
+
+theorem binaryRepresentationSet_equiv2plus1resulthelp (n : ℕ ) : binaryRepresentationSet (2*n +1) = (binaryRepresentationSet (2*n +1) \ {0}) ∪ {0} := by
+  simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
+
+theorem binaryRepresentationSet_equiv2plus1resulthelp2 (n : ℕ ) : ∑ k in binaryRepresentationSet (2*n +1), 2^k = ∑ k in binaryRepresentationSet (2*n +1) \ {0}, 2^k +1 := by
+  conv_lhs => rw[binaryRepresentationSet_equiv2plus1resulthelp]
+  apply Finset.sum_union
+  simp
+
+theorem binaryRepresentationSet_equiv2plus1other (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1)\ {0} := by
+  simp only [Finset.mem_sdiff, Finset.mem_singleton, AddLeftCancelMonoid.add_eq_zero, one_ne_zero,
+    and_false, not_false_eq_true, and_true]
+  apply binaryRepresentationSet_equiv2plus1
+
+
+
 theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
-  sorry
+  rw[binaryRepresentationSet_equiv2plus1resulthelp2]
+  simp only [add_left_inj]
+  let i : ℕ → ℕ  := fun i ↦ i + 1
+  apply Finset.sum_nbij i
+  · intro a ha
+    simp only [i]
+    rw[← binaryRepresentationSet_equiv2plus1other]
+    exact ha
+  · unfold InjOn
+    simp only [Finset.mem_coe]
+    intro z hz
+    intro y hy
+    intro h
+    simp only [add_left_inj, i] at h
+    exact h
+  · unfold SurjOn
+    intro y hy
+    simp only [mem_image, Finset.mem_coe, i]
+    have hy0 : y ≥ 1 := by
+      refine Nat.one_le_iff_ne_zero.mpr ?_
+      by_contra a
+      rw[a] at hy
+      simp at hy
+    set s:= y -1 with hs
+    use s
+    constructor
+    · rw[binaryRepresentationSet_equiv2plus1other, hs, Nat.sub_one_add_one_eq_of_pos hy0]
+      exact hy
+    · rw [Nat.sub_one_add_one_eq_of_pos hy0]
+  · simp
+
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
@@ -235,6 +298,17 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
         rw[pow_succ, mul_comm]
 
 
+theorem removebit_help (N M : ℕ ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N = (binaryRepresentationSet N \ {M}) ∪ {M} := by
+  simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
+  exact h
+
+--jest szansa ze dowód tego trzeba za pomoca indukcji na maksymalnym/minimalnym elemencie
+theorem remove_bit3 (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
+  conv_rhs => rw[← binaryRepresentationSet_explicit N, removebit_help N M h]
+  rw[Finset.sum_union]
+  · simp only [Finset.sum_singleton, add_tsub_cancel_right]
+    sorry
+  · simp
 
 
 
