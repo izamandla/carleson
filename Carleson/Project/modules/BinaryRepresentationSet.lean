@@ -45,8 +45,8 @@ theorem binaryRepresentationSet_not_zero (n : ℕ ) (h : n >0 )  : binaryReprese
   rw [h] at h_i
   exact Finset.not_mem_empty i h_i
 
-theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = { M } := by
-  rw[h,binaryRepresentationSet]
+theorem binaryforpower (M: ℕ ): binaryRepresentationSet (2^M) = { M } := by
+  rw[binaryRepresentationSet]
   ext x
   constructor
   · simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
@@ -64,83 +64,9 @@ theorem binaryforpower (n M: ℕ ) ( h : n = 2^M ): binaryRepresentationSet n = 
     · rw[Nat.size_pow]
       linarith
     · apply Nat.testBit_two_pow_self
-/--
-theorem remove_bithelp (N M a : ℕ ) (ha1 : a ∈ binaryRepresentationSet N)
-(ha2 : a ≠  M) (h : M ∈ binaryRepresentationSet N) : a ∈ binaryRepresentationSet (N - 2 ^ M) := by
-  refine (mem_binaryRepresentationSet_iff (N - 2 ^ M) a).mpr ?_
-  simp only [mem_binaryRepresentationSet_iff] at h
-  have h0 : 2^M ≤ N := by
-    apply Nat.testBit_implies_ge h
-  set N' := N - 2^M with hs
-  have hs1: N' + 2^M = N := by
-    rw[hs, Nat.sub_add_cancel]
-    exact h0
-  simp only [mem_binaryRepresentationSet_iff] at ha1
-  rw[← hs1, add_comm] at ha1
-  rw[← hs1, add_comm] at h
-  rw[Nat.testBit_two_pow_add_eq] at h
-  simp at h
-  sorry
 
-theorem remove_bit2 (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
-  refine Finset.ext_iff.mpr ?_
-  intro a
-  constructor
-  · intro ha
-    simp only [Finset.mem_sdiff, Finset.mem_singleton] at ha
-    obtain ⟨ ha1, ha2 ⟩ := ha
-    sorry
-  · intro ha
-    simp only [Finset.mem_sdiff, Finset.mem_singleton]
-    constructor
-    · sorry
-    ·
-      sorry
 
-/--
-Removing an element from the binary representation set.
--/
 
-theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
-  rw [mem_binaryRepresentationSet_iff] at h
-  have h0 : 2^M ≤ N := by
-    apply Nat.testBit_implies_ge h
-  set N' := N - 2^M with hs
-  have hs1: N' + 2^M = N := by
-    rw[hs, Nat.sub_add_cancel]
-    exact h0
-  have h1 : (N - 2^M).testBit M = false := by
-    rw[← hs1, add_comm, Nat.testBit_two_pow_add_eq ]at h
-    simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
-    exact h
-  rw[hs]
-  ext x
-  simp only [Finset.mem_sdiff, Finset.mem_singleton, mem_binaryRepresentationSet_iff]
-  constructor
-  · intro hx
-    obtain ⟨hx1,hx2⟩ := hx
-    push_neg at hx2
-    apply Nat.testBit_implies_ge at hx1
-    sorry
-  · intro hx
-    constructor
-    · sorry
-    · sorry
-
-  --Nat.testBit_two_pow_add_eq
-  --Nat.testBit_two_pow_add_gt
-  rw [mem_binaryRepresentationSet_iff ] at h
-  ext x
-  simp only [Finset.mem_sdiff, Finset.mem_singleton]
-  constructor
-  · intro h1
-    rcases h1 with ⟨hr, hl⟩
-    · push_neg at hl
-      rw [mem_binaryRepresentationSet_iff N x] at hr
-      apply (mem_binaryRepresentationSet_iff (N - 2 ^ M) x).mpr ?h.mp.intro.a
-      apply Nat.testBit_implies_ge at hr
-      sorry
-  · sorry-/
 
 
 theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
@@ -298,18 +224,47 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
         rw[pow_succ, mul_comm]
 
 
+
+
+
+/--theorem sumofbinaryrepset (N  : ℕ ): Finset.disjiUnion (binaryRepresentationSet N) binaryRepresentationSet (2^) = binaryRepresentationSet N := by
+  sorry  -/
+
+--to powinno być jakoś robialne z dodawania po bitach
+theorem sumofbinaryrepset (N M : ℕ ) (h: Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : (binaryRepresentationSet M) ∪ (binaryRepresentationSet N) = binaryRepresentationSet (M + N) := by
+  ext x
+  conv_lhs => rw [@Finset.mem_union]
+  simp only [mem_binaryRepresentationSet_iff]
+  constructor
+  · intro hx
+
+    sorry
+  · intro hx
+    sorry
+
 theorem removebit_help (N M : ℕ ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N = (binaryRepresentationSet N \ {M}) ∪ {M} := by
   simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
   exact h
 
---jest szansa ze dowód tego trzeba za pomoca indukcji na maksymalnym/minimalnym elemencie
-theorem remove_bit3 (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
-  conv_rhs => rw[← binaryRepresentationSet_explicit N, removebit_help N M h]
-  rw[Finset.sum_union]
-  · simp only [Finset.sum_singleton, add_tsub_cancel_right]
-    sorry
-  · simp
 
+theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
+  rw [mem_binaryRepresentationSet_iff] at h
+  have h0 : 2^M ≤ N := by
+    apply Nat.testBit_implies_ge h
+  set N' := N - 2^M with hs
+  have hs1: N' + 2^M = N := by
+    rw[hs, Nat.sub_add_cancel]
+    exact h0
+  have h1 : Disjoint (binaryRepresentationSet N') {M} := by
+    simp only [Finset.disjoint_singleton_right, mem_binaryRepresentationSet_iff, Bool.not_eq_true]
+    rw[← hs1, add_comm , Nat.testBit_two_pow_add_eq] at h
+    simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
+    exact h
+  rw[← hs1, ← sumofbinaryrepset]
+  · rw[binaryforpower ]
+    apply Finset.union_sdiff_cancel_right h1
+  · rw[← binaryforpower ] at h1
+    exact h1
 
 
 theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) = 2*n := by
