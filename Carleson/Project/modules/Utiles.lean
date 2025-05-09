@@ -85,7 +85,7 @@ Walsh functions expressed using products of Rademacher functions.
 
 theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
   Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
-  induction' n using Nat.strong_induction_on with n ih
+  induction' n using Nat.strong_induction_on with n ih generalizing x
   by_cases hzero :n = 0
   · rw[hzero]
     rw[BinaryRepresentationSet.binaryRepresentationSet_zero, Walsh.walsh_zero]
@@ -113,6 +113,9 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
+        rw[ih k hk0 y hy.1 hy.2]
+        rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2plus1resultprod]
+        · sorry
         -- brakuje relacji miedzy bin rep set n i bin rep set 2n+1
         sorry
       · push_neg at h

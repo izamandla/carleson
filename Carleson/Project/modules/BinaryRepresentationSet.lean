@@ -67,7 +67,17 @@ theorem binaryforpower (M: ℕ ): binaryRepresentationSet (2^M) = { M } := by
 
 
 
-
+theorem bin2insert2plus1 (n : ℕ ) : binaryRepresentationSet (2*n +1) = insert 0 (binaryRepresentationSet (2*n))  := by
+  ext x
+  simp only [mem_binaryRepresentationSet_iff, Finset.mem_insert]
+  cases' x with y
+  · simp only [Nat.testBit_zero, decide_eq_true_eq, Nat.mul_mod_right, zero_ne_one, decide_false,
+      Bool.false_eq_true, or_false, iff_true]
+    exact Nat.odd_iff.mp (odd_two_mul_add_one n)
+  · simp only [Nat.testBit_add_one, AddLeftCancelMonoid.add_eq_zero, one_ne_zero, and_false, ne_eq,
+    OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_left₀, false_or, Bool.coe_iff_coe]
+    congr
+    omega
 
 theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
@@ -108,7 +118,36 @@ theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresen
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
   · simp
 
-
+theorem binaryRepresentationSet_equiv2resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) : ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n), f k:= by
+  let i : ℕ → ℕ  := fun i ↦ i + 1
+  apply Finset.prod_nbij i
+  · intro a ha
+    simp only [i]
+    rw[← binaryRepresentationSet_equiv2]
+    exact ha
+  · unfold InjOn
+    simp only [Finset.mem_coe]
+    intro z hz
+    intro y hy
+    intro h
+    simp only [add_left_inj, i] at h
+    exact h
+  · unfold SurjOn
+    intro y hy
+    simp only [mem_image, Finset.mem_coe, i]
+    have hy0 : y ≥ 1 := by
+      refine Nat.one_le_iff_ne_zero.mpr ?_
+      by_contra a
+      rw[a] at hy
+      apply lackofzeroin2 at hy
+      exact hy
+    set s:= y -1 with hs
+    use s
+    constructor
+    · rw[binaryRepresentationSet_equiv2, hs, Nat.sub_one_add_one_eq_of_pos hy0]
+      exact hy
+    · rw [Nat.sub_one_add_one_eq_of_pos hy0]
+  · simp
 
 theorem binaryRepresentationSet_equiv2plus1 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
@@ -135,10 +174,14 @@ theorem binaryRepresentationSet_equiv2plus1resulthelp2 (n : ℕ ) : ∑ k in bin
   apply Finset.sum_union
   simp
 
+
+
+
 theorem binaryRepresentationSet_equiv2plus1other (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1)\ {0} := by
   simp only [Finset.mem_sdiff, Finset.mem_singleton, AddLeftCancelMonoid.add_eq_zero, one_ne_zero,
     and_false, not_false_eq_true, and_true]
   apply binaryRepresentationSet_equiv2plus1
+
 
 
 
@@ -174,6 +217,9 @@ theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRep
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
   · simp
 
+
+theorem binaryRepresentationSet_equiv2plus1resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (h : f 0 = 1): ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n +1), f k:= by
+  rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), h,one_mul, binaryRepresentationSet_equiv2resultprod]
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
