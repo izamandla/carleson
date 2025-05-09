@@ -499,6 +499,25 @@ def rademacherFunction (k : ℕ) (t : ℝ) : ℝ :=
   2^(- k / 2 : ℝ ) * ∑ n in Finset.range (2^k), haarFunctionScaled (-k) n t
 
 
+def rademacherFunctionzeroleft (t : ℝ) (h1 : 0≤ t ) (h2 : t< 0.5): rademacherFunction 0 t = 1 := by
+  simp only [rademacherFunction, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, pow_zero,
+    Finset.range_one, haarFunctionScaled, Int.cast_zero, zpow_zero, one_mul, Int.cast_natCast,
+    Finset.sum_singleton, sub_zero]
+  apply haarFunction_left_half
+  constructor
+  · exact h1
+  · ring_nf at h2
+    exact h2
+
+  def rademacherFunctionzeroright (t : ℝ) (h1 : 0.5≤ t ) (h2 : t< 1): rademacherFunction 0 t = -1 := by
+  simp only [rademacherFunction, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, pow_zero,
+    Finset.range_one, haarFunctionScaled, Int.cast_zero, zpow_zero, one_mul, Int.cast_natCast,
+    Finset.sum_singleton, sub_zero]
+  apply haarFunction_right_half
+  constructor
+  · ring_nf at h1
+    exact h1
+  · exact h2
 
 /--
 Rademacher function is zero outisde `[0,1)`.

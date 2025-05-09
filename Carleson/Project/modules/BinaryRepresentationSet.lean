@@ -218,8 +218,8 @@ theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRep
   · simp
 
 
-theorem binaryRepresentationSet_equiv2plus1resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (h : f 0 = 1): ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n +1), f k:= by
-  rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), h,one_mul, binaryRepresentationSet_equiv2resultprod]
+theorem binaryRepresentationSet_equiv2plus1resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (h : f 0 = 1): (f 0) * ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n +1), f k:= by
+  rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), h,one_mul, binaryRepresentationSet_equiv2resultprod, one_mul]
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
