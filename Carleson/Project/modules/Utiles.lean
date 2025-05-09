@@ -197,22 +197,25 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
 /--
 Special case of Walsh-Rademacher relation for powers of two.
 -/
-theorem differentwalshRademacherRelation (n : ℕ) (x : ℝ) :
+theorem differentwalshRademacherRelation (n : ℕ) (x : ℝ)  (hx1 : 0 ≤ x) (hx2 :  x<1 ):
   Walsh.walsh (2^n) x = Haar.rademacherFunction n x := by
-  sorry
+  rw[walshRademacherRelation, BinaryRepresentationSet.binaryforpower, Finset.prod_singleton]
+  · exact hx1
+  · exact hx2
 
 /--
 Walsh-Rademacher relation.
 -/
 theorem walshRademacherRelationresult {M N : ℕ} (h : 2^M ≤ N) (x : ℝ) :
   Walsh.walsh N x = Walsh.walsh (2^M) x * ∏ m in BinaryRepresentationSet.binaryRepresentationSet (N - (2^M)) , Haar.rademacherFunction m x := by
-  simp [walshRademacherRelation]
+  rw[walshRademacherRelation,differentwalshRademacherRelation]
   have h1: BinaryRepresentationSet.binaryRepresentationSet (2 ^ M) ∪ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)= BinaryRepresentationSet.binaryRepresentationSet N := by
     rw[← BinaryRepresentationSet.remove_bit]
     unfold BinaryRepresentationSet.binaryRepresentationSet
     sorry
     sorry
-  sorry
+  all_goals sorry
+
 
 
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Icc 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
