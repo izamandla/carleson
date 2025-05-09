@@ -125,10 +125,6 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
         · exact hx1
         · ring_nf
           exact h
-        · apply Haar.rademacherFunctionzeroleft
-          · exact hx1
-          · ring_nf
-            exact h
       · push_neg at h
         rw[Walsh.walsh_odd_right h hx2]
         set y:= 2* x -1 with h_y
@@ -151,7 +147,6 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
         · ring_nf
           exact h
         · exact hx2
-        · sorry
     · rw[Nat.not_odd_iff_even ] at h0
       have hk1 : 2*k = n := by
         rw[h_k]
@@ -167,8 +162,15 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        --exact ih k hk0 y hy
-        sorry
+        rw[ih k hk0 y hy.1 hy.2]
+        rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2resultprod]
+        apply Finset.prod_congr
+        · simp
+        · intro m hm
+          rw[Haar.rademachernextfirsthalf]
+          simp only [mem_Ico, hx1, true_and]
+          ring_nf
+          exact h
       · push_neg at h
         rw[Walsh.walsh_even_right h hx2]
         set y:= 2* x -1 with h_y
@@ -177,7 +179,18 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        sorry
+        rw[ih k hk0 y hy.1 hy.2]
+        rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2resultprod]
+        apply Finset.prod_congr
+        · simp
+        · intro m hm
+          rw[Haar.rademachernextsecondhalf]
+          simp only [mem_Ico, hx1, true_and]
+          ring_nf
+          constructor
+          · exact h
+          · exact hx2
+
 
 
 
