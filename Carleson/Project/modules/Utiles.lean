@@ -29,10 +29,9 @@ theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
 /--
 Kernel function for binary powers `N = 2^m`.
 -/
-theorem kernel_two_pow (m : ℕ) (x y : ℝ) : kernel (2^m) x y = 1 + ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y) := by
-  simp only [kernel, add_right_inj]
+theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n in Finset.range (2^N), (Haar.haarFunctionScaled N n x) * (Haar.haarFunctionScaled N n y) := by
+  simp only [kernel, add_right_inj, BinaryRepresentationSet.binaryforpower,Finset.sum_singleton]
 
-  sorry
 
 
 end Kernel
@@ -83,7 +82,7 @@ theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
 Walsh functions expressed using products of Rademacher functions.
 -/
 
-theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
+theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
   Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih generalizing x
   by_cases hzero :n = 0
@@ -113,7 +112,7 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        rw[ih k hk0 y hy.1 hy.2]
+        rw[ih k hk0 hy.1 hy.2]
         rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2plus1resultprod, Haar.rademacherFunctionzeroleft , one_mul]
         · apply Finset.prod_congr
           · simp
@@ -133,7 +132,7 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        rw[ih k hk0 y hy.1 hy.2]
+        rw[ih k hk0 hy.1 hy.2]
         rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2plus1resultprod, Haar.rademacherFunctionzeroright, neg_mul, one_mul, neg_inj]
         · apply Finset.prod_congr
           · simp
@@ -162,7 +161,7 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        rw[ih k hk0 y hy.1 hy.2]
+        rw[ih k hk0 hy.1 hy.2]
         rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2resultprod]
         apply Finset.prod_congr
         · simp
@@ -179,7 +178,7 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
           constructor
           · linarith
           · linarith
-        rw[ih k hk0 y hy.1 hy.2]
+        rw[ih k hk0 hy.1 hy.2]
         rw[← BinaryRepresentationSet.binaryRepresentationSet_equiv2resultprod]
         apply Finset.prod_congr
         · simp
@@ -197,7 +196,7 @@ theorem walshRademacherRelation (n : ℕ ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :  x<1
 /--
 Special case of Walsh-Rademacher relation for powers of two.
 -/
-theorem differentwalshRademacherRelation (n : ℕ) (x : ℝ)  (hx1 : 0 ≤ x) (hx2 :  x<1 ):
+theorem differentwalshRademacherRelation {n : ℕ} {x : ℝ}  (hx1 : 0 ≤ x) (hx2 :  x<1 ):
   Walsh.walsh (2^n) x = Haar.rademacherFunction n x := by
   rw[walshRademacherRelation, BinaryRepresentationSet.binaryforpower, Finset.prod_singleton]
   · exact hx1
@@ -206,19 +205,17 @@ theorem differentwalshRademacherRelation (n : ℕ) (x : ℝ)  (hx1 : 0 ≤ x) (h
 /--
 Walsh-Rademacher relation.
 -/
-theorem walshRademacherRelationresult {M N : ℕ} (h : 2^M ≤ N) (x : ℝ) :
+theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRepresentationSet.binaryRepresentationSet N) (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
   Walsh.walsh N x = Walsh.walsh (2^M) x * ∏ m in BinaryRepresentationSet.binaryRepresentationSet (N - (2^M)) , Haar.rademacherFunction m x := by
-  rw[walshRademacherRelation,differentwalshRademacherRelation]
-  have h1: BinaryRepresentationSet.binaryRepresentationSet (2 ^ M) ∪ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)= BinaryRepresentationSet.binaryRepresentationSet N := by
-    rw[← BinaryRepresentationSet.remove_bit]
-    unfold BinaryRepresentationSet.binaryRepresentationSet
-    sorry
-    sorry
-  all_goals sorry
+  rw[walshRademacherRelation hx1 hx2,differentwalshRademacherRelation hx1 hx2]
+  rw[← BinaryRepresentationSet.remove_bit N M h]
+  exact Finset.prod_eq_mul_prod_diff_singleton h fun x_1 ↦ Haar.rademacherFunction x_1 x
 
+--co jak M nie jest w rozwinieciu binarnym N?
 
 
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Icc 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+
   sorry
 
 /- ## Additional lemmas needed for the main result -/
@@ -229,7 +226,11 @@ Lemma 1
 
 theorem lemma1_1 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
   Walsh.walshFourierPartialSum f (2^M) x =
-  ∑ k in Finset.range (2^M) , (∫ y in Set.Icc 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):=
+  ∑ k in Finset.range (2^M) , (∫ y in Set.Icc 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
+  simp only [Walsh.walshFourierPartialSum]
+
+
+
   --OrthonormalBasis.orthogonalProjection_eq_sum
   sorry
 

@@ -532,9 +532,6 @@ theorem walsh_ort_same {n m : ℕ} (h: m = n) : walshInnerProduct (walsh n) m  =
   apply walsh_norm
 
 
-theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : walshInnerProduct (walsh n) m  = 0 := by
-
-  sorry
 
 
 /--
