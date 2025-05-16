@@ -105,15 +105,18 @@ theorem walsh_one_right (x : ℝ) (h1 :1/2 ≤ x) (h2: x < 1 ) : walsh 1 x = -1:
 /--
 Walsh function for n being even on the left half of `[0,1)`.
 -/
-theorem walsh_even_left {n : ℕ}{x : ℝ}(h1 :0 ≤ x) (h2: x < 1/2 ) : walsh (2*n) x = walsh n (2 * x) := by
+theorem walsh_even_left {n : ℕ}{x : ℝ}(h2: x < 1/2 ) : walsh (2*n) x = walsh n (2 * x) := by
   conv_lhs =>
     unfold walsh
   simp only [one_div, mul_eq_zero, OfNat.ofNat_ne_zero, false_or, ne_eq, not_false_eq_true,
     mul_div_cancel_left₀, Nat.mul_mod_right, ↓reduceIte]
   split_ifs with h_1 h_2 h_3 h_4
-  · exfalso
-    obtain hl|hp := h_1
-    · linarith
+  · obtain hl|hp := h_1
+    · rw[walsh_not_in]
+      left
+      apply mul_neg_of_pos_of_neg
+      · simp only [Nat.ofNat_pos]
+      exact hl
     · linarith
   · push_neg at h_1
     rw[h_3]
@@ -134,16 +137,17 @@ theorem walsh_even_left {n : ℕ}{x : ℝ}(h1 :0 ≤ x) (h2: x < 1/2 ) : walsh (
 /--
 Walsh function for n being even on the right half of `[0,1)`.
 -/
-theorem walsh_even_right {n : ℕ}{x : ℝ}  (h1 :1/2 ≤ x) (h2: x < 1 ) : walsh (2*n) x = walsh n (2 * x - 1) := by
+theorem walsh_even_right {n : ℕ}{x : ℝ}  (h1 :1/2 ≤ x) : walsh (2*n) x = walsh n (2 * x - 1) := by
   conv_lhs =>
     unfold walsh
   simp only [one_div, mul_eq_zero, OfNat.ofNat_ne_zero, false_or, ne_eq, not_false_eq_true,
     mul_div_cancel_left₀, Nat.mul_mod_right, ↓reduceIte]
   split_ifs with h_1 h_2 h_3 h_4
-  · exfalso
-    obtain hl|hp := h_1
+  · obtain hl|hp := h_1
     · linarith
-    · linarith
+    · rw[walsh_not_in]
+      right
+      linarith
   · push_neg at h_1
     rw[h_3]
     rw[walsh_zero (2*x-1)]
@@ -166,7 +170,7 @@ Walsh function for n being odd on the left half of `[0,1)`.
 -/
 
 
-theorem walsh_odd_left {n : ℕ}{x : ℝ}(h1 :0 ≤ x) (h2: x < 1/2 ) : walsh (2*n +1) x = walsh n (2 * x) := by
+theorem walsh_odd_left {n : ℕ}{x : ℝ}(h2: x < 1/2 ) : walsh (2*n +1) x = walsh n (2 * x) := by
   conv_lhs =>
     unfold walsh
   simp only [one_div, AddLeftCancelMonoid.add_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
@@ -182,9 +186,12 @@ theorem walsh_odd_left {n : ℕ}{x : ℝ}(h1 :0 ≤ x) (h2: x < 1/2 ) : walsh (2
     linarith
     simp
   split_ifs with h_1 h_2 h_3
-  · exfalso
+  · rw[walsh_not_in]
     obtain hl|hp := h_1
-    · linarith
+    · left
+      apply mul_neg_of_pos_of_neg
+      · simp only [Nat.ofNat_pos]
+      exact hl
     · linarith
   · push_neg at h_1
     rw[h_odd]
@@ -203,7 +210,7 @@ Walsh function for n being odd on the right half of `[0,1)`.
 -/
 
 
-theorem walsh_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x) (h2: x < 1 ) : walsh (2*n+ 1) x =- walsh n (2 * x - 1) := by
+theorem walsh_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x)  : walsh (2*n+ 1) x =- walsh n (2 * x - 1) := by
   conv_lhs =>
     unfold walsh
   simp only [one_div, AddLeftCancelMonoid.add_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
@@ -219,10 +226,12 @@ theorem walsh_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x) (h2: x < 1 ) : walsh 
     linarith
     simp
   split_ifs with h_1 h_2 h_3
-  · exfalso
-    obtain hl|hp := h_1
+  · obtain hl|hp := h_1
     · linarith
-    · linarith
+    · rw[walsh_not_in]
+      · simp
+      · right
+        linarith
   · push_neg at h_1
     exfalso
     simp_all
@@ -239,11 +248,11 @@ theorem walsh_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x) (h2: x < 1 ) : walsh 
 /--
 Relation between Walsh function of `2n` and `2n+1`.
 -/
-theorem walsh_even_odd_left {n : ℕ}{x : ℝ} (h1 :0 ≤ x) (h2: x < 1/2 ): walsh (2*n) x = walsh (2*n +1) x:= by
-  rw[ walsh_even_left h1 h2, walsh_odd_left h1 h2]
+theorem walsh_even_odd_left {n : ℕ}{x : ℝ} (h2: x < 1/2 ): walsh (2*n) x = walsh (2*n +1) x:= by
+  rw[ walsh_even_left h2, walsh_odd_left h2]
 
-theorem walsh_even_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x) (h2: x < 1 ) :walsh (2*n) x = - walsh (2*n +1) x:= by
-  rw[ walsh_even_right h1 h2, walsh_odd_right h1 h2]
+theorem walsh_even_odd_right {n : ℕ}{x : ℝ} (h1 :1/2 ≤ x)  :walsh (2*n) x = - walsh (2*n +1) x:= by
+  rw[ walsh_even_right h1, walsh_odd_right h1]
   simp
 
 /--
@@ -293,8 +302,6 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
               · linarith
               · linarith
             exact ih k hk2 y hy
-          · let h1:= hx.1
-            exact h1
           · exact h
         · push_neg at h
           rw[walsh_odd_right]
@@ -307,8 +314,6 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
             simp only [ne_eq, neg_eq_zero]
             exact ih k hk2 y hy
           · exact h
-          · let h2:= hx.2
-            exact h2
       · push_neg at h0
         simp only [Nat.not_odd_iff_even] at h0
         have hk1 : 2*k = n := by
@@ -326,8 +331,6 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
               · linarith
               · linarith
             exact ih k hk2 y hy
-          · let h1:= hx.1
-            exact h1
           · exact h
         · push_neg at h
           rw[walsh_even_right]
@@ -339,8 +342,7 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
               · linarith
             exact ih k hk2 y hy
           · exact h
-          · let h2:= hx.2
-            exact h2
+
 --ten dowód jest taki sam jak wcześniejszy - to nie ma sensu -> wcześniejsze twierdzenie powinno korzystać z wcześniejszego
 theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(walsh n x) =1 := by
   induction' n using Nat.strong_induction_on with n ih
@@ -386,8 +388,6 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
               · linarith
               · linarith
             exact ih k hk2 y hy
-          · let h1:= hx.1
-            exact h1
           · exact h
         · push_neg at h
           rw[walsh_odd_right]
@@ -400,8 +400,6 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
             simp only [mul_neg, neg_mul, neg_neg]
             exact ih k hk2 y hy
           · exact h
-          · let h2:= hx.2
-            exact h2
       · push_neg at h0
         simp only [Nat.not_odd_iff_even] at h0
         have hk1 : 2*k = n := by
@@ -419,8 +417,6 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
               · linarith
               · linarith
             exact ih k hk2 y hy
-          · let h1:= hx.1
-            exact h1
           · exact h
         · push_neg at h
           rw[walsh_even_right]
@@ -432,8 +428,7 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
               · linarith
             exact ih k hk2 y hy
           · exact h
-          · let h2:= hx.2
-            exact h2
+
 
 /--
 Squere of Wlash functions is 1 on `[0,1).`
