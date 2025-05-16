@@ -105,7 +105,7 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
         exact h0
       rw[← hk1]
       by_cases h : x<1/2
-      · rw[Walsh.walsh_odd_left hx1 h]
+      · rw[Walsh.walsh_odd_left h]
         set y:= 2* x with h_y
         have hy : 0≤ y ∧ y<1 := by
           rw[h_y]
@@ -125,7 +125,7 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
         · ring_nf
           exact h
       · push_neg at h
-        rw[Walsh.walsh_odd_right h hx2]
+        rw[Walsh.walsh_odd_right h ]
         set y:= 2* x -1 with h_y
         have hy : 0≤ y ∧ y<1 := by
           rw[h_y]
@@ -154,7 +154,7 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
         exact h0
       rw[← hk1]
       by_cases h : x<1/2
-      · rw[Walsh.walsh_even_left hx1 h]
+      · rw[Walsh.walsh_even_left  h]
         set y:= 2* x with h_y
         have hy : 0≤ y ∧ y<1 := by
           rw[h_y]
@@ -171,7 +171,7 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
           ring_nf
           exact h
       · push_neg at h
-        rw[Walsh.walsh_even_right h hx2]
+        rw[Walsh.walsh_even_right h ]
         set y:= 2* x -1 with h_y
         have hy : 0≤ y ∧ y<1 := by
           rw[h_y]
@@ -191,6 +191,22 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
           · exact hx2
 
 
+theorem walshradrelbigger0 {n : ℕ }{x : ℝ} (hn : n >0 ) :
+  Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
+  by_cases h : x≥ 0 ∧ x< 1
+  · apply walshRademacherRelation h.1 h.2
+  · simp only [not_and_or] at h
+    push_neg at h
+    rw[Walsh.walsh_not_in x h]
+    have h1 (m : ℕ ) : Haar.rademacherFunction m x = 0 := by
+      rw[Haar.rademacherFunction_outside ]
+      exact h
+    rw[eq_comm, Finset.prod_eq_zero_iff]
+    simp only [h1, and_true]
+    refine Finset.Nonempty.exists_mem ?_
+    refine Finset.nonempty_iff_ne_empty.mpr ?_
+    apply BinaryRepresentationSet.binaryRepresentationSet_not_zero
+    exact hn
 
 
 /--
@@ -216,8 +232,14 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
   simp only [Walsh.walshInnerProduct]
-  simp_rw[walshRademacherRelation]
-  sorry
+  by_cases hn : n = 0 ∨ m = 0
+  ·
+    sorry
+  · simp at hn
+
+    sorry
+  --simp_rw[walshRademacherRelation]
+
 
 
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Icc 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
