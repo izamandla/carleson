@@ -39,7 +39,7 @@ theorem walsh_not_in {n : ℕ} (x : ℝ) (h : x < 0 ∨  1 ≤ x ) : walsh n x =
 Walsh function for `n=0` is 1 on `[0,1)`.
 -/
 @[simp]
-theorem walsh_zero (x : ℝ) (h1 :0 ≤ x) (h2: x <1 ) : walsh 0 x = 1 := by
+theorem walsh_zero {x : ℝ} (h1 :0 ≤ x) (h2: x <1 ) : walsh 0 x = 1 := by
   simp [walsh, h1,h2]
 
 
@@ -120,13 +120,13 @@ theorem walsh_even_left {n : ℕ}{x : ℝ}(h2: x < 1/2 ) : walsh (2*n) x = walsh
     · linarith
   · push_neg at h_1
     rw[h_3]
-    rw[walsh_zero (2*x)]
+    rw[walsh_zero]
     · linarith
     · linarith
   · rfl
   · push_neg at h_1 h_2
     rw[h_4]
-    rw[walsh_zero (2*x)]
+    rw[walsh_zero]
     · linarith
     · linarith
   · push_neg at h_1 h_2 h_4
@@ -150,7 +150,7 @@ theorem walsh_even_right {n : ℕ}{x : ℝ}  (h1 :1/2 ≤ x) : walsh (2*n) x = w
       linarith
   · push_neg at h_1
     rw[h_3]
-    rw[walsh_zero (2*x-1)]
+    rw[walsh_zero]
     · linarith
     · linarith
   · push_neg at h_1 h_3
@@ -159,7 +159,7 @@ theorem walsh_even_right {n : ℕ}{x : ℝ}  (h1 :1/2 ≤ x) : walsh (2*n) x = w
     linarith
   · push_neg at h_1 h_2
     rw[h_4]
-    rw[walsh_zero (2*x-1)]
+    rw[walsh_zero]
     · linarith
     · linarith
   · rfl

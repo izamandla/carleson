@@ -149,6 +149,33 @@ theorem binaryRepresentationSet_equiv2resultprod {n :ℕ } {α : Type*} [CommMon
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
   · simp
 
+
+theorem binaryRepresentationSet_fun_prod {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k) * (∏ k in (binaryRepresentationSet m) ∩ (binaryRepresentationSet n), f k)^2:= by
+  conv_rhs => rw[pow_two,mul_assoc, mul_comm, ← mul_assoc]
+  have h {i j :ℕ } : ((∏ k ∈ binaryRepresentationSet i\ binaryRepresentationSet j, f k) *
+        ∏ k ∈ binaryRepresentationSet i ∩ binaryRepresentationSet j, f k) = (∏ k ∈ binaryRepresentationSet i, f k) := by
+        sorry
+  simp_rw[h]
+  simp_rw[mul_comm] at h
+  conv_rhs => rw[mul_assoc, mul_comm]
+
+
+
+
+  sorry
+
+theorem binaryRepresentationSet_fun_prod2 {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (hf : ∀ k , (f k)^ 2 = 1) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k):= by
+  by_cases hnm : m = n
+  · rw[hnm]
+    simp only [sdiff_self, Finset.bot_eq_empty, Finset.prod_empty, mul_one, ← pow_two, one_pow, ← Finset.prod_pow]
+    have h : ∀ x ∈ binaryRepresentationSet n, f x ^ 2 = 1 := by
+      intro k hk
+      simp_rw[hf]
+    exact Finset.prod_eq_one h
+  · sorry
+
+
+
 theorem binaryRepresentationSet_equiv2plus1 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
   rw[Nat.testBit_succ]

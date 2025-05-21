@@ -233,12 +233,20 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
   simp only [Walsh.walshInnerProduct]
   by_cases hn : n = 0 ∨ m = 0
-  ·
-    sorry
-  · simp at hn
+  · by_cases hn1 : n =0
+    · rw[hn1]
+      have h1 : EqOn ((Walsh.walsh 0)*(Walsh.walsh m)) (Walsh.walsh m) (Set.Ico 0 (1:ℝ)):= by
+        sorry
+      have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
+        simp
 
+      --change ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x
+      --rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+      sorry
+    · sorry
+  · simp only [not_or] at hn
+    push_neg at hn
     sorry
-  --simp_rw[walshRademacherRelation]
 
 
 
