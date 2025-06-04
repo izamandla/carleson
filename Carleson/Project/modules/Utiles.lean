@@ -236,12 +236,14 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
   · by_cases hn1 : n =0
     · rw[hn1]
       have h1 : EqOn ((Walsh.walsh 0)*(Walsh.walsh m)) (Walsh.walsh m) (Set.Ico 0 (1:ℝ)):= by
+        --simp_rw[Walsh.walsh_zero]
         sorry
       have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
         simp
-
-      --change ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x
-      --rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+      have h3 : ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x := by
+        change ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x
+        rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+      --simp[h3]
       sorry
     · sorry
   · simp only [not_or] at hn
@@ -251,6 +253,7 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
 
 
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Icc 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+
 
   sorry
 

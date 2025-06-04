@@ -154,14 +154,14 @@ theorem binaryRepresentationSet_fun_prod {n m :ℕ } {α : Type*} [CommMonoid α
   conv_rhs => rw[pow_two,mul_assoc, mul_comm, ← mul_assoc]
   have h {i j :ℕ } : ((∏ k ∈ binaryRepresentationSet i\ binaryRepresentationSet j, f k) *
         ∏ k ∈ binaryRepresentationSet i ∩ binaryRepresentationSet j, f k) = (∏ k ∈ binaryRepresentationSet i, f k) := by
-        sorry
+        rw[← Finset.prod_disjUnion ]
+        ·
+          sorry
+        · exact Finset.disjoint_sdiff_inter (binaryRepresentationSet i) (binaryRepresentationSet j)
   simp_rw[h]
   simp_rw[mul_comm] at h
   conv_rhs => rw[mul_assoc, mul_comm]
-
-
-
-
+  --Set.inter_comm
   sorry
 
 theorem binaryRepresentationSet_fun_prod2 {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (hf : ∀ k , (f k)^ 2 = 1) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k):= by
