@@ -154,25 +154,24 @@ theorem binaryRepresentationSet_fun_prod {n m :ℕ } {α : Type*} [CommMonoid α
   conv_rhs => rw[pow_two,mul_assoc, mul_comm, ← mul_assoc]
   have h {i j :ℕ } : ((∏ k ∈ binaryRepresentationSet i\ binaryRepresentationSet j, f k) *
         ∏ k ∈ binaryRepresentationSet i ∩ binaryRepresentationSet j, f k) = (∏ k ∈ binaryRepresentationSet i, f k) := by
-        rw[← Finset.prod_disjUnion ]
-        ·
-          sorry
-        · exact Finset.disjoint_sdiff_inter (binaryRepresentationSet i) (binaryRepresentationSet j)
+        rw[← Finset.prod_disjUnion (Finset.disjoint_sdiff_inter (binaryRepresentationSet i) (binaryRepresentationSet j))]
+        simp only [Finset.disjUnion_eq_union]
+        rw [@Finset.sdiff_union_inter]
   simp_rw[h]
   simp_rw[mul_comm] at h
   conv_rhs => rw[mul_assoc, mul_comm]
-  --Set.inter_comm
-  sorry
+  rw [@Finset.inter_comm]
+  rw[h]
 
 theorem binaryRepresentationSet_fun_prod2 {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (hf : ∀ k , (f k)^ 2 = 1) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k):= by
-  by_cases hnm : m = n
-  · rw[hnm]
-    simp only [sdiff_self, Finset.bot_eq_empty, Finset.prod_empty, mul_one, ← pow_two, one_pow, ← Finset.prod_pow]
-    have h : ∀ x ∈ binaryRepresentationSet n, f x ^ 2 = 1 := by
-      intro k hk
-      simp_rw[hf]
-    exact Finset.prod_eq_one h
-  · sorry
+  simp_rw[binaryRepresentationSet_fun_prod]
+  conv_rhs =>rw[← mul_one ((∏ k ∈ binaryRepresentationSet n \ binaryRepresentationSet m, f k) *
+    ∏ k ∈ binaryRepresentationSet m \ binaryRepresentationSet n, f k)]
+  congr
+  simp_rw[← Finset.prod_pow, hf, Finset.prod_const_one]
+
+
+
 
 
 
