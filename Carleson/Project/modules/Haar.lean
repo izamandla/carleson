@@ -736,7 +736,13 @@ theorem rademachernextsecondhalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0.5 1) :
     linarith
   · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
 
+theorem rad_sqr {k : ℕ} {x : ℝ } (hx1: 0≤ x) (hx2 : x < 1) : (rademacherFunction k x )^ 2 = 1 := by
+  unfold rademacherFunction
+  unfold haarFunctionScaled
+  rw[mul_comm, Finset.sum_mul]
 
+
+  sorry
 
 /- **ToDo** : Prove statements about product of Rademacher functions and its integrals. -/
 end Haar

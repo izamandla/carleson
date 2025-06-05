@@ -230,24 +230,55 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 --co jak M nie jest w rozwinieciu binarnym N?
 
 
+theorem walsh_int {m : ℕ } (h : m>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh m x = 0 := by
+  sorry
+
+
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
   simp only [Walsh.walshInnerProduct]
   by_cases hn : n = 0 ∨ m = 0
   · by_cases hn1 : n =0
     · rw[hn1]
       have h1 : EqOn ((Walsh.walsh 0)*(Walsh.walsh m)) (Walsh.walsh m) (Set.Ico 0 (1:ℝ)):= by
-        --simp_rw[Walsh.walsh_zero]
-        sorry
+        unfold EqOn
+        intro z hz
+        simp only [mem_Ico] at hz
+        simp only [Pi.mul_apply]
+        rw[Walsh.walsh_zero hz.1 hz.2, one_mul]
       have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
         simp
-      have h3 : ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x := by
-        change ∫ (x : ℝ) in Ico 0 1, ((Walsh.walsh 0)*(Walsh.walsh m)) x = ∫ (x : ℝ) in Ico 0 1, (Walsh.walsh m) x
-        rw[MeasureTheory.setIntegral_congr_fun h2 h1]
-      --simp[h3]
-      sorry
-    · sorry
+      simp_rw[← Pi.mul_apply]
+      rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+      apply walsh_int
+      refine Nat.zero_lt_of_ne_zero ?_
+      exact Ne.symm (ne_of_eq_of_ne (id (Eq.symm hn1)) (id (Ne.symm h)))
+    · have hm : m= 0 := by rw[Or.resolve_left hn hn1]
+      rw[hm]
+      have h1 : EqOn ((Walsh.walsh n)*(Walsh.walsh 0)) (Walsh.walsh n) (Set.Ico 0 (1:ℝ)):= by
+        unfold EqOn
+        intro z hz
+        simp only [mem_Ico] at hz
+        simp only [Pi.mul_apply]
+        rw[Walsh.walsh_zero hz.1 hz.2, mul_one]
+      have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
+        simp
+      simp_rw[← Pi.mul_apply]
+      rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+      apply walsh_int
+      refine Nat.zero_lt_of_ne_zero ?_
+      exact hn1
   · simp only [not_or] at hn
     push_neg at hn
+    have h1 : EqOn ((Walsh.walsh n)*(Walsh.walsh m)) ((∏ k in (BinaryRepresentationSet.binaryRepresentationSet n)\ (BinaryRepresentationSet.binaryRepresentationSet m), Haar.rademacherFunction k) * (∏ k in (BinaryRepresentationSet.binaryRepresentationSet m) \ (BinaryRepresentationSet.binaryRepresentationSet n), Haar.rademacherFunction k)) (Set.Ico 0 (1:ℝ)):= by
+      unfold EqOn
+      intro z hz
+      conv_lhs => rw[Pi.mul_apply]
+      rw[walshradrelbigger0, walshradrelbigger0, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2]
+      simp only [Pi.mul_apply, Finset.prod_apply]
+
+
+
+      sorry
     sorry
 
 
