@@ -499,7 +499,7 @@ def rademacherFunction (k : ℕ) (t : ℝ) : ℝ :=
   2^(- k / 2 : ℝ ) * ∑ n in Finset.range (2^k), haarFunctionScaled (-k) n t
 
 
-def rademacherFunctionzeroleft (t : ℝ) (h1 : 0≤ t ) (h2 : t< 0.5): rademacherFunction 0 t = 1 := by
+def rademacherFunctionzeroleft {t : ℝ} (h1 : 0≤ t ) (h2 : t< 0.5): rademacherFunction 0 t = 1 := by
   simp only [rademacherFunction, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, pow_zero,
     Finset.range_one, haarFunctionScaled, Int.cast_zero, zpow_zero, one_mul, Int.cast_natCast,
     Finset.sum_singleton, sub_zero]
@@ -509,7 +509,7 @@ def rademacherFunctionzeroleft (t : ℝ) (h1 : 0≤ t ) (h2 : t< 0.5): rademache
   · ring_nf at h2
     exact h2
 
-  def rademacherFunctionzeroright (t : ℝ) (h1 : 0.5≤ t ) (h2 : t< 1): rademacherFunction 0 t = -1 := by
+  def rademacherFunctionzeroright {t : ℝ} (h1 : 0.5≤ t ) (h2 : t< 1): rademacherFunction 0 t = -1 := by
   simp only [rademacherFunction, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, pow_zero,
     Finset.range_one, haarFunctionScaled, Int.cast_zero, zpow_zero, one_mul, Int.cast_natCast,
     Finset.sum_singleton, sub_zero]
@@ -524,7 +524,7 @@ Rademacher function is zero outisde `[0,1)`.
 -/
 
 @[simp]
-theorem rademacherFunction_outside (k : ℕ) (t : ℝ) (h : t < 0 ∨ t ≥ 1) :
+theorem rademacherFunction_outside {k : ℕ} {t : ℝ} (h : t < 0 ∨ t ≥ 1) :
   rademacherFunction k t = 0 := by
   unfold rademacherFunction
   apply mul_eq_zero_of_right
@@ -540,7 +540,7 @@ theorem rademacherFunction_outside (k : ℕ) (t : ℝ) (h : t < 0 ∨ t ≥ 1) :
   simp only [Int.cast_natCast, neg_neg, zpow_natCast]
   exact_mod_cast h1
 
-theorem rademacherassumofhaar (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x = 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x + 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
+theorem rademacherassumofhaar {k : ℕ } {x : ℝ} : rademacherFunction (k+1) x = 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x + 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   push_cast
   rw[← left_distrib]
@@ -557,7 +557,7 @@ theorem rademacherassumofhaar (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) 
   rw[Finset.sum_disjUnion (α := ℕ) h1 (f := fun n ↦ haarFunctionScaled (-(k + 1)) n x)]
   congr
 
-theorem rademacher2assumofhaar1 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2*x) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
+theorem rademacher2assumofhaar1 {k : ℕ } { x : ℝ } : rademacherFunction k (2*x) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
@@ -587,7 +587,7 @@ theorem rademacher2assumofhaar1 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
     rw [mul_comm, GroupWithZero.mul_inv_cancel _ h1, mul_comm, GroupWithZero.mul_inv_cancel _ h2]
   · norm_cast
 
-theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2*x -1 ) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
+theorem rademacher2assumofhaar2 {k : ℕ } {x : ℝ } : rademacherFunction k (2*x -1 ) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
@@ -661,10 +661,10 @@ theorem rademacher2assumofhaar2 (k : ℕ ) ( x : ℝ ) : rademacherFunction k (2
     linarith
 
 
-theorem rademachernext (k : ℕ ) ( x : ℝ ) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) + rademacherFunction k (2*x -1 ) := by
+theorem rademachernext {k : ℕ } { x : ℝ } : rademacherFunction (k+1) x  = rademacherFunction k (2*x) + rademacherFunction k (2*x -1 ) := by
   rw[rademacherassumofhaar, rademacher2assumofhaar1, rademacher2assumofhaar2]
 
-theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) := by
+theorem rademachernextfirsthalf {k : ℕ } { x : ℝ } (hx : x ∈ Ico 0 0.5) : rademacherFunction (k+1) x  = rademacherFunction k (2*x) := by
   rw[rademachernext]
   simp only [add_right_eq_self]
   unfold rademacherFunction
@@ -706,7 +706,7 @@ theorem rademachernextfirsthalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0 0.5) : 
   · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
 
 
-theorem rademachernextsecondhalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0.5 1) : rademacherFunction (k+1) x  = rademacherFunction k (2*x - 1) := by
+theorem rademachernextsecondhalf {k : ℕ } { x : ℝ } (hx : x ∈ Ico 0.5 1) : rademacherFunction (k+1) x  = rademacherFunction k (2*x - 1) := by
   rw[rademachernext]
   simp only [add_left_eq_self]
   unfold rademacherFunction
@@ -736,13 +736,71 @@ theorem rademachernextsecondhalf (k : ℕ ) ( x : ℝ ) (hx : x ∈ Ico 0.5 1) :
     linarith
   · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
 
+
+
+theorem rademachernextfirsthalf' {k : ℕ } {x : ℝ } (hx : x ∈ Ico 0 0.5) : rademacherFunction k (2*x -1) = 0 := by
+  have h : rademacherFunction k (2*x -1) = rademacherFunction (k+1) x - rademacherFunction k (2*x) := by
+    rw[rademachernext, add_sub_cancel_left]
+  rw[h, rademachernextfirsthalf hx, sub_self]
+
+theorem rademachernextsecondhalf' {k : ℕ } { x : ℝ } (hx : x ∈ Ico 0.5 1) : rademacherFunction k (2*x) = 0 := by
+  have h : rademacherFunction k (2*x) = rademacherFunction (k+1) x - rademacherFunction k (2*x-1) := by
+    rw[rademachernext, add_sub_cancel_right]
+  rw[h, rademachernextsecondhalf hx, sub_self]
+
+
 theorem rad_sqr {k : ℕ} {x : ℝ } (hx1: 0≤ x) (hx2 : x < 1) : (rademacherFunction k x )^ 2 = 1 := by
-  unfold rademacherFunction
-  unfold haarFunctionScaled
-  rw[mul_comm, Finset.sum_mul]
-
-
-  sorry
-
+  induction' k using Nat.strong_induction_on with k ih generalizing x
+  by_cases hk: k = 0
+  · rw[hk]
+    by_cases hx : x< 0.5
+    · rw[rademacherFunctionzeroleft hx1 hx, one_pow]
+    · push_neg at hx
+      rw[rademacherFunctionzeroright hx hx2, @neg_one_pow_two]
+  · push_neg at hk
+    set l := k- 1 with hl
+    have hl' : k = l+1 := by
+      rw[hl, Nat.sub_one_add_one hk]
+    rw[hl']
+    rw[rademachernext]
+    by_cases hx : x< 0.5
+    · set y := 2*x with hy
+      rw[rademachernextfirsthalf', add_zero, ih]
+      · rw[hl]
+        simp only [tsub_lt_self_iff, zero_lt_one, and_true]
+        exact Nat.zero_lt_of_ne_zero hk
+      · rw[hy]
+        simp only [Nat.ofNat_pos, mul_nonneg_iff_of_pos_left, hx1]
+      · rw[hy]
+        rw[← mul_lt_mul_left (a:= 2) (b:=x) (c:= 0.5) two_pos] at hx
+        ring_nf at hx
+        ring_nf
+        exact hx
+      · simp only [mem_Ico]
+        constructor
+        · exact hx1
+        · exact hx
+    · set y := 2*x -1 with hy
+      push_neg at hx
+      rw[rademachernextsecondhalf', zero_add, ih]
+      · rw[hl]
+        simp only [tsub_lt_self_iff, zero_lt_one, and_true]
+        exact Nat.zero_lt_of_ne_zero hk
+      · rw[hy]
+        simp only [sub_nonneg]
+        rw[← mul_le_mul_left (a:= 2) (b:=0.5) (c:= x) two_pos] at hx
+        ring_nf at hx
+        ring_nf
+        exact hx
+      · rw[hy]
+        rw [@sub_lt_iff_lt_add']
+        ring_nf
+        rw[← mul_lt_mul_left (a:= 2) (b:=x) (c:= 1) two_pos] at hx2
+        ring_nf at hx2
+        exact hx2
+      · simp only [mem_Ico]
+        constructor
+        · exact hx
+        · exact hx2
 /- **ToDo** : Prove statements about product of Rademacher functions and its integrals. -/
 end Haar

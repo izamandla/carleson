@@ -230,7 +230,12 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 --co jak M nie jest w rozwinieciu binarnym N?
 
 
-theorem walsh_int {m : ℕ } (h : m>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh m x = 0 := by
+theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
+  have h1 : EqOn (Walsh.walsh n) (∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m) (Set.Ico 0 (1:ℝ)):= by
+    unfold EqOn
+    intro z hz
+    simp only [mem_Ico] at hz
+    rw[ walshRademacherRelation hz.1 hz.2, Finset.prod_apply]
   sorry
 
 
@@ -275,9 +280,8 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
       conv_lhs => rw[Pi.mul_apply]
       rw[walshradrelbigger0, walshradrelbigger0, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2]
       simp only [Pi.mul_apply, Finset.prod_apply]
-
-
-
+      sorry
+      sorry
       sorry
     sorry
 
