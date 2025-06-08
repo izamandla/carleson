@@ -229,14 +229,36 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 
 --co jak M nie jest w rozwinieciu binarnym N?
 
+theorem walsh_int_firsthalf {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 0.5, Walsh.walsh n x = 0 := by
+  induction' n using Nat.strong_induction_on with n ih
+  set l := n/2 with hl
+  by_cases hn : Odd n
+  · have hl' : n  = 2*l + 1 := by sorry
+    simp_rw[hl']
+    --have h1 : EqOn (Walsh.walsh (2 * l + 1) ) (
+    --nie zadziala bo odnosi sie do innej polowy przedzialu
+    sorry
+  · sorry
+
+
+theorem walsh_int_secondhalf {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0.5 1, Walsh.walsh n x = 0 := by
+  induction' n using Nat.strong_induction_on with n ih
+  set l := n/2 with hl
+  by_cases hn : Odd n
+  · have hl' : n  = 2*l + 1 := by sorry
+    simp_rw[hl']
+    sorry
+  · sorry
+
 
 theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
-  have h1 : EqOn (Walsh.walsh n) (∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m) (Set.Ico 0 (1:ℝ)):= by
-    unfold EqOn
-    intro z hz
-    simp only [mem_Ico] at hz
-    rw[ walshRademacherRelation hz.1 hz.2, Finset.prod_apply]
-  sorry
+  have h1 : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = ∫ (x : ℝ) in Ico 0 (0.5), Walsh.walsh n x + ∫ (x : ℝ) in Ico (0.5) 1, Walsh.walsh n x := by
+    --rw[MeasureTheory.setIntegral_union]
+    sorry
+  rw[h1 ]
+  rw [walsh_int_secondhalf h]
+  simp only [add_zero]
+  exact walsh_int_firsthalf h
 
 
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
@@ -280,9 +302,14 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
       conv_lhs => rw[Pi.mul_apply]
       rw[walshradrelbigger0, walshradrelbigger0, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2]
       simp only [Pi.mul_apply, Finset.prod_apply]
-      sorry
-      sorry
-      sorry
+      · simp only [mem_Ico] at hz
+        intro k
+        apply Haar.rad_sqr hz.1 hz.2
+      · refine Nat.zero_lt_of_ne_zero ?_
+        exact hn.2
+      · refine Nat.zero_lt_of_ne_zero ?_
+        exact hn.1
+
     sorry
 
 
