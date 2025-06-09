@@ -36,6 +36,7 @@ theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n in F
 
 end Kernel
 
+namespace Extra
 /- **ToDo** : Connect the facts about scaled Haar, Rademacher and Walsh functions with dyadic structures. -/
 
 theorem wlashradhelp0 (n m : ℕ)(h: m ∈ BinaryRepresentationSet.binaryRepresentationSet n) : (m+1) ∈ BinaryRepresentationSet.binaryRepresentationSet (2*n) := by
@@ -314,10 +315,20 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
 
 
 
-theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Icc 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+  unfold Walsh.walshFourierPartialSum
+  unfold Walsh.walshInnerProduct
+  rw[mul_comm, Finset.sum_mul ]i
+  set b:= Haar.rademacherFunction M x with hb
+  simp only [Pi.mul_apply]
+  rw[Finset.sum_congr]
+  · simp
+  · intro z hz
+    conv_rhs => rw[mul_assoc, mul_comm, mul_assoc, mul_comm]
+    simp only [mul_eq_mul_right_iff]
+    left
+    sorry
 
-
-  sorry
 
 /- ## Additional lemmas needed for the main result -/
 
@@ -325,10 +336,9 @@ theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.r
 Lemma 1
 -/
 
-theorem lemma1_1 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
-  Walsh.walshFourierPartialSum f (2^M) x =
-  ∑ k in Finset.range (2^M) , (∫ y in Set.Icc 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
-  simp only [Walsh.walshFourierPartialSum]
+theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
+  ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
+  ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
 
 
 
@@ -338,9 +348,9 @@ theorem lemma1_1 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ)
 /--
 Lemma 2
 -/
-theorem lemma1_2 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
-  Walsh.walshFourierPartialSum f (2^M) x =
-  ∑ k in Finset.range (2^M),(∫ y in Set.Icc 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
+theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
+  ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
+  ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1]
   · sorry
   · sorry
@@ -350,15 +360,18 @@ theorem lemma1_2 (M N : ℕ) (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
 /--
 Lemma 3
 -/
-theorem lemma2 (M N N' : ℕ) (h1 : 2^M ≤ N ∧ N < 2^(M+1)) (h2 : N' = N - 2^M)
+theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
   (f : ℝ → ℝ) (x : ℝ) :
-  ∑ i in Finset.range (N + 1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
-  ∑ i in Finset.range (N' + 1), Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
+  ∑ i in Finset.range N  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
+  ∑ i in Finset.range N', Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
   sorry
 
 
-theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N + 1), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N + 1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
+theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N ), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
   conv_rhs => rw[add_comm]
   rw[Finset.sum_sdiff]
   rw[Finset.range_subset]
-  exact Nat.le_add_right_of_le h1
+  exact h1
+
+
+end Extra
