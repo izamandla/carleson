@@ -355,3 +355,10 @@ theorem lemma2 (M N N' : ℕ) (h1 : 2^M ≤ N ∧ N < 2^(M+1)) (h2 : N' = N - 2^
   ∑ i in Finset.range (N + 1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
   ∑ i in Finset.range (N' + 1), Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
   sorry
+
+
+theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N + 1), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N + 1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
+  conv_rhs => rw[add_comm]
+  rw[Finset.sum_sdiff]
+  rw[Finset.range_subset]
+  exact Nat.le_add_right_of_le h1
