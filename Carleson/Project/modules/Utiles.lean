@@ -310,6 +310,8 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
         exact hn.2
       · refine Nat.zero_lt_of_ne_zero ?_
         exact hn.1
+    have h2: MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
+      simp
 
     sorry
 
@@ -318,16 +320,14 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
   unfold Walsh.walshFourierPartialSum
   unfold Walsh.walshInnerProduct
-  rw[mul_comm, Finset.sum_mul ]i
+  rw[mul_comm, Finset.sum_mul ]
   set b:= Haar.rademacherFunction M x with hb
   simp only [Pi.mul_apply]
   rw[Finset.sum_congr]
   · simp
   · intro z hz
-    conv_rhs => rw[mul_assoc, mul_comm, mul_assoc, mul_comm]
-    simp only [mul_eq_mul_right_iff]
-    left
-    sorry
+    linarith
+
 
 
 /- ## Additional lemmas needed for the main result -/
