@@ -593,10 +593,25 @@ theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , wals
 
 
 
+theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
+  · simp
+  · --why intro doesnt work??????!??!?
+    --  walsh_even_left
+    sorry
+
+theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0.5 1, walsh (2*n) x := by
+  sorry
+
+theorem relbetweenintodd1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n +1) x := by
+  sorry
+
+theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = - ∫ x in Set.Ico 0.5 1, walsh (2*n+1) x := by
+  sorry
+
+
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
-
-
   sorry
 
 theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0 1, walsh n x := by sorry
@@ -619,7 +634,25 @@ theorem intsum {n :ℕ} : ∫ x in Set.Ico  0 0.5,  walsh n x + ∫ x in Set.Ico
 
 theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
   rw[← intsum]
+  set l :=n/2 with hl
+  have hl' : 2*l + 1 = n := by sorry
+  simp_rw[← hl']
+  --rw[← relbetweenintodd1] why this doesn't work?!?!?!?!?!?!?
   sorry
+
+  /--have h1 : EqOn (walsh (2 * l + 1)) (-walsh (2 * l)) (Set.Ico 0.5 1) := by
+    unfold EqOn
+    intro z hz
+    simp at hz
+    ring_nf at hz
+    simp only [Pi.neg_apply]
+    rw[walsh_even_odd_right hz.1]
+    simp only [neg_neg]
+  have h2 : MeasurableSet (Set.Ico 0.5 (1 : ℝ )) := by
+    simp
+  rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+  simp only [Pi.neg_apply, MeasureTheory.integral_neg]-/
+
 
 theorem intofeven {n k : ℕ} (h: Even n) (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
   sorry
