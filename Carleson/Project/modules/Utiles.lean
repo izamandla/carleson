@@ -233,9 +233,25 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 /--
 Product of two walsh functions
 -/
+
+
+theorem prodofwalshworse {M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) (hk: k = M^^^N) :Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
+  rw[BinaryRepresentationSet.differenceofbinaryrepset] at hk
+  rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
+  · rw[hk]
+  · intro k
+    apply Haar.rad_sqr hx1 hx2
+
+
+
+
 theorem prodofwalsh{M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
-  rw[walshRademacherRelation hx1 hx2, ]
-  sorry
+  rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, BinaryRepresentationSet.differenceofbinaryrepset, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
+  · --nie jestem pewna jak to zrobic - z załozen o funkcji redamachera powiino to jakosc isc ale jak?
+    sorry
+  · intro k
+    apply Haar.rad_sqr hx1 hx2
+
 
 
 theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
@@ -253,7 +269,7 @@ theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n
       by_contra hl3
       rw[hl3] at hl'
       linarith
-    rw[Walsh.intofeven h1 hl']
+    rw[Walsh.intofeven hl']
     simp only [mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
     exact ih l hl1 hl2
 
@@ -262,56 +278,22 @@ theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n
 
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
   simp only [Walsh.walshInnerProduct]
-  by_cases hn : n = 0 ∨ m = 0
-  · by_cases hn1 : n =0
-    · rw[hn1]
-      have h1 : EqOn ((Walsh.walsh 0)*(Walsh.walsh m)) (Walsh.walsh m) (Set.Ico 0 (1:ℝ)):= by
-        unfold EqOn
-        intro z hz
-        simp only [mem_Ico] at hz
-        simp only [Pi.mul_apply]
-        rw[Walsh.walsh_zero hz.1 hz.2, one_mul]
-      have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
-        simp
-      simp_rw[← Pi.mul_apply]
-      rw[MeasureTheory.setIntegral_congr_fun h2 h1]
-      apply walsh_int
-      refine Nat.zero_lt_of_ne_zero ?_
-      exact Ne.symm (ne_of_eq_of_ne (id (Eq.symm hn1)) (id (Ne.symm h)))
-    · have hm : m= 0 := by rw[Or.resolve_left hn hn1]
-      rw[hm]
-      have h1 : EqOn ((Walsh.walsh n)*(Walsh.walsh 0)) (Walsh.walsh n) (Set.Ico 0 (1:ℝ)):= by
-        unfold EqOn
-        intro z hz
-        simp only [mem_Ico] at hz
-        simp only [Pi.mul_apply]
-        rw[Walsh.walsh_zero hz.1 hz.2, mul_one]
-      have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
-        simp
-      simp_rw[← Pi.mul_apply]
-      rw[MeasureTheory.setIntegral_congr_fun h2 h1]
-      apply walsh_int
-      refine Nat.zero_lt_of_ne_zero ?_
-      exact hn1
-  · simp only [not_or] at hn
-    push_neg at hn
-    have h1 : EqOn ((Walsh.walsh n)*(Walsh.walsh m)) ((∏ k in (BinaryRepresentationSet.binaryRepresentationSet n)\ (BinaryRepresentationSet.binaryRepresentationSet m), Haar.rademacherFunction k) * (∏ k in (BinaryRepresentationSet.binaryRepresentationSet m) \ (BinaryRepresentationSet.binaryRepresentationSet n), Haar.rademacherFunction k)) (Set.Ico 0 (1:ℝ)):= by
-      unfold EqOn
-      intro z hz
-      conv_lhs => rw[Pi.mul_apply]
-      rw[walshradrelbigger0, walshradrelbigger0, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2]
-      simp only [Pi.mul_apply, Finset.prod_apply]
-      · simp only [mem_Ico] at hz
-        intro k
-        apply Haar.rad_sqr hz.1 hz.2
-      · refine Nat.zero_lt_of_ne_zero ?_
-        exact hn.2
-      · refine Nat.zero_lt_of_ne_zero ?_
-        exact hn.1
-    have h2: MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
-      simp
-
-    sorry
+  set k := m^^^n with hk
+  simp_rw[← Pi.mul_apply]
+  have h1 : EqOn (Walsh.walsh n * Walsh.walsh m) (Walsh.walsh k) (Set.Ico 0 1):= by
+    unfold EqOn
+    intro z hz
+    simp only [mem_Ico] at hz
+    rw[prodofwalshworse (M:=n) (N:= m) ]
+    · simp only [Pi.mul_apply]
+    · exact hz.1
+    · exact hz.2
+    · exact Nat.xor_comm m n
+  have h2: MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
+    simp
+  rw[MeasureTheory.setIntegral_congr_fun h2 h1, walsh_int]
+  refine Nat.zero_lt_of_ne_zero ?_
+  exact Nat.xor_ne_zero.mpr h
 
 
 

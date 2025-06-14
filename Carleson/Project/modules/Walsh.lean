@@ -654,7 +654,7 @@ theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := 
   simp only [Pi.neg_apply, MeasureTheory.integral_neg]-/
 
 
-theorem intofeven {n k : ℕ} (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
+theorem intofeven {n k : ℕ}  (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
   sorry
 
 end Walsh
