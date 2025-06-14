@@ -230,36 +230,29 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 
 --co jak M nie jest w rozwinieciu binarnym N?
 
-theorem walsh_int_firsthalf {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 0.5, Walsh.walsh n x = 0 := by
-  induction' n using Nat.strong_induction_on with n ih
-  set l := n/2 with hl
-  by_cases hn : Odd n
-  · have hl' : n  = 2*l + 1 := by sorry
-    simp_rw[hl']
-    --have h1 : EqOn (Walsh.walsh (2 * l + 1) ) (
-    --nie zadziala bo odnosi sie do innej polowy przedzialu
-    sorry
-  · sorry
 
-
-theorem walsh_int_secondhalf {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0.5 1, Walsh.walsh n x = 0 := by
-  induction' n using Nat.strong_induction_on with n ih
-  set l := n/2 with hl
-  by_cases hn : Odd n
-  · have hl' : n  = 2*l + 1 := by sorry
-    simp_rw[hl']
-    sorry
-  · sorry
 
 
 theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
-  have h1 : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = ∫ (x : ℝ) in Ico 0 (0.5), Walsh.walsh n x + ∫ (x : ℝ) in Ico (0.5) 1, Walsh.walsh n x := by
-    --rw[MeasureTheory.setIntegral_union]
-    sorry
-  rw[h1 ]
-  rw [walsh_int_secondhalf h]
-  simp only [add_zero]
-  exact walsh_int_firsthalf h
+  induction' n using Nat.strong_induction_on with n ih
+  by_cases h1: Odd n
+  · rw[Walsh.intofodd h1]
+  · simp only [Nat.not_odd_iff_even] at h1
+    set l :=n/2 with hl
+    have hl' : 2* l = n := by
+      exact Nat.two_mul_div_two_of_even h1
+    have hl1 : l< n := by
+      refine Nat.bitwise_rec_lemma (Nat.not_eq_zero_of_lt h)
+    have hl2: 0< l := by
+      refine Nat.zero_lt_of_ne_zero ?_
+      by_contra hl3
+      rw[hl3] at hl'
+      linarith
+    rw[Walsh.intofeven h1 hl']
+    simp only [mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
+    exact ih l hl1 hl2
+
+
 
 
 theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
