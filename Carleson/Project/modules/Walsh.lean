@@ -566,9 +566,62 @@ def walshFourierSeries (f : ℝ → ℝ) : ℝ → ℝ :=
 
 
 
+theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , walsh n x := by
+  have h1' : EqOn (walsh n) 0 (univ\(Set.Ico 0 1) ):= by
+      unfold EqOn
+      intro z hz
+      simp only [mem_diff, mem_univ, mem_Ico,  not_lt, true_and, Decidable.not_and_iff_or_not, not_le] at hz
+      simp only [Pi.zero_apply]
+      rw[walsh_not_in]
+      exact hz
+  have h1'' : MeasurableSet (univ\(Set.Ico 0 (1 : ℝ ))) := by
+      simp
+  have h1 : ∫ x in univ\(Set.Ico 0 1),  walsh n x = 0 := by
+    rw[MeasureTheory.setIntegral_congr_fun h1'' h1']
+    simp only [Pi.zero_apply, MeasureTheory.integral_zero]
+  have h2: ∫ x in Set.Ico 0 1,  walsh n x  + ∫ x in univ\(Set.Ico 0 1),  walsh n x = ∫ x, walsh n x := by
+    have : (Set.Ico 0 1) ∪ ( univ\(Set.Ico 0 1)) = univ := by
+      simp
+    have ht_eq : ∀ x ∈ univ\(Set.Ico 0 1), walsh n x = 0 := by sorry
+    -- nie umiem uzyc ani pierwszego ani drugiego
+    --conv_rhs => rw[← MeasureTheory.integral_union_eq_left_of_forall h1'' ht_eq]
+    --conv_lhs => rw[← MeasureTheory.integral_union_ae ]
+
+    sorry
+  rw[← h2, h1]
+  simp only [add_zero]
 
 
 
 
+theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
+
+
+  sorry
+
+theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0 1, walsh n x := by sorry
+
+theorem intsum {n :ℕ} : ∫ x in Set.Ico  0 0.5,  walsh n x + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
+  have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
+    refine Eq.symm (Ico_union_Ico_eq_Ico ?_ ?_)
+    · linarith
+    · linarith
+  simp_rw[this]
+  rw[MeasureTheory.integral_union_ae]
+  · --why this does not go by simp?
+    sorry
+  · refine Disjoint.aedisjoint ?_
+    simp
+  · simp
+  · sorry
+  · sorry
+
+
+theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
+  rw[← intsum]
+  sorry
+
+theorem intofeven {n k : ℕ} (h: Even n) (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
+  sorry
 
 end Walsh
