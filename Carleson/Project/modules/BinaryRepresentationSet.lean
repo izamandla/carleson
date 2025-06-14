@@ -297,6 +297,7 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
 
 
 
+
 theorem sumofbinaryrepsethelp {N M : ℕ } (h: Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : M + N = M ||| N := by
   conv_lhs => rw[← binaryRepresentationSet_explicit M, ← binaryRepresentationSet_explicit N]
   rw[← binaryRepresentationSet_explicit (M|||N)]
@@ -306,7 +307,6 @@ theorem sumofbinaryrepsethelp {N M : ℕ } (h: Disjoint (binaryRepresentationSet
   simp[mem_binaryRepresentationSet_iff]
 
 
---to powinno być jakoś robialne z dodawania po bitach
 theorem sumofbinaryrepset {N M : ℕ } (h: Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : (binaryRepresentationSet M) ∪ (binaryRepresentationSet N) = binaryRepresentationSet (M + N) := by
   ext x
   conv_lhs => rw [@Finset.mem_union]
@@ -314,6 +314,38 @@ theorem sumofbinaryrepset {N M : ℕ } (h: Disjoint (binaryRepresentationSet M) 
   rw[sumofbinaryrepsethelp h]
   rw[Nat.testBit_or]
   simp only [Bool.or_eq_true]
+
+
+theorem differenceofbinaryrepset {N M k : ℕ} : k = M ^^^ N ↔ binaryRepresentationSet k = ((binaryRepresentationSet M)\(binaryRepresentationSet N)) ∪ ((binaryRepresentationSet N)\ (binaryRepresentationSet M)) := by
+  constructor
+  · intro h
+    rw[h]
+    rw [@Finset.ext_iff]
+    intro a
+    simp only [Finset.mem_union, Finset.mem_sdiff]
+    simp_rw[ mem_binaryRepresentationSet_iff]
+    simp only [Nat.testBit_xor, bne_iff_ne, ne_eq, Bool.not_eq_true]
+    by_cases h0: M.testBit a = true
+    · rw[h0]
+      simp
+    · simp only [Bool.not_eq_true] at h0
+      rw[h0]
+      simp
+  · intro h
+    rw[← binaryRepresentationSet_explicit k, ← binaryRepresentationSet_explicit (M^^^N), h ]
+    congr
+    rw [@Finset.ext_iff]
+    intro a
+    simp only [Finset.mem_union, Finset.mem_sdiff]
+    simp_rw[ mem_binaryRepresentationSet_iff]
+    simp only [Bool.not_eq_true, Nat.testBit_xor, bne_iff_ne, ne_eq]
+    by_cases h0: M.testBit a = true
+    · rw[h0]
+      simp
+    · simp only [Bool.not_eq_true] at h0
+      rw[h0]
+      simp
+
 
 theorem removebit_help (N M : ℕ ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N = (binaryRepresentationSet N \ {M}) ∪ {M} := by
   simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]

@@ -230,7 +230,12 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
 
 --co jak M nie jest w rozwinieciu binarnym N?
 
-
+/--
+Product of two walsh functions
+-/
+theorem prodofwalsh{M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
+  rw[walshRademacherRelation hx1 hx2, ]
+  sorry
 
 
 theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
