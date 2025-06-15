@@ -315,11 +315,40 @@ theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.r
 /--
 Lemma 1
 -/
+def walshhaar (M k: ℕ ) : ℝ → ℝ
+| x =>
+  Walsh.walsh (2^M) x * (Haar.haarFunctionScaled M k x)
 
+
+theorem walshHaar_ort_help {M k k': ℕ } {x :ℝ } (h : k ≠ k'):  walshhaar M k x * walshhaar M k' x = 0 := by
+  unfold walshhaar
+  rw[mul_comm]
+  rw [@mul_mul_mul_comm]
+  rw[Haar.haarFunctionScaled_mul ]
+  · simp only [mul_zero]
+  · simp only [ne_eq, Nat.cast_inj]
+    rw[ne_comm, ne_eq] at h
+    exact h
+
+
+theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
+  have h1 : EqOn (walshhaar M k * walshhaar M k') 0 (Set.Ico 0 1) := by
+    unfold EqOn
+    intro z hz
+    apply walshHaar_ort_help h
+  have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
+    simp
+  simp_rw[← Pi.mul_apply]
+  rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+  simp
+
+
+
+
+--sumowanie jest do 2^M - 1 wiec tu przedzialy sa ok
 theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
-
 
 
   --OrthonormalBasis.orthogonalProjection_eq_sum
@@ -328,14 +357,39 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ)
 /--
 Lemma 2
 -/
+theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x y : ℝ) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1):
+  ∑ k ∈ Finset.range (2 ^ M),
+      f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled M k y * Walsh.walsh (2 ^ M) x *
+        Haar.haarFunctionScaled M k x =
+  ∑ k ∈ Finset.range (2 ^ M),
+     f y * Walsh.walsh N y * Haar.haarFunctionScaled M k y * Walsh.walsh N x *
+      Haar.haarFunctionScaled M k x := by
+  simp_rw[mul_assoc, mul_comm (a:= f y), ← Finset.sum_mul ]
+  simp only [mul_eq_mul_right_iff]
+  left
+  have h : M ∈ BinaryRepresentationSet.binaryRepresentationSet N := by sorry
+  conv_rhs => rw[walshRademacherRelationresult h hy1 hy2,walshRademacherRelationresult h hx1 hx2 , mul_comm]
+  --rw [← BinaryRepresentationSet.remove_bit N M h]
+  simp_rw[mul_comm, ← mul_assoc, ← Finset.sum_mul ]
+  conv_rhs => rw[ mul_comm, ← mul_assoc, ]
+  simp only [mul_eq_mul_right_iff]
+  left
+  conv_rhs => rw[← mul_assoc, mul_comm, ← mul_assoc, ← mul_assoc ]
+  simp only [mul_eq_mul_right_iff]
+  left
+  conv_lhs => rw[← one_mul (a:=   ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x)]
+  congr
+  rw[← Finset.prod_mul_distrib, Finset.prod_eq_one]
+  intro k hk
+
+  sorry
+
 theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
-  rw [lemma1_1]
-  · sorry
-  · sorry
-  · sorry
-  · sorry
+  rw [lemma1_1 h1 h2 ]
+
+  sorry
 
 /--
 Lemma 3
@@ -344,6 +398,7 @@ theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N 
   (f : ℝ → ℝ) (x : ℝ) :
   ∑ i in Finset.range N  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
   ∑ i in Finset.range N', Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
+
   sorry
 
 
