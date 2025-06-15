@@ -426,5 +426,35 @@ theorem min_binaryRepresentationSet (n : ℕ) (h : n >0 ) : ∃ k ∈  binaryRep
   intro j hj
   exact Finset.not_mem_of_lt_min hj ha
 
+theorem aboutM1 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N) : 2 ^ M ≤ N := by
+  rw[← binaryRepresentationSet_explicit N]
+  exact CanonicallyOrderedAddCommMonoid.single_le_sum h1
+
+theorem aboutM2help {M: ℕ} : ∑ k ∈ Finset.range M, 2^k < 2^M :=by
+  refine Nat.geomSum_lt ?_ ?_
+  · simp
+  · simp
+
+theorem aboutM2 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N)  (h2: ∀ j > M, j ∉ binaryRepresentationSet N) :  N< 2^(M+1) := by
+  rw[← binaryRepresentationSet_explicit N]
+  have h0 : binaryRepresentationSet N ⊆ Finset.range (M+1) := by
+    intro k hk
+    simp only [Finset.mem_range]
+    exact Nat.gt_of_not_le fun a ↦ h2 k a hk
+  have h : ∑ k ∈ binaryRepresentationSet N, 2 ^ k < ∑ k ∈ Finset.range (M+1), 2^k :=by
+    -- Finset.sum_lt_sum_of_subset h0  coś nie działa
+    sorry
+  refine Nat.geomSum_lt ?_ ?_
+  · simp
+  · exact fun k a ↦ Nat.gt_of_not_le fun a_1 ↦ h2 k a_1 a
+
+/-theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
+
+  sorry-/
+
+theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
+
+  sorry
+
 
   end BinaryRepresentationSet

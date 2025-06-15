@@ -367,9 +367,7 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
   simp_rw[mul_assoc, mul_comm (a:= f y), ← Finset.sum_mul ]
   simp only [mul_eq_mul_right_iff]
   left
-  have h : M ∈ BinaryRepresentationSet.binaryRepresentationSet N := by sorry
-  conv_rhs => rw[walshRademacherRelationresult h hy1 hy2,walshRademacherRelationresult h hx1 hx2 , mul_comm]
-  --rw [← BinaryRepresentationSet.remove_bit N M h]
+  conv_rhs => rw[walshRademacherRelationresult (BinaryRepresentationSet.aboutMfinal h1 h2) hy1 hy2,walshRademacherRelationresult (BinaryRepresentationSet.aboutMfinal h1 h2) hx1 hx2 , mul_comm]
   simp_rw[mul_comm, ← mul_assoc, ← Finset.sum_mul ]
   conv_rhs => rw[ mul_comm, ← mul_assoc, ]
   simp only [mul_eq_mul_right_iff]
@@ -381,15 +379,18 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
   congr
   rw[← Finset.prod_mul_distrib, Finset.prod_eq_one]
   intro k hk
-
-  sorry
+  apply Haar.rad_mul hx1 hx2 hy1 hy2
 
 theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1 h1 h2 ]
-
-  sorry
+  --jak włozyć sumę pod całkę
+  rw[← MeasureTheory.integral_finset_sum]
+  ·
+    sorry
+  · simp only [Finset.mem_range]
+    sorry
 
 /--
 Lemma 3
