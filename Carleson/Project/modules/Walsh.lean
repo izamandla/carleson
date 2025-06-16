@@ -596,27 +596,46 @@ theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , wals
 theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
   · simp
-
   · apply Filter.Eventually.of_forall
     intro z hz
     simp at hz
     ring_nf at hz
-   --why intro doesnt work??????!??!?
     rw[walsh_even_left hz.2]
 
 
 theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0.5 1, walsh (2*n) x := by
-  sorry
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
+  · simp
+  · apply Filter.Eventually.of_forall
+    intro z hz
+    simp at hz
+    ring_nf at hz
+    rw[walsh_even_right hz.1]
 
 theorem relbetweenintodd1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n +1) x := by
-  sorry
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
+  · simp
+  · apply Filter.Eventually.of_forall
+    intro z hz
+    simp at hz
+    ring_nf at hz
+    rw[walsh_odd_left hz.2]
 
 theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = - ∫ x in Set.Ico 0.5 1, walsh (2*n+1) x := by
-  sorry
+  rw[← MeasureTheory.integral_neg]
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
+  · simp
+  · apply Filter.Eventually.of_forall
+    intro z hz
+    simp at hz
+    ring_nf at hz
+    rw[walsh_odd_right hz.1]
+    simp
 
 
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
+
   sorry
 
 theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0 1, walsh n x := by sorry
