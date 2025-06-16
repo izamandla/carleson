@@ -388,12 +388,17 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
   --jak włozyć sumę pod całkę
   simp_rw[← MeasureTheory.integral_mul_right]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
-  · /-have h1: EqOn  (∑ i ∈ Finset.range (2 ^ M),
+  ·
+    congr -- how to put hypothesis about y being in Ico 0 1
+    ext y
+
+    sorry
+
+    /-have h1: EqOn  (∑ i ∈ Finset.range (2 ^ M),
       f  * Walsh.walsh (2 ^ M)  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh (2 ^ M) x *
         Haar.haarFunctionScaled (↑M) (↑i) x) (∑ i ∈ Finset.range (2 ^ M),f  * Walsh.walsh N  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh N x *
         Haar.haarFunctionScaled (↑M) (↑i) x) (Ico 0 1) := by sorry-/
     --czy mogę uzyc czegos zamiast EqOn -> bo to wymaga braku x
-    sorry
   ·
     sorry
   · simp only [Finset.mem_range]
@@ -402,19 +407,25 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
 /--
 Lemma 3
 -/
+theorem lemma2helphelp {M: ℕ} {y : ℝ } {i : ℕ } (h3 : y ∈ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+  simp only [Finset.mem_range, mem_Ico] at h3
+  rw[← differentwalshRademacherRelation h3.1 h3.2 , ← prodofwalshworse h3.1 h3.2 ]
+  exact Nat.xor_comm (2 ^ M) i
+
 theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
   (f : ℝ → ℝ) (x : ℝ) :
   ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Walsh.walsh i x  =
   ∑ i in Finset.range (N'+1),  ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x  * Haar.rademacherFunction M x:= by
-  have h (i : ℕ  ) (y : ℝ  ): i ∈ Finset.range (N'+1) ∧ y ∈ (Set.Ico 0 1) →  Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y:= by
-    intro h1
-    simp only [Finset.mem_range, mem_Ico] at h1
-    rw[← differentwalshRademacherRelation h1.2.1 h1.2.2 , ← prodofwalshworse h1.2.1 h1.2.2  ]
-    exact Nat.xor_comm (2 ^ M) i
-  -- czy to jest najszybszy sposób?
-  sorry
+  rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
+  · congr
+    ext y
+    sorry
+  · intro i hi
+    sorry
+  · intro i hi
+    sorry
 
 theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
   (f : ℝ → ℝ) (x : ℝ) :

@@ -443,6 +443,7 @@ theorem aboutM2 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N)  (h2: ∀ j >
     exact Nat.gt_of_not_le fun a ↦ h2 k a hk
   have h : ∑ k ∈ binaryRepresentationSet N, 2 ^ k < ∑ k ∈ Finset.range (M+1), 2^k :=by
     -- Finset.sum_lt_sum_of_subset h0  coś nie działa
+
     sorry
   refine Nat.geomSum_lt ?_ ?_
   · simp
@@ -453,8 +454,24 @@ theorem aboutM2 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N)  (h2: ∀ j >
   sorry-/
 
 theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
-
-  sorry
+  rw[← binaryRepresentationSet_explicit N] at h1
+  rw[← binaryRepresentationSet_explicit N] at h2
+  rw[mem_binaryRepresentationSet_iff]
+  by_contra h
+  simp at h
+  have h_1 : ∑ k ∈ Finset.range M,  2 ^ k +1 =  2^M := by
+    rw [Nat.geomSum_eq Nat.le.refl M]
+    simp only [Nat.add_one_sub_one, Nat.div_one]
+    exact succ_mersenne M
+  have h_2 :∑ k ∈ Finset.range M,  2 ^ k < ∑ k ∈ binaryRepresentationSet N, 2 ^ k := by
+    rw[← h_1] at h1
+    exact h1
+  have h_3 : ∃ k ∈ binaryRepresentationSet N, M<k := by
+    -- powinno byc jakies twierdzenie odnosnie sumowania po wiekszym/innym zbiorze dla nierownosci do zastosowania na h_2
+    sorry
+  have h_4 : ∃ k ∈ binaryRepresentationSet N, M+1 ≤ k := by sorry
+  have h_5 : 2^(M+1) ≤ ∑ k ∈ binaryRepresentationSet N, 2 ^ k  := by sorry
+  linarith
 
 
   end BinaryRepresentationSet
