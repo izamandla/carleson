@@ -435,43 +435,29 @@ theorem aboutM2help {M: ℕ} : ∑ k ∈ Finset.range M, 2^k < 2^M :=by
   · simp
   · simp
 
-theorem aboutM2 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N)  (h2: ∀ j > M, j ∉ binaryRepresentationSet N) :  N< 2^(M+1) := by
+theorem aboutM2 {N M :ℕ } (h2: ∀ j > M, j ∉ binaryRepresentationSet N) : N< 2^(M+1) := by
   rw[← binaryRepresentationSet_explicit N]
   have h0 : binaryRepresentationSet N ⊆ Finset.range (M+1) := by
     intro k hk
     simp only [Finset.mem_range]
     exact Nat.gt_of_not_le fun a ↦ h2 k a hk
-  have h : ∑ k ∈ binaryRepresentationSet N, 2 ^ k < ∑ k ∈ Finset.range (M+1), 2^k :=by
-    -- Finset.sum_lt_sum_of_subset h0  coś nie działa
-
-    sorry
   refine Nat.geomSum_lt ?_ ?_
   · simp
   · exact fun k a ↦ Nat.gt_of_not_le fun a_1 ↦ h2 k a_1 a
 
-/-theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
 
-  sorry-/
+
 
 theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
-  rw[← binaryRepresentationSet_explicit N] at h1
-  rw[← binaryRepresentationSet_explicit N] at h2
+  set k := N -2^M with hk
+  have hk' : k +2^M = N := by
+    exact Nat.sub_add_cancel h1
   rw[mem_binaryRepresentationSet_iff]
-  by_contra h
-  simp at h
-  have h_1 : ∑ k ∈ Finset.range M,  2 ^ k +1 =  2^M := by
-    rw [Nat.geomSum_eq Nat.le.refl M]
-    simp only [Nat.add_one_sub_one, Nat.div_one]
-    exact succ_mersenne M
-  have h_2 :∑ k ∈ Finset.range M,  2 ^ k < ∑ k ∈ binaryRepresentationSet N, 2 ^ k := by
-    rw[← h_1] at h1
-    exact h1
-  have h_3 : ∃ k ∈ binaryRepresentationSet N, M<k := by
-    -- powinno byc jakies twierdzenie odnosnie sumowania po wiekszym/innym zbiorze dla nierownosci do zastosowania na h_2
-    sorry
-  have h_4 : ∃ k ∈ binaryRepresentationSet N, M+1 ≤ k := by sorry
-  have h_5 : 2^(M+1) ≤ ∑ k ∈ binaryRepresentationSet N, 2 ^ k  := by sorry
-  linarith
-
+  rw[← hk', le_add_iff_nonneg_left] at h1
+  rw[← hk', Nat.pow_add_one, mul_two, add_lt_add_iff_right] at h2
+  rw[← hk']
+  rw[add_comm, Nat.testBit_two_pow_add_eq]
+  simp only [Bool.not_eq_eq_eq_not, Bool.not_true]
+  exact Nat.testBit_lt_two_pow h2
 
   end BinaryRepresentationSet
