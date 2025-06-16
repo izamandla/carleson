@@ -596,9 +596,14 @@ theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , wals
 theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
   · simp
-  · --why intro doesnt work??????!??!?
-    --  walsh_even_left
-    sorry
+
+  · apply Filter.Eventually.of_forall
+    intro z hz
+    simp at hz
+    ring_nf at hz
+   --why intro doesnt work??????!??!?
+    rw[walsh_even_left hz.2]
+
 
 theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0.5 1, walsh (2*n) x := by
   sorry
@@ -616,15 +621,13 @@ theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x)
 
 theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0 1, walsh n x := by sorry
 
-theorem intsum {n :ℕ} : ∫ x in Set.Ico  0 0.5,  walsh n x + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
+theorem intsum {n :ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
   have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
     refine Eq.symm (Ico_union_Ico_eq_Ico ?_ ?_)
     · linarith
     · linarith
   simp_rw[this]
   rw[MeasureTheory.integral_union_ae]
-  · --why this does not go by simp?
-    sorry
   · refine Disjoint.aedisjoint ?_
     simp
   · simp
@@ -637,7 +640,7 @@ theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := 
   set l :=n/2 with hl
   have hl' : 2*l + 1 = n := by sorry
   simp_rw[← hl']
-  --rw[← relbetweenintodd1] why this doesn't work?!?!?!?!?!?!?
+  rw[← relbetweenintodd1]
   sorry
 
   /--have h1 : EqOn (walsh (2 * l + 1)) (-walsh (2 * l)) (Set.Ico 0.5 1) := by
@@ -658,3 +661,6 @@ theorem intofeven {n k : ℕ}  (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x =
   sorry
 
 end Walsh
+
+
+---measurability

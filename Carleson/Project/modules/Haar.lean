@@ -803,7 +803,9 @@ theorem rad_sqr {k : ℕ} {x : ℝ } (hx1: 0≤ x) (hx2 : x < 1) : (rademacherFu
         · exact hx
         · exact hx2
 
-theorem rad_mul {k : ℕ} {x  y: ℝ } (hx1: 0≤ x) (hx2 : x < 1) (hy1: 0≤ y) (hy2 : y < 1) : (rademacherFunction k x )* (rademacherFunction k y )= 1 := by sorry
+
+
+
 
 
 end Haar

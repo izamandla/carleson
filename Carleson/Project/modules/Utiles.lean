@@ -357,6 +357,16 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ)
 /--
 Lemma 2
 -/
+theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
+  have h : BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M) ⊆ Finset.range M := by
+
+    --nwm czy to jest potrzebne
+    sorry
+
+  sorry
+
+
+
 theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x y : ℝ) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1):
   ∑ k ∈ Finset.range (2 ^ M),
       f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled M k y * Walsh.walsh (2 ^ M) x *
@@ -379,7 +389,7 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
   congr
   rw[← Finset.prod_mul_distrib, Finset.prod_eq_one]
   intro k hk
-  apply Haar.rad_mul hx1 hx2 hy1 hy2
+  apply aboutprodrad h1 h2 hy1 hy2 hx1 hx2 hk
 
 theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
@@ -388,17 +398,24 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
   --jak włozyć sumę pod całkę
   simp_rw[← MeasureTheory.integral_mul_right]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
-  ·
-    congr -- how to put hypothesis about y being in Ico 0 1
-    ext y
+  · apply MeasureTheory.setIntegral_congr_fun
+    · sorry
+    · unfold EqOn
+      intro z hz
+      simp at hz
+      simp only
+      apply lemma1_2help h1 h2
+      all_goals sorry
+    -- how to put hypothesis about y being in Ico 0 1
 
-    sorry
+    --ext y
+
 
     /-have h1: EqOn  (∑ i ∈ Finset.range (2 ^ M),
       f  * Walsh.walsh (2 ^ M)  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh (2 ^ M) x *
         Haar.haarFunctionScaled (↑M) (↑i) x) (∑ i ∈ Finset.range (2 ^ M),f  * Walsh.walsh N  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh N x *
-        Haar.haarFunctionScaled (↑M) (↑i) x) (Ico 0 1) := by sorry-/
-    --czy mogę uzyc czegos zamiast EqOn -> bo to wymaga braku x
+        Haar.haarFunctionScaled (↑M) (↑i) x) (Ico 0 1) := by sorry
+    --czy mogę uzyc czegos zamiast EqOn -> bo to wymaga braku x-/
   ·
     sorry
   · simp only [Finset.mem_range]
