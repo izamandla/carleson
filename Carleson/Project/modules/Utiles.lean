@@ -391,34 +391,28 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
   intro k hk
   apply aboutprodrad h1 h2 hy1 hy2 hx1 hx2 hk
 
-theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) :
+theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) (hx1 : 0≤ x) (hx2 : x<1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1 h1 h2 ]
-  --jak włozyć sumę pod całkę
   simp_rw[← MeasureTheory.integral_mul_right]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · apply MeasureTheory.setIntegral_congr_fun
-    · sorry
+    · simp
     · unfold EqOn
       intro z hz
-      simp at hz
+      simp only [mem_Ico] at hz
       simp only
       apply lemma1_2help h1 h2
-      all_goals sorry
-    -- how to put hypothesis about y being in Ico 0 1
-
-    --ext y
-
-
-    /-have h1: EqOn  (∑ i ∈ Finset.range (2 ^ M),
-      f  * Walsh.walsh (2 ^ M)  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh (2 ^ M) x *
-        Haar.haarFunctionScaled (↑M) (↑i) x) (∑ i ∈ Finset.range (2 ^ M),f  * Walsh.walsh N  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh N x *
-        Haar.haarFunctionScaled (↑M) (↑i) x) (Ico 0 1) := by sorry
-    --czy mogę uzyc czegos zamiast EqOn -> bo to wymaga braku x-/
-  ·
+      · exact hz.1
+      · exact hz.2
+      · exact hx1
+      · exact hx2
+  · intro i hi
+    simp_all only [Finset.mem_range]
     sorry
   · simp only [Finset.mem_range]
+
     sorry
 
 /--
@@ -438,6 +432,8 @@ theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' 
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · congr
     ext y
+    --tu bedzie jakas bijekcja chyba
+
     sorry
   · intro i hi
     sorry

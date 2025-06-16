@@ -582,7 +582,8 @@ theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , wals
   have h2: ∫ x in Set.Ico 0 1,  walsh n x  + ∫ x in univ\(Set.Ico 0 1),  walsh n x = ∫ x, walsh n x := by
     have : (Set.Ico 0 1) ∪ ( univ\(Set.Ico 0 1)) = univ := by
       simp
-    have ht_eq : ∀ x ∈ univ\(Set.Ico 0 1), walsh n x = 0 := by sorry
+    have ht_eq : ∀ x ∈ univ\(Set.Ico 0 1), walsh n x = 0 := by
+      sorry
     -- nie umiem uzyc ani pierwszego ani drugiego
     --conv_rhs => rw[← MeasureTheory.integral_union_eq_left_of_forall h1'' ht_eq]
     --conv_lhs => rw[← MeasureTheory.integral_union_ae ]
@@ -635,6 +636,8 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
 
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
+  --nwm jak zamienic granice calkowania
+
 
   sorry
 
