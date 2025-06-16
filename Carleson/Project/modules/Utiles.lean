@@ -386,7 +386,14 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
   ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1 h1 h2 ]
   --jak włozyć sumę pod całkę
-  rw[← MeasureTheory.integral_finset_sum]
+  simp_rw[← MeasureTheory.integral_mul_right]
+  rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
+  · /-have h1: EqOn  (∑ i ∈ Finset.range (2 ^ M),
+      f  * Walsh.walsh (2 ^ M)  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh (2 ^ M) x *
+        Haar.haarFunctionScaled (↑M) (↑i) x) (∑ i ∈ Finset.range (2 ^ M),f  * Walsh.walsh N  * Haar.haarFunctionScaled (↑M) (↑i)  * Walsh.walsh N x *
+        Haar.haarFunctionScaled (↑M) (↑i) x) (Ico 0 1) := by sorry-/
+    --czy mogę uzyc czegos zamiast EqOn -> bo to wymaga braku x
+    sorry
   ·
     sorry
   · simp only [Finset.mem_range]
@@ -395,12 +402,42 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
 /--
 Lemma 3
 -/
+theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
+  (f : ℝ → ℝ) (x : ℝ) :
+  ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
+      f y * Walsh.walsh i y * Walsh.walsh i x  =
+  ∑ i in Finset.range (N'+1),  ∫ (y : ℝ) in Ico 0 1,
+      f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x  * Haar.rademacherFunction M x:= by
+  have h (i : ℕ  ) (y : ℝ  ): i ∈ Finset.range (N'+1) ∧ y ∈ (Set.Ico 0 1) →  Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y:= by
+    intro h1
+    simp only [Finset.mem_range, mem_Ico] at h1
+    rw[← differentwalshRademacherRelation h1.2.1 h1.2.2 , ← prodofwalshworse h1.2.1 h1.2.2  ]
+    exact Nat.xor_comm (2 ^ M) i
+  -- czy to jest najszybszy sposób?
+  sorry
+
 theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
   (f : ℝ → ℝ) (x : ℝ) :
-  ∑ i in Finset.range N  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
-  ∑ i in Finset.range N', Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
+  ∑ i in Finset.range (N+1)  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
+  ∑ i in Finset.range (N' +1), Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
+  unfold Walsh.walshInnerProduct
+  simp only [Pi.mul_apply]
+  simp_rw[← MeasureTheory.integral_mul_right]
+  rw[lemma2help h10 h11 h2]
+  apply Finset.sum_congr
+  · simp
+  · intro k hk
+    congr
+    rw [funext_iff]
+    intro y
+    conv_lhs => rw[mul_comm, ← mul_assoc]
+    simp only [mul_eq_mul_right_iff]
+    left
+    rw[mul_comm]
+    simp only [mul_eq_mul_right_iff]
+    left
+    rw[mul_comm, ← mul_assoc]
 
-  sorry
 
 
 theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N ), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
