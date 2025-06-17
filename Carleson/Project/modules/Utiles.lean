@@ -359,7 +359,6 @@ Lemma 2
 -/
 theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
   have h : BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M) ⊆ Finset.range M := by
-
     --nwm czy to jest potrzebne
     sorry
 
@@ -410,6 +409,8 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
       · exact hx2
   · intro i hi
     simp_all only [Finset.mem_range]
+    --rw[MeasureTheory.MemLp.integrable_mul]
+    --MeasureTheory.Integrable.mul_of_top_right
     sorry
   · simp only [Finset.mem_range]
 
@@ -423,8 +424,51 @@ theorem lemma2helphelp {M: ℕ} {y : ℝ } {i : ℕ } (h3 : y ∈ (Set.Ico 0 1))
   rw[← differentwalshRademacherRelation h3.1 h3.2 , ← prodofwalshworse h3.1 h3.2 ]
   exact Nat.xor_comm (2 ^ M) i
 
+theorem lemma2helphelpextra {M: ℕ} {y : ℝ } {i : ℕ } (h : y ∈ univ \ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+  simp only [mem_diff, mem_univ, mem_Ico, not_and, not_lt, true_and] at h
+  rw[Walsh.walsh_not_in, Walsh.walsh_not_in]
+  · simp only [zero_mul]
+  · rw[lt_iff_not_ge]
+    exact Decidable.not_or_of_imp h
+  · rw[lt_iff_not_ge]
+    exact Decidable.not_or_of_imp h
+
+theorem lemma2helphelp' {M: ℕ} {y : ℝ } {i : ℕ }: Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+  by_cases h : y ∈ (Set.Ico 0 1)
+  · exact lemma2helphelp h
+  · push_neg at h
+    refine lemma2helphelpextra ?_
+    exact mem_diff_of_mem trivial h
+
+theorem about_altern_and_add {k M : ℕ } (h : k < 2^M) : k^^^(2^M) = k + 2^M := by
+  apply Nat.eq_of_testBit_eq
+  intro i
+  simp only [Nat.testBit_xor]
+  by_cases hi : i = M
+  · rw[hi]
+    have h1 : k.testBit M = false := by
+      exact Nat.testBit_lt_two_pow h
+    have h2 : (2 ^ M).testBit M = true := by
+      exact Nat.testBit_two_pow_self
+    simp only [Nat.testBit_two_pow_self, Bool.bne_true, Bool.not_eq_eq_eq_not]
+    rw[h1]
+    simp only [Bool.false_eq, Bool.not_eq_eq_eq_not, Bool.not_false]
+    rw[add_comm, Nat.testBit_two_pow_add_eq]
+    simp only [Bool.not_eq_eq_eq_not, Bool.not_true]
+    exact h1
+  · push_neg at hi
+    have h2 : (2 ^ M).testBit i = false := by
+      exact Nat.testBit_two_pow_of_ne (id (Ne.symm hi))
+    rw[h2]
+    simp only [Bool.bne_false]
+    have h3 : k.testBit i = true → i < M  := by
+      sorry
+
+
+    sorry
+
 theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
-  (f : ℝ → ℝ) (x : ℝ) :
+  (f : ℝ → ℝ) (x : ℝ):
   ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Walsh.walsh i x  =
   ∑ i in Finset.range (N'+1),  ∫ (y : ℝ) in Ico 0 1,
@@ -432,10 +476,55 @@ theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' 
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · congr
     ext y
-    --tu bedzie jakas bijekcja chyba
-
-    sorry
+    rw[eq_comm]
+    let i : ℕ → ℕ  := fun i ↦ i + 2^M
+    apply Finset.sum_nbij i
+    · simp only [Finset.mem_range, Finset.mem_sdiff, not_lt]
+      unfold i
+      simp only [le_add_iff_nonneg_left, zero_le, and_true, h2]
+      intro a ha
+      refine Nat.lt_sub_iff_add_lt.mp ?_
+      exact Nat.lt_of_lt_of_eq ha (Eq.symm (Nat.sub_add_comm h10))
+    · unfold InjOn
+      unfold i
+      simp
+    · unfold SurjOn
+      intro k hk
+      simp only [Finset.coe_range, mem_image, mem_Iio]
+      unfold i
+      set s := k - 2^M with hs
+      use s
+      simp only [Finset.coe_sdiff, Finset.coe_range, Iio_diff_Iio, mem_Ico] at hk
+      constructor
+      · rw[h2]
+        refine Nat.sub_lt_left_of_lt_add ?_ ?_
+        · exact hk.1
+        · have : 2 ^ M + (N - 2 ^ M + 1) = N + 1 := by
+            rw [Nat.add_comm, add_assoc, add_comm]
+            conv_rhs => rw[add_comm]
+            rw[add_assoc, add_left_cancel_iff, Nat.add_sub_cancel' h10]
+          rw[this]
+          exact hk.2
+      · rw[hs]
+        refine Nat.sub_add_cancel ?_
+        exact hk.1
+    · intro k hk
+      rw[h2] at hk
+      simp only [Finset.mem_range] at hk
+      have hk' : k < 2^ M := by
+        rw[← Nat.add_one_le_iff ,pow_add, pow_one, mul_two] at h11
+        apply Nat.sub_le_sub_right (k:= 2^M) at h11
+        rw[Nat.add_sub_cancel, Nat.sub_add_comm h10] at h11
+        exact Nat.lt_of_lt_of_le hk h11
+      unfold i
+      conv_lhs => rw[mul_assoc, lemma2helphelp', mul_comm, mul_assoc, lemma2helphelp', ← mul_assoc, mul_comm, ← mul_assoc, mul_comm, ← mul_assoc ]
+      congr
+      · rw[Nat.xor_comm ]
+        apply about_altern_and_add hk'
+      · rw[Nat.xor_comm ]
+        apply about_altern_and_add hk'
   · intro i hi
+
     sorry
   · intro i hi
     sorry
