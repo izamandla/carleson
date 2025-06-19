@@ -357,12 +357,16 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ)
 /--
 Lemma 2
 -/
-theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M)) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
-  have h : BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M) ⊆ Finset.range M := by
-    --nwm czy to jest potrzebne
-    sorry
 
-  sorry
+
+
+theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h: N < 2^M) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet N ) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
+  by_cases h : ∃ n, x ∈ Ico (2^((-k) : ℤ )*n) (2^((-k) : ℤ )*(n+1)) ∧ y ∈ Ico (2^((-k) : ℤ )*n ) ( 2^((-k) : ℤ )*(n+1))
+  · sorry
+  · sorry
+
+---tu trzeba sie lepiej zastanowic jak zrobic to najkrocej
+
 
 
 
@@ -388,7 +392,11 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
   congr
   rw[← Finset.prod_mul_distrib, Finset.prod_eq_one]
   intro k hk
-  apply aboutprodrad h1 h2 hy1 hy2 hx1 hx2 hk
+  set N' := N - 2 ^ M with hN
+  have hN1 : N' < 2^M := by
+    rw[hN, propext (Nat.sub_lt_iff_lt_add' h1), ← mul_two, ← Nat.pow_add_one]
+    exact h2
+  apply aboutprodrad hN1 hy1 hy2 hx1 hx2 hk
 
 theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) (hx1 : 0≤ x) (hx2 : x<1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=

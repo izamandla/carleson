@@ -635,9 +635,9 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
 
 
 
+
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
   --nwm jak zamienic granice calkowania
-
 
   sorry
 
@@ -653,34 +653,25 @@ theorem intsum {n :ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.I
   · refine Disjoint.aedisjoint ?_
     simp
   · simp
-  · sorry
+  ·
+    sorry
   · sorry
 
 
 theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
   rw[← intsum]
   set l :=n/2 with hl
-  have hl' : 2*l + 1 = n := by sorry
+  have hl' : 2*l + 1 = n := by
+    exact Nat.two_mul_div_two_add_one_of_odd h
   simp_rw[← hl']
-  rw[← relbetweenintodd1]
-  sorry
+  rw[← relbetweenintodd1, ← sub_neg_eq_add, ← relbetweenintodd2, changeofint_firsthalf, changeofint_secondhalf, sub_self]
 
-  /--have h1 : EqOn (walsh (2 * l + 1)) (-walsh (2 * l)) (Set.Ico 0.5 1) := by
-    unfold EqOn
-    intro z hz
-    simp at hz
-    ring_nf at hz
-    simp only [Pi.neg_apply]
-    rw[walsh_even_odd_right hz.1]
-    simp only [neg_neg]
-  have h2 : MeasurableSet (Set.Ico 0.5 (1 : ℝ )) := by
-    simp
-  rw[MeasureTheory.setIntegral_congr_fun h2 h1]
-  simp only [Pi.neg_apply, MeasureTheory.integral_neg]-/
 
 
 theorem intofeven {n k : ℕ}  (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
-  sorry
+  rw[← intsum, ← hk]
+  rw[← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf]
+  exact Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))
 
 end Walsh
 
