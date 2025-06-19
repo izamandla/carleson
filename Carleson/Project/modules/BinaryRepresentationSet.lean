@@ -347,6 +347,23 @@ theorem differenceofbinaryrepset {N M k : ℕ} : k = M ^^^ N ↔ binaryRepresent
       simp
 
 
+theorem about_altern_and_add' {k M : ℕ } (h : k < 2^M) : k^^^(2^M) = k + 2^M := by
+  rw[eq_comm, differenceofbinaryrepset]
+  have h0 : Disjoint (binaryRepresentationSet k) (binaryRepresentationSet (2 ^ M)) := by
+    rw [binaryforpower, @Finset.disjoint_singleton_right]
+    refine Finset.forall_mem_not_eq.mp ?_
+    intro b hb
+    refine Nat.ne_of_lt' ?_
+    rw[← Nat.pow_lt_pow_iff_right (a:= 2) (Nat.one_lt_ofNat) ]
+    have : 2^b ≤  k := by
+      rw[← binaryRepresentationSet_explicit k]
+      exact CanonicallyOrderedAddCommMonoid.single_le_sum hb
+    exact Nat.lt_of_le_of_lt this h
+  rw[← sumofbinaryrepset h0, Finset.sdiff_eq_self_of_disjoint h0, Finset.sdiff_eq_self_of_disjoint (id (Disjoint.symm h0))]
+
+
+
+
 theorem removebit_help (N M : ℕ ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N = (binaryRepresentationSet N \ {M}) ∪ {M} := by
   simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
   exact h

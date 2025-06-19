@@ -440,32 +440,8 @@ theorem lemma2helphelp' {M: ℕ} {y : ℝ } {i : ℕ }: Walsh.walsh i y * Haar.r
     refine lemma2helphelpextra ?_
     exact mem_diff_of_mem trivial h
 
-theorem about_altern_and_add {k M : ℕ } (h : k < 2^M) : k^^^(2^M) = k + 2^M := by
-  apply Nat.eq_of_testBit_eq
-  intro i
-  simp only [Nat.testBit_xor]
-  by_cases hi : i = M
-  · rw[hi]
-    have h1 : k.testBit M = false := by
-      exact Nat.testBit_lt_two_pow h
-    have h2 : (2 ^ M).testBit M = true := by
-      exact Nat.testBit_two_pow_self
-    simp only [Nat.testBit_two_pow_self, Bool.bne_true, Bool.not_eq_eq_eq_not]
-    rw[h1]
-    simp only [Bool.false_eq, Bool.not_eq_eq_eq_not, Bool.not_false]
-    rw[add_comm, Nat.testBit_two_pow_add_eq]
-    simp only [Bool.not_eq_eq_eq_not, Bool.not_true]
-    exact h1
-  · push_neg at hi
-    have h2 : (2 ^ M).testBit i = false := by
-      exact Nat.testBit_two_pow_of_ne (id (Ne.symm hi))
-    rw[h2]
-    simp only [Bool.bne_false]
-    have h3 : k.testBit i = true → i < M  := by
-      sorry
 
 
-    sorry
 
 theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
   (f : ℝ → ℝ) (x : ℝ):
@@ -520,9 +496,9 @@ theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' 
       conv_lhs => rw[mul_assoc, lemma2helphelp', mul_comm, mul_assoc, lemma2helphelp', ← mul_assoc, mul_comm, ← mul_assoc, mul_comm, ← mul_assoc ]
       congr
       · rw[Nat.xor_comm ]
-        apply about_altern_and_add hk'
+        apply BinaryRepresentationSet.about_altern_and_add' hk'
       · rw[Nat.xor_comm ]
-        apply about_altern_and_add hk'
+        apply BinaryRepresentationSet.about_altern_and_add' hk'
   · intro i hi
 
     sorry
