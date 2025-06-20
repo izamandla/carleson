@@ -604,7 +604,7 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
     simp
 
 
-theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun x ↦ 1 : ℝ → ℝ ) := by
+theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun _ ↦ 1 : ℝ → ℝ ) := by
   ext x
   rw[indicator]
   simp only [mem_Ico]
@@ -636,11 +636,45 @@ theorem walshevenasfun {n : ℕ } : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5)
     ring_nf at h3
     exact h3.1
   · simp only [add_zero]
-    simp at h1
-    simp at h3
-    sorry
+    simp only [mem_Ico, not_and, not_lt] at h3
+    simp only [mem_Ico, not_and, not_lt] at h1
+    rw[walsh_zero_outside_domain  ]
+    by_contra h
+    push_neg at h
+    obtain ⟨hx₀, hx₁⟩ := h
+    have h0_5 : 0.5 ≤ x := h1 hx₀
+    have h1' : 1 ≤ x := h3 h0_5
+    linarith
 
-theorem walshoddasfun {n : ℕ } : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ - walsh n (2*x -1) : ℝ → ℝ )  := by sorry
+theorem walshoddasfun {n : ℕ } : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ - walsh n (2*x -1) : ℝ → ℝ )  := by
+  ext x
+  simp only [Pi.add_apply]
+  rw[indicator, indicator]
+  split_ifs with h1 h2 h3
+  · exfalso
+    simp at h1
+    simp at h2
+    linarith
+  · simp only [add_zero]
+    rw[walsh_odd_left]
+    simp at h1
+    ring_nf at h1
+    exact h1.2
+  · simp only [zero_add]
+    rw[walsh_odd_right]
+    simp at h3
+    ring_nf at h3
+    exact h3.1
+  · simp only [add_zero]
+    simp only [mem_Ico, not_and, not_lt] at h3
+    simp only [mem_Ico, not_and, not_lt] at h1
+    rw[walsh_zero_outside_domain  ]
+    by_contra h
+    push_neg at h
+    obtain ⟨hx₀, hx₁⟩ := h
+    have h0_5 : 0.5 ≤ x := h1 hx₀
+    have h1' : 1 ≤ x := h3 h0_5
+    linarith
 
 theorem measurability_of_walsh {n : ℕ } : Measurable (walsh n):= by
   induction' n using Nat.evenOddRec with n ih n ih
@@ -680,8 +714,31 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
       · have : Measurable (fun x ↦ 2*x : ℝ → ℝ ) := by
           fun_prop
         apply MeasureTheory.Integrable.comp_measurable ?_ this
+        simp only [MeasureTheory.integrableOn_univ] at ih
+        apply MeasureTheory.Integrable.mono_measure ih
+        rw [@MeasureTheory.Measure.le_iff]
+        intro s hs
+        simp_rw[mul_comm ]
+        rw[MeasureTheory.Measure.map_apply]
+        · simp only [measurableSet_Ico, MeasureTheory.Measure.restrict_apply']
+          unfold preimage
+          simp only
+          have h2 : MeasureTheory.volume ({x | x * 2 ∈ s} ∩ Ico 0 0.5) ≤ MeasureTheory.volume ({x | x * 2 ∈ s} ) := by
+            apply MeasureTheory.measure_mono
+            simp
+          have h3 : MeasureTheory.volume ({x | x * 2 ∈ s} ) ≤ MeasureTheory.volume s := by
+            have h4 : MeasureTheory.volume ({x | 2 * x ∈ s}) = 1/2  * MeasureTheory.volume s := by
+              rw [@ENNReal.mul_comm_div]
+              simp only [one_mul]
+              sorry
+            sorry
 
-        sorry
+
+
+          sorry
+        · fun_prop
+        · exact hs
+
       · simp only [measurableSet_Ico]
     · rw[MeasureTheory.integrable_indicator_iff]
       · sorry
@@ -692,29 +749,7 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
 
 
 
-theorem intergability' {n : ℕ } :MeasureTheory.Integrable (walsh n)  MeasureTheory.volume := by
-  have h0 : MeasureTheory.Integrable ((Set.Ico 0 1).indicator (fun _ ↦ 1 : ℝ → ℝ )) := by
-    unfold MeasureTheory.Integrable
-    refine ⟨?_, ?_⟩
-    · refine MeasureTheory.AEStronglyMeasurable.indicator ?_ ?_
-      · measurability
-      · simp
-    · unfold MeasureTheory.HasFiniteIntegral
-      rw [@lt_top_iff_ne_top]
-      simp only [ne_eq]
 
-      sorry
-  apply MeasureTheory.Integrable.mono' h0
-  · apply Measurable.aestronglyMeasurable
-    apply measurability_of_walsh
-  · apply Filter.Eventually.of_forall
-    simp only [Real.norm_eq_abs]
-    intro z
-    unfold indicator
-    simp only [mem_Ico]
-    split_ifs with h
-    · sorry
-    · sorry
 
 
 
