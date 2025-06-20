@@ -270,7 +270,6 @@ theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n
       rw[hl3] at hl'
       linarith
     rw[Walsh.intofeven hl']
-    simp only [mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
     exact ih l hl1 hl2
 
 

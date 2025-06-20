@@ -623,8 +623,8 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
 
 theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n x := by
   rw[← MeasureTheory.integral_indicator ]
-  apply MeasureTheory.integral_congr_ae --?
-  · rw[Filter.EventuallyEq ]
+  · apply MeasureTheory.integral_congr_ae
+    rw[Filter.EventuallyEq ]
     apply Filter.Eventually.of_forall
     simp only [indicator_apply_eq_self]
     intro x hx
@@ -643,9 +643,11 @@ theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n
 
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
+  sorry
+
+
   --nwm jak zamienic granice calkowania
 
-  sorry
 
 theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by sorry
 
