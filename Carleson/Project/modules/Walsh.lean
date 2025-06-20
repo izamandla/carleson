@@ -474,10 +474,6 @@ theorem mul_walsh_outside' {n : ℕ} (x y : ℝ ) (h : x <0 ∨  1 ≤  x) : (wa
   exact  h
 
 
---**ToDo** : Prove the statement about the product of Wlash functions of fixed `n` and different arguments in `[0, 1)`-/
---theorem mul_walsh {n : ℕ} (x y : ℝ ): (walsh n x)*(walsh n y ) =
---this has to be done from walsh redamacher relation
-
 
 
 
@@ -566,32 +562,6 @@ def walshFourierSeries (f : ℝ → ℝ) : ℝ → ℝ :=
 
 
 
-theorem changeofint {n : ℕ } : ∫ x in Set.Ico 0 1,  walsh n x = ∫ x , walsh n x := by
-  have h1' : EqOn (walsh n) 0 (univ\(Set.Ico 0 1) ):= by
-      unfold EqOn
-      intro z hz
-      simp only [mem_diff, mem_univ, mem_Ico,  not_lt, true_and, Decidable.not_and_iff_or_not, not_le] at hz
-      simp only [Pi.zero_apply]
-      rw[walsh_not_in]
-      exact hz
-  have h1'' : MeasurableSet (univ\(Set.Ico 0 (1 : ℝ ))) := by
-      simp
-  have h1 : ∫ x in univ\(Set.Ico 0 1),  walsh n x = 0 := by
-    rw[MeasureTheory.setIntegral_congr_fun h1'' h1']
-    simp only [Pi.zero_apply, MeasureTheory.integral_zero]
-  have h2: ∫ x in Set.Ico 0 1,  walsh n x  + ∫ x in univ\(Set.Ico 0 1),  walsh n x = ∫ x, walsh n x := by
-    have : (Set.Ico 0 1) ∪ ( univ\(Set.Ico 0 1)) = univ := by
-      simp
-    have ht_eq : ∀ x ∈ univ\(Set.Ico 0 1), walsh n x = 0 := by
-      sorry
-    -- nie umiem uzyc ani pierwszego ani drugiego
-    --conv_rhs => rw[← MeasureTheory.integral_union_eq_left_of_forall h1'' ht_eq]
-    --conv_lhs => rw[← MeasureTheory.integral_union_ae ]
-
-    sorry
-  rw[← h2, h1]
-  simp only [add_zero]
-
 
 
 theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
@@ -634,14 +604,50 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
     simp
 
 
+theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
+  --simp only [MeasureTheory.integrableOn_univ]
+  induction' n using Nat.strong_induction_on with n ih
+  have h : univ = Ico 0 1 ∪ (univ\Ico 0 1) := by simp
+  --simp_rw[h] at ih --czemu to nie dziala?
+  --simp_rw[h , MeasureTheory.IntegrableOn.union ]
+  set l := n/2 with hl
+  by_cases hn : Odd n
+  · have hl' : 2*l + 1 = n := by sorry
+    rw[← hl']
+    sorry
+  · sorry
 
 
-theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = ∫ x in Set.Ico 0 1, walsh n x := by
+
+
+
+theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n x := by
+  rw[← MeasureTheory.integral_indicator ]
+  apply MeasureTheory.integral_congr_ae --?
+  · rw[Filter.EventuallyEq ]
+    apply Filter.Eventually.of_forall
+    simp only [indicator_apply_eq_self]
+    intro x hx
+    simp_rw[Ico] at hx
+    simp only [mem_setOf_eq] at hx
+    apply walsh_zero_outside_domain
+    simp only [ge_iff_le]
+    rw[Decidable.not_and_iff_or_not] at hx
+    push_neg at hx
+    exact hx
+  · exact measurableSet_Ico
+
+
+
+
+
+
+theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
   --nwm jak zamienic granice calkowania
 
   sorry
 
-theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0 1, walsh n x := by sorry
+theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by sorry
 
 theorem intsum {n :ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
   have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
@@ -653,9 +659,10 @@ theorem intsum {n :ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.I
   · refine Disjoint.aedisjoint ?_
     simp
   · simp
-  ·
-    sorry
-  · sorry
+  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
+    simp
+  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
+    simp
 
 
 theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
@@ -668,10 +675,12 @@ theorem intofodd {n : ℕ} (h: Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := 
 
 
 
-theorem intofeven {n k : ℕ}  (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x = 2* ∫ x in Set.Ico 0 1,  walsh k x  := by
+theorem intofeven {n k : ℕ}  (hk: 2*k = n): ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
   rw[← intsum, ← hk]
-  rw[← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf]
-  exact Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))
+  rw[← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf, ← mul_add]
+  rw[Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))]
+  simp only [one_div, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    IsUnit.inv_mul_cancel_left]
 
 end Walsh
 
