@@ -552,7 +552,7 @@ theorem add_walshInnerProduct (f g : ℝ → ℝ) (n : ℕ) :
 Definition of Walsh Fourier partial sum.
 -/
 def walshFourierPartialSum (f : ℝ → ℝ) (N : ℕ) : ℝ → ℝ :=
- λ x => ∑ n in Finset.range N, (walshInnerProduct f n) * walsh n x
+ λ x => ∑ n in Finset.range (N+1), (walshInnerProduct f n) * walsh n x
 
 /--
 Definition of Walsh Fourier Series.

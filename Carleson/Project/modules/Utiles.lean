@@ -296,7 +296,7 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
 
 
 
-theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range N, (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range (N+1), (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
   unfold Walsh.walshFourierPartialSum
   unfold Walsh.walshInnerProduct
   rw[mul_comm, Finset.sum_mul ]
@@ -535,12 +535,12 @@ theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N 
     rw[mul_comm, ← mul_assoc]
 
 
-
-theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N ), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
+--zmienilam granice sumowania - czy slusznie?
+theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N +1), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N+1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
   conv_rhs => rw[add_comm]
   rw[Finset.sum_sdiff]
   rw[Finset.range_subset]
-  exact h1
+  exact Nat.le_add_right_of_le h1
 
 
 end Extra
