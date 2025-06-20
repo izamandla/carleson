@@ -604,20 +604,117 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
     simp
 
 
-theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
-  --simp only [MeasureTheory.integrableOn_univ]
-  induction' n using Nat.strong_induction_on with n ih
-  have h : univ = Ico 0 1 ∪ (univ\Ico 0 1) := by simp
-  --simp_rw[h] at ih --czemu to nie dziala?
-  --simp_rw[h , MeasureTheory.IntegrableOn.union ]
-  set l := n/2 with hl
-  by_cases hn : Odd n
-  · have hl' : 2*l + 1 = n := by sorry
-    rw[← hl']
+theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun x ↦ 1 : ℝ → ℝ ) := by
+  ext x
+  rw[indicator]
+  simp only [mem_Ico]
+  split_ifs with h1
+  · rw[walsh_zero h1.1 h1.2]
+  · rw[Decidable.not_and_iff_or_not] at h1
+    push_neg at h1
+    rw[← ge_iff_le] at h1
+    rw[walsh_zero_outside_domain]
+    exact h1
+
+theorem walshevenasfun {n : ℕ } : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ walsh n (2*x -1) : ℝ → ℝ )  := by
+  ext x
+  simp only [Pi.add_apply]
+  rw[indicator, indicator]
+  split_ifs with h1 h2 h3
+  · exfalso
+    simp at h1
+    simp at h2
+    linarith
+  · simp only [add_zero]
+    rw[walsh_even_left]
+    simp at h1
+    ring_nf at h1
+    exact h1.2
+  · simp only [zero_add]
+    rw[walsh_even_right]
+    simp at h3
+    ring_nf at h3
+    exact h3.1
+  · simp only [add_zero]
+    simp at h1
+    simp at h3
     sorry
+
+theorem walshoddasfun {n : ℕ } : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ - walsh n (2*x -1) : ℝ → ℝ )  := by sorry
+
+theorem measurability_of_walsh {n : ℕ } : Measurable (walsh n):= by
+  induction' n using Nat.evenOddRec with n ih n ih
+  · rw[walsh0asfun]
+    refine (measurable_indicator_const_iff 1).mpr ?_
+    simp
+  · rw[walshevenasfun]
+    refine (Measurable.add_iff_right ?_).mpr ?_
+    · apply Measurable.indicator
+      · fun_prop
+      · simp
+    · apply Measurable.indicator
+      · fun_prop
+      · simp
+  · rw[walshoddasfun]
+    refine (Measurable.add_iff_right ?_).mpr ?_
+    · apply Measurable.indicator
+      · fun_prop
+      · simp
+    · apply Measurable.indicator
+      · fun_prop
+      · simp
+
+theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
+  have h : univ = Ico (0 :ℝ ) 1 ∪ (univ\Ico 0 1) := by simp
+  induction' n using Nat.evenOddRec with n ih
+  · rw[walsh0asfun]
+    simp only [MeasureTheory.integrableOn_univ]
+    rw[MeasureTheory.integrable_indicator_iff]
+    · simp only [MeasureTheory.integrableOn_const, one_ne_zero, Real.volume_Ico, sub_zero,
+      ENNReal.ofReal_one, ENNReal.one_lt_top, or_true]
+    · simp only [measurableSet_Ico]
+  · rw[walshevenasfun]
+    simp only [MeasureTheory.integrableOn_univ]
+    apply MeasureTheory.Integrable.add
+    · rw[MeasureTheory.integrable_indicator_iff]
+      · have : Measurable (fun x ↦ 2*x : ℝ → ℝ ) := by
+          fun_prop
+        apply MeasureTheory.Integrable.comp_measurable ?_ this
+
+        sorry
+      · simp only [measurableSet_Ico]
+    · rw[MeasureTheory.integrable_indicator_iff]
+      · sorry
+      · simp only [measurableSet_Ico]
+
   · sorry
 
 
+
+
+theorem intergability' {n : ℕ } :MeasureTheory.Integrable (walsh n)  MeasureTheory.volume := by
+  have h0 : MeasureTheory.Integrable ((Set.Ico 0 1).indicator (fun _ ↦ 1 : ℝ → ℝ )) := by
+    unfold MeasureTheory.Integrable
+    refine ⟨?_, ?_⟩
+    · refine MeasureTheory.AEStronglyMeasurable.indicator ?_ ?_
+      · measurability
+      · simp
+    · unfold MeasureTheory.HasFiniteIntegral
+      rw [@lt_top_iff_ne_top]
+      simp only [ne_eq]
+
+      sorry
+  apply MeasureTheory.Integrable.mono' h0
+  · apply Measurable.aestronglyMeasurable
+    apply measurability_of_walsh
+  · apply Filter.Eventually.of_forall
+    simp only [Real.norm_eq_abs]
+    intro z
+    unfold indicator
+    simp only [mem_Ico]
+    split_ifs with h
+    · sorry
+    · sorry
 
 
 

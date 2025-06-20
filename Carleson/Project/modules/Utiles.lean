@@ -350,7 +350,7 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ)
   ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
 
 
-  --OrthonormalBasis.orthogonalProjection_eq_sum
+  --rw[OrthonormalBasis.orthogonalProjection_eq_sum]
   sorry
 
 /--
@@ -422,7 +422,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
   · simp only [Finset.mem_range]
 
     sorry
-
+--f integrable (new assumption)
 /--
 Lemma 3
 -/
