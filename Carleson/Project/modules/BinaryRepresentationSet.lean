@@ -450,15 +450,6 @@ theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentat
   · intro k hk
     rw[pow_succ, mul_comm]
 
-theorem binaryRepresentationSet_equiv2help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
-  rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
---to mozna z tego kolejnego --moze tak by bylo lepiej??
---nie uzywam
-
-theorem binaryRepresentationSet_equiv2plus1help (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
-  rw[binaryRepresentationSet_explicit2, binaryRepresentationSet_explicit]
-
---nie uzywam
 
 
 /--
@@ -466,15 +457,12 @@ Binary representation set has maximal element.
 -/
 
 theorem max_binaryRepresentationSet (n : ℕ ) (h : n >0 ) : ∃ k ∈  binaryRepresentationSet n, ∀ j > k, j ∉ binaryRepresentationSet n := by
-  have h0 : (binaryRepresentationSet n).Nonempty := by
+  have h1 :  ∃ (a : ℕ), Finset.max (binaryRepresentationSet n )= a := by
+    apply Finset.max_of_nonempty
     apply binaryRepresentationSet_not_zero at h
     exact Finset.nonempty_iff_ne_empty.mpr h
-  have h1 :  ∃ (a : ℕ), Finset.max (binaryRepresentationSet n )= a := by
-    apply Finset.max_of_nonempty h0
   obtain ⟨ a , ha ⟩ := h1
-  have h : a ∈ binaryRepresentationSet n := by
-    exact Finset.mem_of_max ha
-  use a, h
+  use a, (Finset.mem_of_max ha)
   simp only [gt_iff_lt]
   intro j hj
   exact Finset.not_mem_of_max_lt hj ha
@@ -484,15 +472,12 @@ theorem max_binaryRepresentationSet (n : ℕ ) (h : n >0 ) : ∃ k ∈  binaryRe
 Binary representation set has minimal element.
 -/
 theorem min_binaryRepresentationSet (n : ℕ) (h : n >0 ) : ∃ k ∈  binaryRepresentationSet n, ∀ j < k, j ∉ binaryRepresentationSet n := by
-  have h0 : (binaryRepresentationSet n).Nonempty := by
+  have h1 :  ∃ (a : ℕ), Finset.min (binaryRepresentationSet n )= a := by
+    apply Finset.min_of_nonempty
     apply binaryRepresentationSet_not_zero at h
     exact Finset.nonempty_iff_ne_empty.mpr h
-  have h1 :  ∃ (a : ℕ), Finset.min (binaryRepresentationSet n )= a := by
-    apply Finset.min_of_nonempty h0
   obtain ⟨ a , ha ⟩ := h1
-  have h : a ∈ binaryRepresentationSet n := by
-    exact Finset.mem_of_min ha
-  use a, h
+  use a, (Finset.mem_of_min ha)
   intro j hj
   exact Finset.not_mem_of_lt_min hj ha
 
@@ -530,12 +515,9 @@ theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binary
   set k := N -2^M with hk
   have hk' : k +2^M = N := by
     exact Nat.sub_add_cancel h1
-  rw[mem_binaryRepresentationSet_iff]
   rw[← hk', le_add_iff_nonneg_left] at h1
   rw[← hk', Nat.pow_add_one, mul_two, add_lt_add_iff_right] at h2
-  rw[← hk']
-  rw[add_comm, Nat.testBit_two_pow_add_eq]
-  simp only [Bool.not_eq_eq_eq_not, Bool.not_true]
+  rw[mem_binaryRepresentationSet_iff, ← hk', add_comm, Nat.testBit_two_pow_add_eq, Bool.not_eq_eq_eq_not, Bool.not_true]
   exact Nat.testBit_lt_two_pow h2
 
   end BinaryRepresentationSet
