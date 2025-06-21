@@ -700,7 +700,7 @@ theorem measurability_of_walsh {n : ℕ } : Measurable (walsh n):= by
 
 theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
   have h : univ = Ico (0 :ℝ ) 1 ∪ (univ\Ico 0 1) := by simp
-  induction' n using Nat.evenOddRec with n ih
+  induction' n using Nat.evenOddRec with n ih n ih
   · rw[walsh0asfun]
     simp only [MeasureTheory.integrableOn_univ]
     rw[MeasureTheory.integrable_indicator_iff]
@@ -721,27 +721,39 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
         simp_rw[mul_comm ]
         rw[MeasureTheory.Measure.map_apply]
         · simp only [measurableSet_Ico, MeasureTheory.Measure.restrict_apply']
-          unfold preimage
-          simp only
-          have h2 : MeasureTheory.volume ({x | x * 2 ∈ s} ∩ Ico 0 0.5) ≤ MeasureTheory.volume ({x | x * 2 ∈ s} ) := by
+          have h' : MeasureTheory.volume ((fun x ↦ x * 2) ⁻¹' s ∩ Ico 0 0.5) ≤ MeasureTheory.volume ((fun x ↦ x * 2) ⁻¹' s ) := by
             apply MeasureTheory.measure_mono
             simp
-          have h3 : MeasureTheory.volume ({x | x * 2 ∈ s} ) ≤ MeasureTheory.volume s := by
-            have h4 : MeasureTheory.volume ({x | 2 * x ∈ s}) = 1/2  * MeasureTheory.volume s := by
-              rw [@ENNReal.mul_comm_div]
-              simp only [one_mul]
-              sorry
-            sorry
-
-
+          rw[Real.volume_preimage_mul_right] at h'
+          · apply le_trans h'
+            apply mul_le_of_le_one_left'
+            simp only [ENNReal.ofReal_le_one]
+            rw[abs_of_nonneg]
+            · linarith
+            · linarith
+          · exact Ne.symm (NeZero.ne' 2)
+        · fun_prop
+        · exact hs
+      · simp only [measurableSet_Ico]
+    · rw[MeasureTheory.integrable_indicator_iff]
+      · have : Measurable (fun x ↦ 2*x -1 : ℝ → ℝ ) := by
+          fun_prop
+        apply MeasureTheory.Integrable.comp_measurable ?_ this
+        simp only [MeasureTheory.integrableOn_univ] at ih
+        apply MeasureTheory.Integrable.mono_measure ih
+        rw [@MeasureTheory.Measure.le_iff]
+        intro s hs
+        simp_rw[mul_comm ]
+        rw[MeasureTheory.Measure.map_apply]
+        · simp only [measurableSet_Ico, MeasureTheory.Measure.restrict_apply']
+          have h' : MeasureTheory.volume ((fun x ↦ x * 2 -1 ) ⁻¹' s ∩ Ico 0.5 1) ≤ MeasureTheory.volume ((fun x ↦ x * 2 - 1) ⁻¹' s ) := by
+            apply MeasureTheory.measure_mono
+            simp
+          apply le_trans h'
 
           sorry
         · fun_prop
         · exact hs
-
-      · simp only [measurableSet_Ico]
-    · rw[MeasureTheory.integrable_indicator_iff]
-      · sorry
       · simp only [measurableSet_Ico]
 
   · sorry
