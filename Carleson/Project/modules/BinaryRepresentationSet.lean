@@ -16,7 +16,7 @@ Condition for being in the binary representation set.
 -/
 theorem mem_binaryRepresentationSet_iff (n m : ℕ) :
   m ∈ binaryRepresentationSet n ↔ (Nat.testBit n m = true) := by
-  simp only [binaryRepresentationSet, Finset.mem_filter, Finset.mem_range, and_iff_right_iff_imp]
+  rw[binaryRepresentationSet, Finset.mem_filter, Finset.mem_range, and_iff_right_iff_imp]
   intro h
   apply m.testBit_implies_ge at h
   rw [ge_iff_le, ← m.lt_size] at h
@@ -27,8 +27,7 @@ theorem mem_binaryRepresentationSet_iff (n m : ℕ) :
 Binary representation set of `0` is empty.
 -/
 theorem binaryRepresentationSet_zero : binaryRepresentationSet 0 = ∅ := by
-  simp [binaryRepresentationSet, Nat.testBit_zero]
-
+  simp[binaryRepresentationSet, Nat.testBit_zero]
 
 
 /--
@@ -53,22 +52,17 @@ Binary representation set of `2^M` equals `M`.
 theorem binaryforpower (M: ℕ ): binaryRepresentationSet (2^M) = { M } := by
   rw[binaryRepresentationSet]
   ext x
+  simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
   constructor
-  · simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
-    intro h0
-    obtain ⟨ h1, h2 ⟩ := h0
+  · intro h
     by_contra hx
     rw[eq_comm] at hx
-    push_neg at hx
     apply Nat.testBit_two_pow_of_ne at hx
-    exact Std.Tactic.BVDecide.Reflect.Bool.false_of_eq_true_of_eq_false h2 hx
-  · simp only [Finset.mem_singleton, Finset.mem_filter, Finset.mem_range]
-    intro h0
-    rw[h0]
-    constructor
-    · rw[Nat.size_pow]
-      linarith
-    · apply Nat.testBit_two_pow_self
+    exact Std.Tactic.BVDecide.Reflect.Bool.false_of_eq_true_of_eq_false h.2 hx
+  · intro h
+    simp_rw[h, Nat.size_pow, Nat.testBit_two_pow_self, and_true]
+    linarith
+
 
 /--
 Binary representation set of odd number equals binary representation set of number one less of it with extra `0`.
@@ -116,9 +110,7 @@ theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresen
     exact ha
   · unfold InjOn
     simp only [Finset.mem_coe]
-    intro z hz
-    intro y hy
-    intro h
+    intro z hz y hy h
     simp only [add_left_inj, i] at h
     exact h
   · unfold SurjOn
@@ -126,8 +118,8 @@ theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresen
     simp only [mem_image, Finset.mem_coe, i]
     have hy0 : y ≥ 1 := by
       refine Nat.one_le_iff_ne_zero.mpr ?_
-      by_contra a
-      rw[a] at hy
+      by_contra hy'
+      rw[hy'] at hy
       apply lackofzeroin2 at hy
       exact hy
     set s:= y -1 with hs
