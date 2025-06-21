@@ -365,8 +365,7 @@ relation between xor and binary representation sets
 theorem differenceofbinaryrepset {N M k : ℕ} : k = M ^^^ N ↔ binaryRepresentationSet k = ((binaryRepresentationSet M)\(binaryRepresentationSet N)) ∪ ((binaryRepresentationSet N)\ (binaryRepresentationSet M)) := by
   constructor
   · intro h
-    rw[h]
-    rw [@Finset.ext_iff]
+    rw[h, @Finset.ext_iff]
     intro a
     simp only [Finset.mem_union, Finset.mem_sdiff]
     simp_rw[ mem_binaryRepresentationSet_iff]
@@ -392,6 +391,18 @@ theorem differenceofbinaryrepset {N M k : ℕ} : k = M ^^^ N ↔ binaryRepresent
       rw[h0]
       simp
 
+/-- if some `k < 2^M` then binary representation sets of `k` and `2^M` are disjoint-/
+
+theorem disjoftwopow {k M : ℕ } (h : k < 2^M) : Disjoint (binaryRepresentationSet k) (binaryRepresentationSet (2 ^ M)) := by
+  rw [binaryforpower, @Finset.disjoint_singleton_right]
+  refine Finset.forall_mem_not_eq.mp ?_
+  intro b hb
+  refine Nat.ne_of_lt' ?_
+  rw[← Nat.pow_lt_pow_iff_right (a:= 2) (Nat.one_lt_ofNat) ]
+  have : 2^b ≤  k := by
+    rw[← binaryRepresentationSet_explicit k]
+    exact CanonicallyOrderedAddCommMonoid.single_le_sum hb
+  exact Nat.lt_of_le_of_lt this h
 
 
 /--
@@ -400,46 +411,26 @@ relation between xor of some `2^M` and sum.
 
 theorem about_altern_and_add' {k M : ℕ } (h : k < 2^M) : k^^^(2^M) = k + 2^M := by
   rw[eq_comm, differenceofbinaryrepset]
-  have h0 : Disjoint (binaryRepresentationSet k) (binaryRepresentationSet (2 ^ M)) := by
-    rw [binaryforpower, @Finset.disjoint_singleton_right]
-    refine Finset.forall_mem_not_eq.mp ?_
-    intro b hb
-    refine Nat.ne_of_lt' ?_
-    rw[← Nat.pow_lt_pow_iff_right (a:= 2) (Nat.one_lt_ofNat) ]
-    have : 2^b ≤  k := by
-      rw[← binaryRepresentationSet_explicit k]
-      exact CanonicallyOrderedAddCommMonoid.single_le_sum hb
-    exact Nat.lt_of_le_of_lt this h
-  rw[← sumofbinaryrepset h0, Finset.sdiff_eq_self_of_disjoint h0, Finset.sdiff_eq_self_of_disjoint (id (Disjoint.symm h0))]
+  rw[← sumofbinaryrepset (disjoftwopow h), Finset.sdiff_eq_self_of_disjoint (disjoftwopow h), Finset.sdiff_eq_self_of_disjoint (id (Disjoint.symm (disjoftwopow h)))]
 
 
 /--
 Removing element of binary representation set.
 -/
-
-theorem removebit_help (N M : ℕ ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N = (binaryRepresentationSet N \ {M}) ∪ {M} := by
-  simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
-  exact h
-  --nie uzywam tego twierdzenia tutaj - czy uzywam go w innej sekcji?
-
-
 theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRepresentationSet N \ {M} = binaryRepresentationSet (N - 2^M) := by
   rw [mem_binaryRepresentationSet_iff] at h
-  have h0 : 2^M ≤ N := by
-    apply Nat.testBit_implies_ge h
   set N' := N - 2^M with hs
-  have hs1: N' + 2^M = N := by
+  have hs': N' + 2^M = N := by
     rw[hs, Nat.sub_add_cancel]
-    exact h0
+    apply Nat.testBit_implies_ge h
   have h1 : Disjoint (binaryRepresentationSet N') {M} := by
     simp only [Finset.disjoint_singleton_right, mem_binaryRepresentationSet_iff, Bool.not_eq_true]
-    rw[← hs1, add_comm , Nat.testBit_two_pow_add_eq] at h
-    simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h
+    rw[← hs', add_comm , Nat.testBit_two_pow_add_eq, Bool.not_eq_eq_eq_not, Bool.not_true] at h
     exact h
-  rw[← hs1, ← sumofbinaryrepset]
-  · rw[binaryforpower ]
+  rw[← hs', ← sumofbinaryrepset]
+  · rw[binaryforpower]
     apply Finset.union_sdiff_cancel_right h1
-  · rw[← binaryforpower ] at h1
+  · rw[binaryforpower]
     exact h1
 
 
