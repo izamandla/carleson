@@ -524,6 +524,15 @@ theorem walsh_ort_same {n m : ℕ} (h: m = n) : walshInnerProduct (walsh n) m  =
 
 
 
+theorem walsh_leq_one {n : ℕ } {x : ℝ } : |walsh n x| ≤ 1 := by
+  by_cases h : 0 ≤ x ∧ x < 1
+  · rw [@abs_le_one_iff_mul_self_le_one, walsh_sqr1 ]
+    exact h
+  · rw[Mathlib.Tactic.PushNeg.not_and_or_eq ] at h
+    simp only [not_le, not_lt, ← ge_iff_le] at h
+    rw[walsh_zero_outside_domain n  x h ]
+    simp
+
 
 /--
 Multiplication Walsh inner product by scalar.
@@ -698,7 +707,7 @@ theorem measurability_of_walsh {n : ℕ } : Measurable (walsh n):= by
       · fun_prop
       · simp
 
-theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
+/-theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
   have h : univ = Ico (0 :ℝ ) 1 ∪ (univ\Ico 0 1) := by simp
   induction' n using Nat.evenOddRec with n ih n ih
   · rw[walsh0asfun]
@@ -756,8 +765,96 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
         · exact hs
       · simp only [measurableSet_Ico]
 
-  · sorry
+  · sorry-/
 
+
+
+
+
+theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
+  induction' n using Nat.evenOddRec with n ih n ih
+  · rw[walsh0asfun, MeasureTheory.integrableOn_univ, MeasureTheory.integrable_indicator_iff]
+    · simp
+    · simp
+  · rw[walshevenasfun, MeasureTheory.integrableOn_univ]
+    apply MeasureTheory.Integrable.add
+    · rw[ MeasureTheory.Integrable.eq_1 ]
+      constructor
+      · apply Measurable.aestronglyMeasurable
+        refine Measurable.indicator ?_ ?_
+        · apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
+        · simp
+      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
+        · unfold MeasureTheory.HasFiniteIntegral
+
+          sorry
+        · apply Filter.Eventually.of_forall
+          simp only [Real.norm_eq_abs]
+          intro x
+          simp only [indicator, mem_Ico, Pi.one_apply]
+          split_ifs with h
+          · apply walsh_leq_one (n := n) (x := (2*x))
+          · simp
+    · rw[ MeasureTheory.Integrable.eq_1 ]
+      constructor
+      · apply Measurable.aestronglyMeasurable
+        refine Measurable.indicator ?_ ?_
+        · apply Measurable.comp (measurability_of_walsh)
+          refine Measurable.add_const ?_ (-1)
+          exact measurable_const_mul 2
+        · simp
+      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
+        · unfold indicator
+          simp only [mem_Ico, Pi.one_apply]
+          sorry
+        · apply Filter.Eventually.of_forall
+          simp only [Real.norm_eq_abs]
+          intro x
+          simp only [indicator, mem_Ico, Pi.one_apply]
+          split_ifs with h
+          · apply walsh_leq_one (n := n) (x := (2*x- 1))
+          · simp
+  · rw[walshoddasfun, MeasureTheory.integrableOn_univ]
+    apply MeasureTheory.Integrable.add
+    · rw[ MeasureTheory.Integrable.eq_1 ]
+      constructor
+      · apply Measurable.aestronglyMeasurable
+        refine Measurable.indicator ?_ ?_
+        · apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
+        · simp
+      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
+        · unfold indicator
+          simp only [mem_Ico, Pi.one_apply]
+
+          sorry
+        · apply Filter.Eventually.of_forall
+          simp only [Real.norm_eq_abs]
+          intro x
+          simp only [indicator, mem_Ico, Pi.one_apply]
+          split_ifs with h
+          · apply walsh_leq_one (n := n) (x := (2*x))
+          · simp
+    · rw[ MeasureTheory.Integrable.eq_1 ]
+      constructor
+      · apply Measurable.aestronglyMeasurable
+        refine Measurable.indicator ?_ ?_
+        · simp only [measurable_neg_iff]
+          apply Measurable.comp (measurability_of_walsh)
+          refine Measurable.add_const ?_ (-1)
+          exact measurable_const_mul 2
+        · simp
+      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
+        · unfold indicator
+          simp only [mem_Ico, Pi.one_apply]
+          sorry
+        · apply Filter.Eventually.of_forall
+          simp only [Real.norm_eq_abs]
+          intro x
+          simp only [indicator, mem_Ico, Pi.one_apply]
+          split_ifs with h
+          · simp only [abs_neg]
+            apply walsh_leq_one (n := n) (x := (2*x- 1))
+          · simp
 
 
 
