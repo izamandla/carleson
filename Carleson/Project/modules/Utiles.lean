@@ -341,6 +341,10 @@ theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
   rw[MeasureTheory.setIntegral_congr_fun h2 h1]
   simp
 
+theorem wlashhaar_norm {M k : ℕ } : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
+  simp_rw[walshhaar, Haar.haarFunctionScaled]
+  sorry
+
 
 
 
@@ -348,6 +352,7 @@ theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
 theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
+
 
 
   --rw[OrthonormalBasis.orthogonalProjection_eq_sum]
@@ -360,6 +365,7 @@ Lemma 2
 
 
 theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h: N < 2^M) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet N ) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
+  unfold Haar.rademacherFunction
   by_cases h : ∃ n, x ∈ Ico (2^((-k) : ℤ )*n) (2^((-k) : ℤ )*(n+1)) ∧ y ∈ Ico (2^((-k) : ℤ )*n ) ( 2^((-k) : ℤ )*(n+1))
   · sorry
   · sorry
@@ -420,7 +426,6 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
     --MeasureTheory.Integrable.mul_of_top_right
     sorry
   · simp only [Finset.mem_range]
-
     sorry
 --f integrable (new assumption)
 /--

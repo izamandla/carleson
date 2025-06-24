@@ -150,7 +150,7 @@ theorem haarFunctionScaled_left_half (k n : ℤ ) (x : ℝ) (h1 : 0 ≤ 2 ^(-k) 
     · linarith
     · linarith
 
-
+--theorem haarFunctionScaled_left_half_as_fun
 
 /--
 Right half of the scaled Haar function is equal to `-2^(-k / 2)`.

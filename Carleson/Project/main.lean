@@ -38,7 +38,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1: 0≤ x) (hx2 : x<
         rw[Filter.EventuallyEq ]
         apply Filter.Eventually.of_forall
         intro y
-
+        -- to musi zostac zrobione przez indukcje
         sorry
       · sorry
       · sorry
