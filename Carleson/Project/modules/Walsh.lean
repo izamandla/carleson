@@ -785,7 +785,8 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
         · apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
         · simp
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
-        · unfold MeasureTheory.HasFiniteIntegral
+        · simp[MeasureTheory.HasFiniteIntegral]
+          --nwm jak to zrobić :(
 
           sorry
         · apply Filter.Eventually.of_forall
@@ -884,13 +885,25 @@ theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n
 
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
-  sorry
+  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+  rw[← intervalIntegral.integral_of_le, ← intervalIntegral.integral_of_le]
+  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    intervalIntegral.integral_comp_mul_left, mul_zero, smul_eq_mul, one_div, mul_eq_mul_left_iff,
+    inv_eq_zero, or_false]
+    ring_nf
+  · linarith
+  · linarith
 
 
-  --nwm jak zamienic granice calkowania
-
-
-theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by sorry
+theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by
+  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+  rw[← intervalIntegral.integral_of_le, ← intervalIntegral.integral_of_le]
+  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    intervalIntegral.integral_comp_mul_sub, mul_one, smul_eq_mul, one_div, mul_eq_mul_left_iff,
+    inv_eq_zero, or_false]
+    ring_nf
+  · linarith
+  · linarith
 
 theorem intsum {n :ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
   have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
