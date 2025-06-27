@@ -2,7 +2,7 @@ import Carleson.Project.modules.DyadicStructures
 import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 import Carleson.Project.modules.BinaryRepresentationSet
-open Function Set Classical
+open Function Set
 open unitInterval
 noncomputable section
 
@@ -21,7 +21,7 @@ def kernel (N : ℕ) (x y : ℝ) : ℝ :=
 The kernel function at `N = 0` is constant 1.
 -/
 theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
-  simp only [kernel, add_right_eq_self]
+  simp only [kernel, add_eq_left]
   rw[BinaryRepresentationSet.binaryRepresentationSet_zero]
   exact rfl
 
@@ -39,7 +39,7 @@ end Kernel
 namespace Extra
 /- **ToDo** : Connect the facts about scaled Haar, Rademacher and Walsh functions with dyadic structures. -/
 
-theorem wlashradhelp0 (n m : ℕ)(h: m ∈ BinaryRepresentationSet.binaryRepresentationSet n) : (m+1) ∈ BinaryRepresentationSet.binaryRepresentationSet (2*n) := by
+theorem wlashradhelp0 (n m : ℕ) (h : m ∈ BinaryRepresentationSet.binaryRepresentationSet n) : (m+1) ∈ BinaryRepresentationSet.binaryRepresentationSet (2*n) := by
   rw[BinaryRepresentationSet.mem_binaryRepresentationSet_iff] at h
   rw[BinaryRepresentationSet.mem_binaryRepresentationSet_iff]
   rw[← Nat.testBit_div_two]
@@ -50,7 +50,7 @@ theorem wlashradhelp0 (n m : ℕ)(h: m ∈ BinaryRepresentationSet.binaryReprese
 Relation between Haar function and Walsh functions.
 -/
 
-theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
+theorem walsh_haar_one (x : ℝ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
   simp only [Haar.haarFunction, one_div]
   split_ifs with h1 h2
   · obtain ⟨ hl, hr⟩ := h1
@@ -83,8 +83,8 @@ theorem walsh_haar_one (x : ℝ ) : Walsh.walsh 1 x  = Haar.haarFunction x := by
 Walsh functions expressed using products of Rademacher functions.
 -/
 
-theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
-  Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
+theorem walshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : Walsh.walsh n x = ∏
+  m ∈ BinaryRepresentationSet.binaryRepresentationSet n, Haar.rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih generalizing x
   by_cases hzero :n = 0
   · rw[hzero]
@@ -192,8 +192,9 @@ theorem walshRademacherRelation {n : ℕ }{x : ℝ} (hx1 : 0 ≤ x) (hx2 :  x<1 
           · exact hx2
 
 
-theorem walshradrelbigger0 {n : ℕ }{x : ℝ} (hn : n >0 ) :
-  Walsh.walsh n x = ∏ m in BinaryRepresentationSet.binaryRepresentationSet n , Haar.rademacherFunction m x := by
+theorem walshradrelbigger0 {n : ℕ} {x : ℝ} (hn : n > 0) :
+  Walsh.walsh n x = ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet n,
+    Haar.rademacherFunction m x := by
   by_cases h : x≥ 0 ∧ x< 1
   · apply walshRademacherRelation h.1 h.2
   · simp only [not_and_or] at h
@@ -213,8 +214,7 @@ theorem walshradrelbigger0 {n : ℕ }{x : ℝ} (hn : n >0 ) :
 /--
 Special case of Walsh-Rademacher relation for powers of two.
 -/
-theorem differentwalshRademacherRelation {n : ℕ} {x : ℝ}  (hx1 : 0 ≤ x) (hx2 :  x<1 ):
-  Walsh.walsh (2^n) x = Haar.rademacherFunction n x := by
+theorem differentwalshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1): Walsh.walsh (2^n) x = Haar.rademacherFunction n x := by
   rw[walshRademacherRelation, BinaryRepresentationSet.binaryforpower, Finset.prod_singleton]
   · exact hx1
   · exact hx2
@@ -222,8 +222,8 @@ theorem differentwalshRademacherRelation {n : ℕ} {x : ℝ}  (hx1 : 0 ≤ x) (h
 /--
 Walsh-Rademacher relation.
 -/
-theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRepresentationSet.binaryRepresentationSet N) (hx1 : 0 ≤ x) (hx2 :  x<1 ) :
-  Walsh.walsh N x = Walsh.walsh (2^M) x * ∏ m in BinaryRepresentationSet.binaryRepresentationSet (N - (2^M)) , Haar.rademacherFunction m x := by
+theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRepresentationSet.binaryRepresentationSet N) (hx1 : 0 ≤ x) (hx2 : x < 1) : Walsh.walsh N x = Walsh.walsh (2^M) x * ∏
+  m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - (2 ^ M)), Haar.rademacherFunction m x := by
   rw[walshRademacherRelation hx1 hx2,differentwalshRademacherRelation hx1 hx2]
   rw[← BinaryRepresentationSet.remove_bit N M h]
   exact Finset.prod_eq_mul_prod_diff_singleton h fun x_1 ↦ Haar.rademacherFunction x_1 x
@@ -235,7 +235,7 @@ Product of two walsh functions
 -/
 
 
-theorem prodofwalshworse {M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) (hk: k = M^^^N) :Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
+theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (hk : k = M ^^^ N) :Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
   rw[BinaryRepresentationSet.differenceofbinaryrepset] at hk
   rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
   · rw[hk]
@@ -245,7 +245,7 @@ theorem prodofwalshworse {M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) 
 
 
 
-theorem prodofwalsh{M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
+theorem prodofwalsh {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
   rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, BinaryRepresentationSet.differenceofbinaryrepset, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
   · --nie jestem pewna jak to zrobic - z załozen o funkcji redamachera powiino to jakosc isc ale jak?
     sorry
@@ -254,7 +254,7 @@ theorem prodofwalsh{M N k : ℕ} {x : ℝ } (hx1 : 0 ≤ x) (hx2 :  x<1 ) : k = 
 
 
 
-theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
+theorem walsh_int {n : ℕ} (h : n > 0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
   induction' n using Nat.strong_induction_on with n ih
   by_cases h1: Odd n
   · rw[Walsh.intofodd h1]
@@ -263,7 +263,7 @@ theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n
     have hl' : 2* l = n := by
       exact Nat.two_mul_div_two_of_even h1
     have hl1 : l< n := by
-      refine Nat.bitwise_rec_lemma (Nat.not_eq_zero_of_lt h)
+      refine Nat.bitwise_rec_lemma (Nat.ne_zero_of_lt h)
     have hl2: 0< l := by
       refine Nat.zero_lt_of_ne_zero ?_
       by_contra hl3
@@ -275,7 +275,7 @@ theorem walsh_int {n : ℕ } (h : n>0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n
 
 
 
-theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
+theorem walsh_ort_dif {n m : ℕ} (h : m ≠ n) : Walsh.walshInnerProduct (Walsh.walsh n) m  = 0 := by
   simp only [Walsh.walshInnerProduct]
   set k := m^^^n with hk
   simp_rw[← Pi.mul_apply]
@@ -296,7 +296,11 @@ theorem walsh_ort_dif {n m : ℕ} (h: m ≠  n) : Walsh.walshInnerProduct (Walsh
 
 
 
-theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑ n in Finset.range (N+1), (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y )* f y * Walsh.walsh n y) * Haar.rademacherFunction M x * Walsh.walsh n x  := by
+theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑
+  n ∈ Finset.range (N + 1),
+  (∫ y in Set.Ico 0 1, (Haar.rademacherFunction M y) * f y * Walsh.walsh n y) *
+      Haar.rademacherFunction M x *
+    Walsh.walsh n x  := by
   unfold Walsh.walshFourierPartialSum
   unfold Walsh.walshInnerProduct
   rw[mul_comm, Finset.sum_mul ]
@@ -314,12 +318,12 @@ theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ ) : Haar.r
 /--
 Lemma 1
 -/
-def walshhaar (M k: ℕ ) : ℝ → ℝ
+def walshhaar (M k : ℕ) : ℝ → ℝ
 | x =>
   Walsh.walsh (2^M) x * (Haar.haarFunctionScaled M k x)
 
 
-theorem walshHaar_ort_help {M k k': ℕ } {x :ℝ } (h : k ≠ k'):  walshhaar M k x * walshhaar M k' x = 0 := by
+theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k'):  walshhaar M k x * walshhaar M k' x = 0 := by
   unfold walshhaar
   rw[mul_comm]
   rw [@mul_mul_mul_comm]
@@ -330,7 +334,7 @@ theorem walshHaar_ort_help {M k k': ℕ } {x :ℝ } (h : k ≠ k'):  walshhaar M
     exact h
 
 
-theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
+theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k'):  ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
   have h1 : EqOn (walshhaar M k * walshhaar M k') 0 (Set.Ico 0 1) := by
     unfold EqOn
     intro z hz
@@ -343,7 +347,7 @@ theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
 
 --w def walshhaar musi być dodatkowy warunek na k
 
-theorem wlashhaar_norm {M k : ℕ } : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
+theorem wlashhaar_norm {M k : ℕ} : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
   have h : (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by sorry
   rw[← h]
   simp_rw[walshhaar, Haar.haarFunctionScaled]
@@ -361,7 +365,7 @@ theorem wlashhaar_norm {M k : ℕ } : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1
 
 
 --sumowanie jest do 2^M - 1 wiec tu przedzialy sa ok
-theorem lemma1_1 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) (f : ℝ → ℝ) (x : ℝ) :
+theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
 
@@ -376,7 +380,7 @@ Lemma 2
 
 
 
-theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h: N < 2^M) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1)(hk: k ∈ BinaryRepresentationSet.binaryRepresentationSet N ) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
+theorem aboutprodrad {k N M : ℕ} {x y : ℝ} (h : N < 2 ^ M) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1)(hk : k ∈ BinaryRepresentationSet.binaryRepresentationSet N) : Haar.rademacherFunction k x * Haar.rademacherFunction k y = 1 := by
   unfold Haar.rademacherFunction
   by_cases h : ∃ n, x ∈ Ico (2^((-k) : ℤ )*n) (2^((-k) : ℤ )*(n+1)) ∧ y ∈ Ico (2^((-k) : ℤ )*n ) ( 2^((-k) : ℤ )*(n+1))
   · sorry
@@ -387,7 +391,7 @@ theorem aboutprodrad {k N M : ℕ } {x y : ℝ} (h: N < 2^M) (hy1 : 0≤ y) (hy2
 
 
 
-theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x y : ℝ) (hy1 : 0≤ y) (hy2 : y< 1) (hx1 : 0≤ x) (hx2 : x<1):
+theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1):
   ∑ k ∈ Finset.range (2 ^ M),
       f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled M k y * Walsh.walsh (2 ^ M) x *
         Haar.haarFunctionScaled M k x =
@@ -415,11 +419,14 @@ theorem lemma1_2help  {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → 
     exact h2
   apply aboutprodrad hN1 hy1 hy2 hx1 hx2 hk
 
-theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) (x : ℝ) (hx1 : 0≤ x) (hx2 : x<1) :
+theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
-  ∑ k in Finset.range (2^M),(∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y) ) * Walsh.walsh N x * (Haar.haarFunctionScaled M k x) := by
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y)) *
+        Walsh.walsh N x *
+      (Haar.haarFunctionScaled M k x) := by
   rw [lemma1_1 h1 h2 ]
-  simp_rw[← MeasureTheory.integral_mul_right]
+  simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · apply MeasureTheory.setIntegral_congr_fun
     · simp
@@ -443,12 +450,12 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1))(f : ℝ → ℝ) 
 /--
 Lemma 3
 -/
-theorem lemma2helphelp {M: ℕ} {y : ℝ } {i : ℕ } (h3 : y ∈ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+theorem lemma2helphelp {M : ℕ} {y : ℝ} {i : ℕ} (h3 : y ∈ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
   simp only [Finset.mem_range, mem_Ico] at h3
   rw[← differentwalshRademacherRelation h3.1 h3.2 , ← prodofwalshworse h3.1 h3.2 ]
   exact Nat.xor_comm (2 ^ M) i
 
-theorem lemma2helphelpextra {M: ℕ} {y : ℝ } {i : ℕ } (h : y ∈ univ \ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+theorem lemma2helphelpextra {M : ℕ} {y : ℝ} {i : ℕ} (h : y ∈ univ \ (Set.Ico 0 1)) : Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
   simp only [mem_diff, mem_univ, mem_Ico, not_and, not_lt, true_and] at h
   rw[Walsh.walsh_not_in, Walsh.walsh_not_in]
   · simp only [zero_mul]
@@ -457,7 +464,7 @@ theorem lemma2helphelpextra {M: ℕ} {y : ℝ } {i : ℕ } (h : y ∈ univ \ (Se
   · rw[lt_iff_not_ge]
     exact Decidable.not_or_of_imp h
 
-theorem lemma2helphelp' {M: ℕ} {y : ℝ } {i : ℕ }: Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
+theorem lemma2helphelp' {M : ℕ} {y : ℝ} {i : ℕ}: Walsh.walsh i y * Haar.rademacherFunction M y = Walsh.walsh (2^M^^^i) y := by
   by_cases h : y ∈ (Set.Ico 0 1)
   · exact lemma2helphelp h
   · push_neg at h
@@ -467,7 +474,7 @@ theorem lemma2helphelp' {M: ℕ} {y : ℝ } {i : ℕ }: Walsh.walsh i y * Haar.r
 
 
 
-theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
+theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
   (f : ℝ → ℝ) (x : ℝ):
   ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Walsh.walsh i x  =
@@ -529,13 +536,13 @@ theorem lemma2help {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' 
   · intro i hi
     sorry
 
-theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N - 2^M)
+theorem lemma2 {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
   (f : ℝ → ℝ) (x : ℝ) :
   ∑ i in Finset.range (N+1)  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
   ∑ i in Finset.range (N' +1), Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
   unfold Walsh.walshInnerProduct
   simp only [Pi.mul_apply]
-  simp_rw[← MeasureTheory.integral_mul_right]
+  simp_rw[← MeasureTheory.integral_mul_const]
   rw[lemma2help h10 h11 h2]
   apply Finset.sum_congr
   · simp
@@ -553,7 +560,9 @@ theorem lemma2 {M N N' : ℕ}(h10 : 2^M ≤ N )( h11: N < 2^(M+1)) (h2 : N' = N 
 
 
 --zmienilam granice sumowania - czy slusznie?
-theorem partition {M N : ℕ } (h1 : 2^M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑ i in Finset.range (N +1), Walsh.walshInnerProduct f i  * Walsh.walsh i x =∑ i in  Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x + ∑ i in Finset.range (N+1) \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x := by
+theorem partition {M N : ℕ} (h1 : 2 ^ M ≤ N) (f : ℝ → ℝ) (x : ℝ) : ∑
+  i ∈ Finset.range (N + 1), Walsh.walshInnerProduct f i * Walsh.walsh i x =∑
+    i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x + ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x := by
   conv_rhs => rw[add_comm]
   rw[Finset.sum_sdiff]
   rw[Finset.range_subset]
