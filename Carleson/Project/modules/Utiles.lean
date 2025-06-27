@@ -475,7 +475,7 @@ theorem lemma2helphelp' {M : ℕ} {y : ℝ} {i : ℕ}: Walsh.walsh i y * Haar.ra
 
 
 theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
-  (f : ℝ → ℝ) (x : ℝ):
+  (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) (x : ℝ):
   ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Walsh.walsh i x  =
   ∑ i in Finset.range (N'+1),  ∫ (y : ℝ) in Ico 0 1,
