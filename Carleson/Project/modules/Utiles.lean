@@ -341,9 +341,21 @@ theorem walshHaar_ort {M k k': ℕ } (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
   rw[MeasureTheory.setIntegral_congr_fun h2 h1]
   simp
 
+--w def walshhaar musi być dodatkowy warunek na k
+
 theorem wlashhaar_norm {M k : ℕ } : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
+  have h : (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by sorry
+  rw[← h]
   simp_rw[walshhaar, Haar.haarFunctionScaled]
-  sorry
+  simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
+  induction' M using Nat.evenOddRec with n ih n ih
+  · simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
+
+    --simp_rw[Walsh.walsh_one_left]
+    sorry
+  · sorry
+  · sorry
+
 
 
 

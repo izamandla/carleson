@@ -787,7 +787,7 @@ theorem intergability {n : ℕ } :MeasureTheory.IntegrableOn (walsh n) univ Meas
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
         · simp[MeasureTheory.HasFiniteIntegral]
           --nwm jak to zrobić :(
-
+          simp_rw[enorm_indicator_eq_indicator_enorm]
           sorry
         · apply Filter.Eventually.of_forall
           simp only [Real.norm_eq_abs]
