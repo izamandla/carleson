@@ -16,7 +16,7 @@ def dyadicInterval (k n : ℤ) : Set ℝ :=
   { x | (2^k : ℝ) * n ≤ x ∧ x < (2^k : ℝ) * (n + 1) }
 
 
-/-- Special case: the dyadic interval with `k,n = 0` is `[0, 1)`. --/
+/-- Special case: the dyadic interval with `k,n = 0` is `[0, 1)`. -/
 @[simp]
 theorem zero_dyadicInterval : dyadicInterval 0 0 = Set.Ico 0 1 := by
   ext x

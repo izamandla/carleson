@@ -1,5 +1,5 @@
 import Mathlib
-open Function Set Classical
+open Function Set --Classical
 noncomputable section
 
 /- ## Binary representation set -/
@@ -9,7 +9,7 @@ namespace BinaryRepresentationSet
 Binary representation of a number as a set of indices.
 -/
 def binaryRepresentationSet (n : ℕ) : Finset ℕ :=
-  Finset.filter (λ m => Nat.testBit n m) (Finset.range (Nat.size n + 1))
+  Finset.filter (fun m => Nat.testBit n m) (Finset.range (Nat.size n + 1))
 
 /--
 Condition for being in the binary representation set.
@@ -18,7 +18,7 @@ theorem mem_binaryRepresentationSet_iff (n m : ℕ) :
   m ∈ binaryRepresentationSet n ↔ (Nat.testBit n m = true) := by
   rw[binaryRepresentationSet, Finset.mem_filter, Finset.mem_range, and_iff_right_iff_imp]
   intro h
-  apply m.testBit_implies_ge at h
+  apply m.ge_two_pow_of_testBit at h
   rw [ge_iff_le, ← m.lt_size] at h
   linarith
 
@@ -34,22 +34,22 @@ theorem binaryRepresentationSet_zero : binaryRepresentationSet 0 = ∅ := by
 Binary representation set of `n>0` is nonempty.
 -/
 
-theorem binaryRepresentationSet_not_zero (n : ℕ ) (h : n >0 )  : binaryRepresentationSet n ≠  ∅ := by
+theorem binaryRepresentationSet_not_zero (n : ℕ) (h : n > 0) : binaryRepresentationSet n ≠  ∅ := by
   rw[gt_iff_lt, ← Nat.ne_zero_iff_zero_lt] at h
-  apply Nat.ne_zero_implies_bit_true at h
+  apply Nat.exists_testBit_of_ne_zero at h
   obtain ⟨ i, h_i ⟩ := h
   rw[←  mem_binaryRepresentationSet_iff ] at h_i
   simp only [ne_eq]
   intro h
   rw [h] at h_i
-  exact Finset.not_mem_empty i h_i
+  exact Finset.notMem_empty i h_i
 
 
 /--
 Binary representation set of `2^M` equals `M`.
 -/
 
-theorem binaryforpower (M: ℕ ): binaryRepresentationSet (2^M) = { M } := by
+theorem binaryforpower (M : ℕ): binaryRepresentationSet (2^M) = { M } := by
   rw[binaryRepresentationSet]
   ext x
   simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
@@ -68,10 +68,10 @@ theorem binaryforpower (M: ℕ ): binaryRepresentationSet (2^M) = { M } := by
 Binary representation set of odd number equals binary representation set of number one less of it with extra `0`.
 -/
 
-theorem bin2insert2plus1 (n : ℕ ) : binaryRepresentationSet (2*n +1) = insert 0 (binaryRepresentationSet (2*n))  := by
+theorem bin2insert2plus1 (n : ℕ) : binaryRepresentationSet (2*n +1) = insert 0 (binaryRepresentationSet (2*n))  := by
   ext x
   simp only [mem_binaryRepresentationSet_iff, Finset.mem_insert]
-  cases' x with y
+  rcases x
   · simp only [Nat.testBit_zero, decide_eq_true_eq, Nat.mul_mod_right, zero_ne_one, decide_false,
       Bool.false_eq_true, or_false, iff_true]
     exact Nat.odd_iff.mp (odd_two_mul_add_one n)
@@ -84,9 +84,9 @@ theorem bin2insert2plus1 (n : ℕ ) : binaryRepresentationSet (2*n +1) = insert 
 Binary representation set of `n` contains `k` iff bninary representation set of `2n` contains `k+1`.
 -/
 
-theorem binaryRepresentationSet_equiv2 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
+theorem binaryRepresentationSet_equiv2 (n k : ℕ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe]
-  rw[← Nat.pow_one 2 , Nat.testBit_mul_pow_two]
+  rw[← Nat.pow_one 2 , Nat.testBit_two_pow_mul]
   simp
 
 /--
@@ -101,7 +101,8 @@ theorem lackofzeroin2 (n : ℕ) : 0 ∉ binaryRepresentationSet (2*n) := by
 Relation between explicit forms of binary representation sets of `n` and `2n`.
 -/
 
-theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) =  ∑ k in binaryRepresentationSet (2*n), 2^k:= by
+theorem binaryRepresentationSet_equiv2result (n : ℕ) : ∑ k ∈ binaryRepresentationSet n,
+  2 ^ (k + 1) =  ∑ k ∈ binaryRepresentationSet (2 * n), 2 ^ k:= by
   let i : ℕ → ℕ  := fun i ↦ i + 1
   apply Finset.sum_nbij i
   · intro a ha
@@ -126,13 +127,15 @@ theorem binaryRepresentationSet_equiv2result (n :ℕ ) : ∑ k in binaryRepresen
     · rw[binaryRepresentationSet_equiv2, Nat.sub_one_add_one_eq_of_pos hy0]
       exact hy
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
-  · simp
+  · simp[i]
+
 
 /--
 relation between product over binary rpresentation set of some funtions
 -/
 
-theorem binaryRepresentationSet_equiv2resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) : ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n), f k:= by
+theorem binaryRepresentationSet_equiv2resultprod {n : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α) : ∏
+  k ∈ binaryRepresentationSet n, f (k + 1) =  ∏ k ∈ binaryRepresentationSet (2 * n), f k:= by
   let i : ℕ → ℕ  := fun i ↦ i + 1
   apply Finset.prod_nbij i
   · intro a ha
@@ -157,14 +160,18 @@ theorem binaryRepresentationSet_equiv2resultprod {n :ℕ } {α : Type*} [CommMon
     · rw[binaryRepresentationSet_equiv2, Nat.sub_one_add_one_eq_of_pos hy0]
       exact hy
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
-  · simp
+  · simp[i]
 
 
 /--
 Partition of product taken over binary representation set
 -/
 
-theorem binaryRepresentationSet_fun_prod {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k) * (∏ k in (binaryRepresentationSet m) ∩ (binaryRepresentationSet n), f k)^2:= by
+theorem binaryRepresentationSet_fun_prod {n m : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α) : (∏
+  k ∈ binaryRepresentationSet n, f k) * (∏ k ∈ binaryRepresentationSet m, f k)  =  (∏
+    k ∈ (binaryRepresentationSet n) \ (binaryRepresentationSet m), f k) * (∏
+      k ∈ (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k) * (∏
+        k ∈ (binaryRepresentationSet m) ∩ (binaryRepresentationSet n), f k)^2:= by
   conv_rhs => rw[pow_two,mul_assoc, mul_comm, ← mul_assoc]
   have h {i j :ℕ } : ((∏ k ∈ binaryRepresentationSet i\ binaryRepresentationSet j, f k) *
         ∏ k ∈ binaryRepresentationSet i ∩ binaryRepresentationSet j, f k) = (∏ k ∈ binaryRepresentationSet i, f k) := by
@@ -179,7 +186,10 @@ theorem binaryRepresentationSet_fun_prod {n m :ℕ } {α : Type*} [CommMonoid α
 /--
 Partition of product taken over binary representation set when square of function equals 1.
 -/
-theorem binaryRepresentationSet_fun_prod2 {n m :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ) (hf : ∀ k , (f k)^ 2 = 1) : (∏ k in binaryRepresentationSet n, f k) * (∏ k in binaryRepresentationSet m, f k)  =  (∏ k in (binaryRepresentationSet n)\ (binaryRepresentationSet m), f k) * (∏ k in (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k):= by
+theorem binaryRepresentationSet_fun_prod2 {n m : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α) (hf : ∀ k, (f k) ^ 2 = 1) : (∏
+  k ∈ binaryRepresentationSet n, f k) * (∏ k ∈ binaryRepresentationSet m, f k)  =  (∏
+    k ∈ (binaryRepresentationSet n) \ (binaryRepresentationSet m), f k) * (∏
+      k ∈ (binaryRepresentationSet m) \ (binaryRepresentationSet n), f k):= by
   simp_rw[binaryRepresentationSet_fun_prod]
   conv_rhs =>rw[← mul_one ((∏ k ∈ binaryRepresentationSet n \ binaryRepresentationSet m, f k) *
     ∏ k ∈ binaryRepresentationSet m \ binaryRepresentationSet n, f k)]
@@ -192,7 +202,7 @@ theorem binaryRepresentationSet_fun_prod2 {n m :ℕ } {α : Type*} [CommMonoid �
 Relation between elements of binary representation sets of odd and even numbers
 -/
 
-theorem binaryRepresentationSet_equiv2plus1 (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1) := by
+theorem binaryRepresentationSet_equiv2plus1 (n k : ℕ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1) := by
   simp only [mem_binaryRepresentationSet_iff, Bool.coe_iff_coe, Nat.testBit_succ]
   have h : (2 * n + 1) / 2 = n := by
     set l:= 2 * n + 1 with hl
@@ -217,14 +227,16 @@ theorem exofzeroin2plus1 (n : ℕ) : 0 ∈  binaryRepresentationSet (2*n +1) := 
 Stronger relation between odd and even numbers' binary representation sets. Includes `0`.
 -/
 
-theorem binaryRepresentationSet_equiv2plus1other (n k :ℕ ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1)\ {0} := by
+theorem binaryRepresentationSet_equiv2plus1other (n k : ℕ) : k ∈ binaryRepresentationSet n ↔ (k+1) ∈ binaryRepresentationSet (2*n +1)\ {0} := by
   simp only [Finset.mem_sdiff, Finset.mem_singleton, AddLeftCancelMonoid.add_eq_zero, one_ne_zero,
     and_false, not_false_eq_true, and_true]
   apply binaryRepresentationSet_equiv2plus1
 
 
 
-theorem binaryRepresentationSet_equiv2plus1resulthelp2 (n : ℕ ) : ∑ k in binaryRepresentationSet (2*n +1), 2^k = ∑ k in binaryRepresentationSet (2*n +1) \ {0}, 2^k +1 := by
+theorem binaryRepresentationSet_equiv2plus1resulthelp2 (n : ℕ) : ∑
+  k ∈ binaryRepresentationSet (2 * n + 1), 2 ^ k = ∑
+    k ∈ binaryRepresentationSet (2 * n + 1) \ {0}, 2 ^ k +1 := by
   have h : binaryRepresentationSet (2*n +1) = (binaryRepresentationSet (2*n +1) \ {0}) ∪ {0} := by
     simp only [Finset.sdiff_union_self_eq_union, Finset.left_eq_union, Finset.singleton_subset_iff, exofzeroin2plus1 ]
   conv_lhs => rw[h]
@@ -235,7 +247,8 @@ theorem binaryRepresentationSet_equiv2plus1resulthelp2 (n : ℕ ) : ∑ k in bin
 Relation between explicit forms of binary representation set of `n` and `2n+1`.
 -/
 
-theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
+theorem binaryRepresentationSet_equiv2plus1result (n : ℕ) : ∑ k ∈ binaryRepresentationSet n,
+  2 ^ (k + 1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
   rw[binaryRepresentationSet_equiv2plus1resulthelp2, add_left_inj]
   let i : ℕ → ℕ  := fun i ↦ i + 1
   apply Finset.sum_nbij i
@@ -259,26 +272,27 @@ theorem binaryRepresentationSet_equiv2plus1result (n :ℕ ) : ∑ k in binaryRep
     · rw[binaryRepresentationSet_equiv2plus1other, Nat.sub_one_add_one_eq_of_pos hy0]
       exact hy
     · rw [Nat.sub_one_add_one_eq_of_pos hy0]
-  · simp
+  · simp[i]
 
 /--
 relation of prodacts between `n` and `2n+1`.
 -/
-theorem binaryRepresentationSet_equiv2plus1resultprod {n :ℕ } {α : Type*} [CommMonoid α]  (f : ℕ → α ): (f 0) * ∏ k in binaryRepresentationSet n, f (k+1) =  ∏ k in binaryRepresentationSet (2*n +1), f k:= by
+theorem binaryRepresentationSet_equiv2plus1resultprod {n : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α): (f 0) * ∏
+  k ∈ binaryRepresentationSet n, f (k + 1) =  ∏ k ∈ binaryRepresentationSet (2 * n + 1), f k:= by
   rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), binaryRepresentationSet_equiv2resultprod]
 
 /--
 Natural number can be written using the sum of two to the power of element of binary representation set.
 -/
-theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^k = n := by
+theorem binaryRepresentationSet_explicit (n : ℕ) : ∑ k ∈ binaryRepresentationSet n, 2 ^ k = n := by
   induction' n using Nat.evenOddRec with n ih n ih
   · simp_rw[Finset.sum_eq_zero_iff, pow_eq_zero_iff', OfNat.ofNat_ne_zero, ne_eq, false_and,
-      imp_false, binaryRepresentationSet_zero, Finset.not_mem_empty, not_false_eq_true, implies_true]
+      imp_false, binaryRepresentationSet_zero, Finset.notMem_empty, not_false_eq_true, implies_true]
   · conv_rhs => rw[← ih]
     rw[Finset.mul_sum, ← binaryRepresentationSet_equiv2result, Finset.sum_congr]
     · simp
     · simp_rw[pow_succ, mul_comm, implies_true]
-  . conv_rhs => rw[← ih]
+  · conv_rhs => rw[← ih]
     rw[Finset.mul_sum, ← binaryRepresentationSet_equiv2plus1result, add_left_inj,Finset.sum_congr]
     · simp
     · simp_rw[pow_succ, mul_comm, implies_true]
@@ -290,7 +304,7 @@ theorem binaryRepresentationSet_explicit (n :ℕ ) : ∑ k in binaryRepresentati
 Relation between sum and bitwise or.
 -/
 
-theorem sumofbinaryrepsethelp {N M : ℕ } (h: Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : M + N = M ||| N := by
+theorem sumofbinaryrepsethelp {N M : ℕ} (h : Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : M + N = M ||| N := by
   conv_lhs => rw[← binaryRepresentationSet_explicit M, ← binaryRepresentationSet_explicit N]
   rw[← binaryRepresentationSet_explicit (M|||N), ← Finset.sum_union h]
   congr
@@ -302,7 +316,7 @@ theorem sumofbinaryrepsethelp {N M : ℕ } (h: Disjoint (binaryRepresentationSet
 Union of two disjoint binary representation sets.
 -/
 
-theorem sumofbinaryrepset {N M : ℕ } (h: Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : (binaryRepresentationSet M) ∪ (binaryRepresentationSet N) = binaryRepresentationSet (M + N) := by
+theorem sumofbinaryrepset {N M : ℕ} (h : Disjoint (binaryRepresentationSet M) (binaryRepresentationSet N)) : (binaryRepresentationSet M) ∪ (binaryRepresentationSet N) = binaryRepresentationSet (M + N) := by
   ext x
   conv_lhs => rw [@Finset.mem_union]
   simp_rw [mem_binaryRepresentationSet_iff, sumofbinaryrepsethelp h, Nat.testBit_or, Bool.or_eq_true]
@@ -336,9 +350,9 @@ theorem differenceofbinaryrepset {N M k : ℕ} : k = M ^^^ N ↔ binaryRepresent
     · simp_rw[h0]
       simp
 
-/-- if some `k < 2^M` then binary representation sets of `k` and `2^M` are disjoint-/
+/-- If some `k < 2^M` then binary representation sets of `k` and `2^M` are disjoint. -/
 
-theorem disjoftwopow {k M : ℕ } (h : k < 2^M) : Disjoint (binaryRepresentationSet k) (binaryRepresentationSet (2 ^ M)) := by
+theorem disjoftwopow {k M : ℕ} (h : k < 2 ^ M) : Disjoint (binaryRepresentationSet k) (binaryRepresentationSet (2 ^ M)) := by
   rw [binaryforpower, @Finset.disjoint_singleton_right]
   refine Finset.forall_mem_not_eq.mp ?_
   intro b hb
@@ -354,7 +368,7 @@ theorem disjoftwopow {k M : ℕ } (h : k < 2^M) : Disjoint (binaryRepresentation
 relation between xor of some `2^M` and sum.
 -/
 
-theorem about_altern_and_add' {k M : ℕ } (h : k < 2^M) : k^^^(2^M) = k + 2^M := by
+theorem about_altern_and_add' {k M : ℕ} (h : k < 2 ^ M) : k^^^(2^M) = k + 2^M := by
   rw[eq_comm, differenceofbinaryrepset]
   rw[← sumofbinaryrepset (disjoftwopow h), Finset.sdiff_eq_self_of_disjoint (disjoftwopow h), Finset.sdiff_eq_self_of_disjoint (id (Disjoint.symm (disjoftwopow h)))]
 
@@ -367,7 +381,7 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
   set N' := N - 2^M with hs
   have hs': N' + 2^M = N := by
     rw[hs, Nat.sub_add_cancel]
-    apply Nat.testBit_implies_ge h
+    apply Nat.ge_two_pow_of_testBit h
   have h1 : Disjoint (binaryRepresentationSet N') {M} := by
     simp only [Finset.disjoint_singleton_right, mem_binaryRepresentationSet_iff, Bool.not_eq_true]
     rw[← hs', add_comm , Nat.testBit_two_pow_add_eq, Bool.not_eq_eq_eq_not, Bool.not_true] at h
@@ -379,7 +393,7 @@ theorem remove_bit (N M : ℕ) (h : M ∈ binaryRepresentationSet N) : binaryRep
     exact h1
 
 
-theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentationSet n, 2^(k+1) = 2*n := by
+theorem binaryRepresentationSet_explicit2 (n : ℕ) : ∑ k ∈ binaryRepresentationSet n, 2 ^ (k + 1) = 2*n := by
   conv_rhs => rw[← binaryRepresentationSet_explicit n, Finset.mul_sum]
   apply Finset.sum_congr
   · simp
@@ -392,7 +406,7 @@ theorem binaryRepresentationSet_explicit2 (n :ℕ ) : ∑ k in binaryRepresentat
 Binary representation set has maximal element.
 -/
 
-theorem max_binaryRepresentationSet (n : ℕ ) (h : n >0 ) : ∃ k ∈  binaryRepresentationSet n, ∀ j > k, j ∉ binaryRepresentationSet n := by
+theorem max_binaryRepresentationSet (n : ℕ) (h : n > 0) : ∃ k ∈  binaryRepresentationSet n, ∀ j > k, j ∉ binaryRepresentationSet n := by
   have h1 :  ∃ (a : ℕ), Finset.max (binaryRepresentationSet n )= a := by
     apply Finset.max_of_nonempty
     apply binaryRepresentationSet_not_zero at h
@@ -401,13 +415,13 @@ theorem max_binaryRepresentationSet (n : ℕ ) (h : n >0 ) : ∃ k ∈  binaryRe
   use a, (Finset.mem_of_max ha)
   simp only [gt_iff_lt]
   intro j hj
-  exact Finset.not_mem_of_max_lt hj ha
+  exact Finset.notMem_of_max_lt hj ha
 
 
 /--
 Binary representation set has minimal element.
 -/
-theorem min_binaryRepresentationSet (n : ℕ) (h : n >0 ) : ∃ k ∈  binaryRepresentationSet n, ∀ j < k, j ∉ binaryRepresentationSet n := by
+theorem min_binaryRepresentationSet (n : ℕ) (h : n > 0) : ∃ k ∈  binaryRepresentationSet n, ∀ j < k, j ∉ binaryRepresentationSet n := by
   have h1 :  ∃ (a : ℕ), Finset.min (binaryRepresentationSet n )= a := by
     apply Finset.min_of_nonempty
     apply binaryRepresentationSet_not_zero at h
@@ -415,15 +429,15 @@ theorem min_binaryRepresentationSet (n : ℕ) (h : n >0 ) : ∃ k ∈  binaryRep
   obtain ⟨ a , ha ⟩ := h1
   use a, (Finset.mem_of_min ha)
   intro j hj
-  exact Finset.not_mem_of_lt_min hj ha
+  exact Finset.notMem_of_lt_min hj ha
 
-/-- Two to the power of element of binary representation set of `N` is smaller or equal to `N`.-/
+/-- Two to the power of element of binary representation set of `N` is smaller or equal to `N`. -/
 
-theorem aboutM1 {N M :ℕ } (h1 : M ∈ binaryRepresentationSet N) : 2 ^ M ≤ N := by
+theorem aboutM1 {N M : ℕ} (h1 : M ∈ binaryRepresentationSet N) : 2 ^ M ≤ N := by
   rw[← binaryRepresentationSet_explicit N]
   exact CanonicallyOrderedAddCommMonoid.single_le_sum h1
 
-theorem aboutM2help {M: ℕ} : ∑ k ∈ Finset.range M, 2^k < 2^M :=by
+theorem aboutM2help {M : ℕ} : ∑ k ∈ Finset.range M, 2^k < 2^M :=by
   refine Nat.geomSum_lt ?_ ?_
   · simp
   · simp
@@ -432,7 +446,7 @@ theorem aboutM2help {M: ℕ} : ∑ k ∈ Finset.range M, 2^k < 2^M :=by
 Two to the power of maximum element of binary representation set of `N` plus one is bigger than `N`.
 -/
 
-theorem aboutM2 {N M :ℕ } (h2: ∀ j > M, j ∉ binaryRepresentationSet N) : N< 2^(M+1) := by
+theorem aboutM2 {N M : ℕ} (h2 : ∀ j > M, j ∉ binaryRepresentationSet N) : N< 2^(M+1) := by
   rw[← binaryRepresentationSet_explicit N]
   have h0 : binaryRepresentationSet N ⊆ Finset.range (M+1) := by
     intro k hk
@@ -447,7 +461,7 @@ If `M` fulfills `2^M ≤ N` and `N < 2^(M+1)` then it is a member of binary repr
 -/
 
 
-theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binaryRepresentationSet N := by
+theorem aboutMfinal {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) : M ∈ binaryRepresentationSet N := by
   set k := N -2^M with hk
   have hk' : k +2^M = N := by
     exact Nat.sub_add_cancel h1
@@ -456,4 +470,4 @@ theorem aboutMfinal {M N : ℕ} (h1 : 2^M ≤ N)(h2: N < 2^(M+1)) : M ∈ binary
   rw[mem_binaryRepresentationSet_iff, ← hk', add_comm, Nat.testBit_two_pow_add_eq, Bool.not_eq_eq_eq_not, Bool.not_true]
   exact Nat.testBit_lt_two_pow h2
 
-  end BinaryRepresentationSet
+end BinaryRepresentationSet

@@ -356,7 +356,7 @@ theorem wlashhaar_norm {M k : ℕ } : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1
   · sorry
   · sorry
 
-
+--theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
 
 
 

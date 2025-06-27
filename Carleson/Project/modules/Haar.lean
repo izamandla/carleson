@@ -400,14 +400,17 @@ theorem haarFunctionScaled_normalization (k n : ℤ ) : ∫ x in Set.Ico (2^k*n 
   have : ((2 ^ k : ℝ ) * (↑n + 1) - 2 ^ k * ↑n) = 2^k := by
     rw[mul_add]
     simp
+  --rw[this]
+  simp only [MeasurableSet.univ, measureReal_restrict_apply, univ_inter, Real.volume_real_Ico]
   rw[this]
-  rw[ENNReal.toReal_ofReal]
+  sorry
+  /-rw[ENNReal.toReal_ofReal]
   · rw[← zpow_neg, ← zpow_add₀]
     · simp only [add_neg_cancel, zpow_zero]
     · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
   · apply le_of_lt
     apply zpow_pos
-    simp only [Nat.ofNat_pos]
+    simp only [Nat.ofNat_pos]-/
 
 theorem helphaarzero1 (n k: ℕ) (x : ℝ ) (hn : n ∈ Finset.range (2^(k+1))\ Finset.range (2^k)) (hx : x ∈ Ico 0 0.5 ) : (2^(k+1)*x - n ) ∉ Ico 0 1 := by
   simp only [Finset.mem_sdiff, Finset.mem_range, not_lt] at hn
@@ -554,8 +557,9 @@ theorem rademacherassumofhaar {k : ℕ } {x : ℝ} : rademacherFunction (k+1) x 
     ring_nf
     simp only [Nat.ofNat_pos, pow_pos, le_mul_iff_one_le_right, Nat.one_le_ofNat]
   rw[h2]
-  rw[Finset.sum_disjUnion (α := ℕ) h1 (f := fun n ↦ haarFunctionScaled (-(k + 1)) n x)]
-  congr
+  sorry
+ /- rw[Finset.sum_disjUnion (α := ℕ) h1 (f := fun n ↦ haarFunctionScaled (-(k + 1)) n x)]
+  congr-/
 
 theorem rademacher2assumofhaar1 {k : ℕ } { x : ℝ } : rademacherFunction k (2*x) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction

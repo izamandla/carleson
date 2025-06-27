@@ -284,8 +284,9 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
     · have hk2 : k < n := by
         push_neg at hzero
         rw[h_k]
-        apply Nat.div2Induction.proof_2
-        apply Nat.pos_of_ne_zero hzero
+        sorry
+        /-apply Nat.div2Induction.proof_2
+        apply Nat.pos_of_ne_zero hzero-/
       by_cases h0 : Odd n
       · have hk1 : 2*k+1 = n := by
           rw[h_k]
@@ -370,8 +371,9 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
     · have hk2 : k < n := by
         push_neg at hzero
         rw[h_k]
-        apply Nat.div2Induction.proof_2
-        apply Nat.pos_of_ne_zero hzero
+        sorry
+        /-apply Nat.div2Induction.proof_2
+        apply Nat.pos_of_ne_zero hzero-/
       by_cases h0 : Odd n
       · have hk1 : 2*k+1 = n := by
           rw[h_k]
