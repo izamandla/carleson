@@ -34,9 +34,7 @@ theorem exceptional_set_carleson {f : ℝ → ℂ}
   have h_periodic : h.Periodic (2 * π) := periodic_f₀.sub periodic_f
   have h_bound : ∀ x, ‖h x‖ ≤ ε' := by
     intro x
-    simp only [hdef, Pi.sub_apply, Complex.norm_eq_abs]
-    rw [← Complex.dist_eq, dist_comm, Complex.dist_eq]
-    exact hf₀ x
+    simpa only [hdef, Pi.sub_apply, norm_sub_rev] using hf₀ x
 
   /- Control approximation effect: Get a bound on the partial Fourier sums of h. -/
   obtain ⟨E, Esubset, Emeasurable, Evolume, hE⟩ := control_approximation_effect εpos ε'pos
@@ -66,8 +64,6 @@ theorem exceptional_set_carleson {f : ℝ → ℂ}
     rw [← div_le_iff₀' (by norm_num)]
     exact le_trans' (lt_C_control_approximation_effect εpos).le (by linarith [Real.two_le_pi])
   _ ≤ ε := by linarith
-
-
 
 theorem carleson_interval {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f : f.Periodic (2 * π)) :
     ∀ᵐ x ∂volume.restrict (Set.Icc 0 (2 * π)),
@@ -164,8 +160,6 @@ theorem carleson_interval {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f 
   by_contra h
   exact hx.2 (hE x ⟨hx.1, h⟩)
 
-
-
 section
 open Pointwise
 
@@ -200,7 +194,7 @@ lemma Function.Periodic.ae_of_ae_restrict {T : ℝ} (hT : 0 < T) {a : ℝ} {P : 
   rw [ae_iff, ← hE]
   exact Emeasure
 
-end section
+end
 
 /- Carleson's theorem asserting a.e. convergence of the partial Fourier sums for continous functions. -/
 theorem classical_carleson {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f : f.Periodic (2 * π)) :
@@ -216,3 +210,9 @@ theorem classical_carleson {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f
 
   -- Show a.e. convergence on [0,2π]
   exact carleson_interval cont_f periodic_f
+
+/- Classical theorem of Carleson and Hunt asserting a.e. convergence of the partial Fourier sums for L^p functions for p>1. -/
+theorem carleson_hunt {T : ℝ} [hT : Fact (0 < T)] {f : AddCircle T → ℂ} {p : ENNReal} (hp : 1 < p) (hf : MemLp f p AddCircle.haarAddCircle) :
+    ∀ᵐ x, Filter.Tendsto (partialFourierSum' · f x) Filter.atTop (nhds (f x)) := sorry
+
+end

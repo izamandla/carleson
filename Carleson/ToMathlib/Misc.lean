@@ -1,12 +1,15 @@
 import Mathlib.Analysis.Convex.PartitionOfUnity
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.Average
-import Mathlib.MeasureTheory.Integral.Bochner
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 import Mathlib.Topology.MetricSpace.Holder
 import Mathlib.Data.Set.Card
 import Mathlib.Data.Real.ENatENNReal
-import Carleson.ToMathlib.MeasureReal
+import Mathlib.MeasureTheory.Measure.Real
+import Carleson.ToMathlib.ENorm
+import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 /-
 * This file can import all ToMathlib files.
@@ -15,6 +18,21 @@ import Carleson.ToMathlib.MeasureReal
 
 open Function Set
 open scoped ENNReal
+
+
+namespace Real
+-- to Mathlib.Analysis.SpecialFunctions.Log.Base
+lemma le_pow_natCeil_logb {b x : ℝ} (hb : 1 < b) (hx : 0 < x) :
+    x ≤ b ^ ⌈Real.logb b x⌉₊ := by
+  calc
+    x = b ^ Real.logb b x := by rw [Real.rpow_logb (by linarith) hb.ne' hx]
+    _ ≤ b ^ ⌈Real.logb b x⌉₊ := by
+      rw [← Real.rpow_natCast]
+      gcongr
+      · exact hb.le
+      apply Nat.le_ceil
+
+end Real
 
 section ENNReal
 
@@ -28,8 +46,7 @@ lemma tsum_one_eq' {α : Type*} (s : Set α) : ∑' (_:s), (1 : ℝ≥0∞) = s.
       simp only [mem_support, ne_eq, one_ne_zero, not_false_eq_true, mem_univ]
     have hsupfin: (Set.univ : Set s).Finite := finite_univ
     rw [← hsup] at hsupfin
-    rw [if_pos hsupfin]
-    rw [hfin.encard_eq_coe_toFinset_card]
+    rw [if_pos hsupfin, hfin.encard_eq_coe_toFinset_card]
     simp only [ENat.toENNReal_coe]
     rw [Finset.card_eq_sum_ones]
     rw [finsum_eq_sum (fun (_ : s) ↦ (1 :ℝ≥0∞)) hsupfin]
@@ -42,15 +59,12 @@ lemma tsum_one_eq' {α : Type*} (s : Set α) : ∑' (_:s), (1 : ℝ≥0∞) = s.
       ext
       exact heq
     · intro a ha
-      use ⟨a,by
-        simp only [Finite.mem_toFinset] at ha
-        exact ha⟩
+      use ⟨a, by simpa [Finite.mem_toFinset] using ha⟩
       simp only [Finite.mem_toFinset, mem_support, ne_eq, one_ne_zero, not_false_eq_true,
         exists_const]
   else
   have : Infinite s := infinite_coe_iff.mpr hfin
-  rw [ENNReal.tsum_const_eq_top_of_ne_zero (by norm_num)]
-  rw [Set.encard_eq_top_iff.mpr hfin]
+  rw [ENNReal.tsum_const_eq_top_of_ne_zero (by norm_num), Set.encard_eq_top_iff.mpr hfin]
   simp only [ENat.toENNReal_top]
 
 lemma ENNReal.tsum_const_eq' {α : Type*} (s : Set α) (c : ℝ≥0∞) :
@@ -100,10 +114,48 @@ end ENNReal
 
 section Indicator
 attribute [gcongr] Set.indicator_le_indicator mulIndicator_le_mulIndicator_of_subset
+
+lemma Set.indicator_eq_indicator' {α : Type*} {M : Type*} [Zero M] {s : Set α} {f g : α → M} (h : ∀ x ∈ s, f x = g x) :
+    s.indicator f = s.indicator g := by
+  ext x
+  unfold indicator
+  split
+  · rename_i hxs
+    exact h x hxs
+  · rfl
+
 end Indicator
 
+section NNReal
+
+
+@[simp]
+lemma _root_.ENNReal.nnorm_toReal {x : ℝ≥0∞} : ‖x.toReal‖₊ = x.toNNReal := by
+  ext; simp [ENNReal.toReal]
+
+end NNReal
 
 namespace MeasureTheory
+
+set_option linter.style.refine false in
+variable {α : Type*} {β : Type*} {s : Set α} {f g : α → β}
+  {m : MeasurableSpace α} {mβ : MeasurableSpace β} {μ : Measure α} in
+@[measurability, fun_prop]
+protected theorem _root_.AEMeasurable.piecewise {d : DecidablePred (· ∈ s)} (hs : MeasurableSet s)
+    (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) : AEMeasurable (piecewise s f g) μ := by
+  refine' ⟨_, hf.measurable_mk.piecewise hs hg.measurable_mk, ?_⟩
+  · assumption
+  filter_upwards [hf.ae_eq_mk, hg.ae_eq_mk] with x hfx hgx
+  simp_rw [Set.piecewise, ← hfx, ← hgx]
+
+variable {α : Type*} {β : Type*} {p : α → Prop} {f g : α → β}
+  {m : MeasurableSpace α} {mβ : MeasurableSpace β} {μ : Measure α} in
+@[measurability, fun_prop]
+protected theorem _root_.AEMeasurable.ite {d : DecidablePred p} (hp : MeasurableSet {a | p a})
+    (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :
+    AEMeasurable (fun x => ite (p x) (f x) (g x)) μ :=
+  hf.piecewise hp hg
+
 
 /-! ## Partitioning an interval -/
 
@@ -111,7 +163,7 @@ namespace MeasureTheory
 lemma lintegral_Ioc_partition {a b : ℕ} {c : ℝ} {f : ℝ → ℝ≥0∞} (hc : 0 ≤ c) :
     ∫⁻ t in Ioc (a * c) (b * c), f t =
     ∑ l ∈ Finset.Ico a b, ∫⁻ t in Ioc (l * c) ((l + 1 : ℕ) * c), f t := by
-  rcases lt_or_le b a with h | h
+  rcases lt_or_ge b a with h | h
   · rw [Finset.Ico_eq_empty (by omega), Ioc_eq_empty (by rw [not_lt]; gcongr),
       setLIntegral_empty, Finset.sum_empty]
   induction b, h using Nat.le_induction with
@@ -120,9 +172,10 @@ lemma lintegral_Ioc_partition {a b : ℕ} {c : ℝ} {f : ℝ → ℝ≥0∞} (hc
   | succ b h ih =>
     have li : a * c ≤ b * c := by gcongr
     rw [← Ioc_union_Ioc_eq_Ioc li (by gcongr; omega),
-      lintegral_union measurableSet_Ioc Ioc_disjoint_Ioc_same,
-      Nat.Ico_succ_right_eq_insert_Ico h, Finset.sum_insert Finset.right_not_mem_Ico,
-      add_comm (lintegral ..), ih]
+      lintegral_union measurableSet_Ioc (Ioc_disjoint_Ioc_of_le le_rfl),
+      ← Order.succ_eq_add_one, ← Finset.insert_Ico_right_eq_Ico_succ h,
+      Finset.sum_insert Finset.right_notMem_Ico,
+      add_comm (lintegral ..), ih, Order.succ_eq_add_one]
 
 /-! ## Averaging -/
 
@@ -152,14 +205,20 @@ lemma laverage_const_mul {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α
 lemma setLaverage_add_left' {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α}
     {s : Set α} {f g : α → ENNReal} (hf : AEMeasurable f μ) :
     ⨍⁻ x in s, (f x + g x) ∂μ = ⨍⁻ x in s, f x ∂μ + ⨍⁻ x in s, g x ∂μ := by
-  simp_rw [setLaverage_eq, ENNReal.div_add_div_same, lintegral_add_left' hf.restrict]
+  simp_rw [setLAverage_eq, ENNReal.div_add_div_same, lintegral_add_left' hf.restrict]
 
 -- Named for consistency with `setLintegral_mono'`
 lemma setLaverage_mono' {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α}
     {s : Set α} (hs : MeasurableSet s) {f g : α → ENNReal} (h : ∀ x ∈ s, f x ≤ g x) :
     ⨍⁻ x in s, f x ∂μ ≤ ⨍⁻ x in s, g x ∂μ := by
-  simp_rw [setLaverage_eq]
+  simp_rw [setLAverage_eq]
   exact ENNReal.div_le_div_right (setLIntegral_mono' hs h) (μ s)
+
+lemma AEStronglyMeasurable_continuousMap_coe {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    [MeasurableSpace X] [OpensMeasurableSpace X] [TopologicalSpace.PseudoMetrizableSpace Y]
+    [SecondCountableTopologyEither X Y]
+    (f : C(X, Y)) : StronglyMeasurable f :=
+  (map_continuous _).stronglyMeasurable
 
 end MeasureTheory
 
@@ -168,26 +227,28 @@ variable {α : Type*} {m : MeasurableSpace α} {μ : Measure α} {s : Set α}
   {F : Type*} [NormedAddCommGroup F]
 
 attribute [fun_prop] Continuous.comp_aestronglyMeasurable
-  AEStronglyMeasurable.mul AEStronglyMeasurable.prod_mk
+  AEStronglyMeasurable.mul AEStronglyMeasurable.prodMk
+  AEMeasurable.restrict AEStronglyMeasurable.restrict
+  AEStronglyMeasurable.const_smul AEStronglyMeasurable.const_smul'
+  AEStronglyMeasurable.smul_const
+  AEStronglyMeasurable.mul AEStronglyMeasurable.add
+  AEStronglyMeasurable.mul_const AEStronglyMeasurable.const_mul
+  AEStronglyMeasurable.inv AEStronglyMeasurable.div
 attribute [gcongr] Measure.AbsolutelyContinuous.prod -- todo: also add one-sided versions for gcongr
+attribute [fun_prop] AEStronglyMeasurable.comp_measurable
 
+lemma measure_mono_ae' {A B : Set α} (h : μ (B \ A) = 0) : μ B ≤ μ A := by
+  apply measure_mono_ae
+  change μ {x | ¬ B x ≤ A x} = 0
+  simpa only [le_Prop_eq, Classical.not_imp]
 
 theorem AEStronglyMeasurable.ennreal_toReal {u : α → ℝ≥0∞} (hu : AEStronglyMeasurable u μ) :
     AEStronglyMeasurable (fun x ↦ (u x).toReal) μ := by
   refine aestronglyMeasurable_iff_aemeasurable.mpr ?_
   exact ENNReal.measurable_toReal.comp_aemeasurable hu.aemeasurable
 
-lemma laverage_mono_ae {f g : α → ℝ≥0∞} (h : ∀ᵐ a ∂μ, f a ≤ g a) :
-    ⨍⁻ a, f a ∂μ ≤ ⨍⁻ a, g a ∂μ := by
-  exact lintegral_mono_ae <| h.filter_mono <| Measure.ae_mono' Measure.smul_absolutelyContinuous
-
-@[gcongr]
-lemma setLAverage_mono_ae {f g : α → ℝ≥0∞} (h : ∀ᵐ a ∂μ, f a ≤ g a) :
-    ⨍⁻ a in s, f a ∂μ ≤ ⨍⁻ a in s, g a ∂μ := by
-  refine laverage_mono_ae <| h.filter_mono <| ae_mono Measure.restrict_le_self
-
 lemma setLaverage_const_le {c : ℝ≥0∞} : ⨍⁻ _x in s, c ∂μ ≤ c := by
-  simp_rw [setLaverage_eq, lintegral_const, Measure.restrict_apply MeasurableSet.univ,
+  simp_rw [setLAverage_eq, lintegral_const, Measure.restrict_apply MeasurableSet.univ,
     univ_inter, div_eq_mul_inv, mul_assoc]
   conv_rhs => rw [← mul_one c]
   gcongr
@@ -196,12 +257,87 @@ lemma setLaverage_const_le {c : ℝ≥0∞} : ⨍⁻ _x in s, c ∂μ ≤ c := b
 theorem eLpNormEssSup_lt_top_of_ae_ennnorm_bound {f : α → F} {C : ℝ≥0∞}
     (hfC : ∀ᵐ x ∂μ, ‖f x‖₊ ≤ C) : eLpNormEssSup f μ ≤ C := essSup_le_of_ae_le C hfC
 
-@[simp]
-lemma ENNReal.nnorm_toReal {x : ℝ≥0∞} : ‖x.toReal‖₊ = x.toNNReal := by
-  ext; simp [ENNReal.toReal]
-
 theorem restrict_absolutelyContinuous : μ.restrict s ≪ μ :=
   fun s hs ↦ Measure.restrict_le_self s |>.trans hs.le |>.antisymm <| zero_le _
+
+section eLpNorm
+
+variable {p : ℝ≥0∞}
+
+open NNReal ENNReal NormedSpace MeasureTheory Set Filter Topology Function
+
+lemma eLpNormEssSup_toReal_le {f : α → ℝ≥0∞} :
+    eLpNormEssSup (ENNReal.toReal ∘ f) μ ≤ eLpNormEssSup f μ := by
+  simp_rw [eLpNormEssSup, enorm_eq_self]
+  apply essSup_mono_ae _
+  apply Eventually.of_forall (by simp)
+
+lemma eLpNormEssSup_toReal_eq {f : α → ℝ≥0∞} (hf : ∀ᵐ x ∂μ, f x ≠ ∞) :
+    eLpNormEssSup (ENNReal.toReal ∘ f) μ = eLpNormEssSup f μ := by
+  simp_rw [eLpNormEssSup, enorm_eq_self]
+  apply essSup_congr_ae
+  filter_upwards [hf] with x hx
+  simp [hx]
+
+lemma eLpNorm'_toReal_le {f : α → ℝ≥0∞} {p : ℝ} (hp : 0 ≤ p) :
+    eLpNorm' (ENNReal.toReal ∘ f) p μ ≤ eLpNorm' f p μ := by
+  simp_rw [eLpNorm', enorm_eq_self]
+  gcongr
+  simp
+
+lemma eLpNorm'_toReal_eq {f : α → ℝ≥0∞} {p : ℝ} (hf : ∀ᵐ x ∂μ, f x ≠ ∞) :
+    eLpNorm' (ENNReal.toReal ∘ f) p μ = eLpNorm' f p μ := by
+  simp_rw [eLpNorm', enorm_eq_self]
+  congr 1
+  apply lintegral_congr_ae
+  filter_upwards [hf] with x hx
+  simp [hx]
+
+lemma eLpNorm_toReal_le {f : α → ℝ≥0∞} :
+    eLpNorm (ENNReal.toReal ∘ f) p μ ≤ eLpNorm f p μ := by
+  simp_rw [eLpNorm]
+  split_ifs
+  · rfl
+  · exact eLpNormEssSup_toReal_le
+  · exact eLpNorm'_toReal_le toReal_nonneg
+
+lemma eLpNorm_toReal_eq {f : α → ℝ≥0∞} (hf : ∀ᵐ x ∂μ, f x ≠ ∞) :
+    eLpNorm (ENNReal.toReal ∘ f) p μ = eLpNorm f p μ := by
+  simp_rw [eLpNorm]
+  split_ifs
+  · rfl
+  · exact eLpNormEssSup_toReal_eq hf
+  · exact eLpNorm'_toReal_eq hf
+
+lemma sq_eLpNorm_two {ε : Type*} [ENorm ε] {f : α → ε} :
+    eLpNorm f 2 μ ^ 2 = ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ := by
+  simpa using eLpNorm_nnreal_pow_eq_lintegral (f := f) two_ne_zero
+
+open ComplexConjugate in
+/-- One of the very few cases where a norm can be moved _out of_ an integral. -/
+lemma eLpNorm_two_eq_enorm_integral_mul_conj {f : α → ℂ} (lpf : MemLp f 2 μ) :
+    eLpNorm f 2 μ ^ 2 = ‖∫ x, f x * conj (f x) ∂μ‖ₑ := by
+  conv_rhs => enter [1, 2, x]; rw [RCLike.mul_conj, ← RCLike.ofReal_pow]
+  rw [integral_ofReal, integral_eq_lintegral_of_nonneg_ae (.of_forall fun _ ↦ by simp)]; swap
+  · exact lpf.aestronglyMeasurable.norm.pow 2
+  conv_rhs => enter [1, 1, 1, 2, x]; rw [ENNReal.ofReal_pow (norm_nonneg _), ofReal_norm]
+  rw [← sq_eLpNorm_two, ← enorm_norm]
+  simp_rw [Complex.coe_algebraMap, Complex.norm_real, enorm_norm]
+  rw [toReal_pow, enorm_pow, enorm_toReal lpf.eLpNorm_ne_top]
+
+end eLpNorm
+
+namespace MemLp
+
+variable {p : ℝ≥0∞}
+theorem toReal {f : α → ℝ≥0∞} (hf : MemLp f p μ) : MemLp (f · |>.toReal) p μ :=
+  ⟨hf.aestronglyMeasurable.aemeasurable.ennreal_toReal.aestronglyMeasurable,
+    eLpNorm_toReal_le.trans_lt hf.eLpNorm_lt_top⟩
+
+end MemLp
+
+theorem Integrable.toReal {f : α → ℝ≥0∞} (hf : Integrable f μ) : Integrable (f · |>.toReal) μ := by
+  rw [← memLp_one_iff_integrable] at hf ⊢; exact hf.toReal
 
 end MeasureTheory
 
@@ -211,13 +347,13 @@ open MeasureTheory Bornology
 variable {E X : Type*} {p : ℝ≥0∞} [NormedAddCommGroup E] [TopologicalSpace X] [MeasurableSpace X]
   {μ : Measure X} [IsFiniteMeasureOnCompacts μ] {f : X → E}
 
----- now obsolete -> `BoundedCompactSupport.memℒp`
--- lemma _root_.HasCompactSupport.memℒp_of_isBounded (hf : HasCompactSupport f)
+---- now obsolete -> `BoundedCompactSupport.memLp`
+-- lemma _root_.HasCompactSupport.memLp_of_isBounded (hf : HasCompactSupport f)
 --     (h2f : IsBounded (range f))
---     (h3f : AEStronglyMeasurable f μ) {p : ℝ≥0∞} : Memℒp f p μ := by
+--     (h3f : AEStronglyMeasurable f μ) {p : ℝ≥0∞} : MemLp f p μ := by
 --   obtain ⟨C, hC⟩ := h2f.exists_norm_le
 --   simp only [mem_range, forall_exists_index, forall_apply_eq_imp_iff] at hC
---   exact hf.memℒp_of_bound h3f C <| .of_forall hC
+--   exact hf.memLp_of_bound h3f C <| .of_forall hC
 
 end
 
@@ -231,7 +367,6 @@ structure EquivalenceOn {α : Type*} (r : α → α → Prop) (s : Set α) : Pro
   symm  : ∀ {x y}, x ∈ s → y ∈ s → r x y → r y x
   /-- An equivalence relation is transitive: `x ~ y` and `y ~ z` implies `x ~ z` -/
   trans : ∀ {x y z}, x ∈ s → y ∈ s → z ∈ s → r x y → r y z → r x z
-
 
 namespace EquivalenceOn
 
@@ -312,7 +447,7 @@ lemma biSup_eq {α : Type*} {ι : Type*} [CompleteLinearOrder α] {s : Set ι}
 end Set.Finite
 
 lemma Real.self_lt_two_rpow (x : ℝ) : x < 2 ^ x := by
-  rcases lt_or_le x 0 with h | h
+  rcases lt_or_ge x 0 with h | h
   · exact h.trans (rpow_pos_of_pos zero_lt_two x)
   · calc
       _ < (⌊x⌋₊.succ : ℝ) := Nat.lt_succ_floor x
@@ -323,7 +458,7 @@ namespace Set
 
 open ComplexConjugate
 
-lemma indicator_eq_indicator_one_mul {ι M:Type*} [MulZeroOneClass M]
+lemma indicator_eq_indicator_one_mul {ι M : Type*} [MulZeroOneClass M]
     (s : Set ι) (f : ι → M) (x : ι) : s.indicator f x = s.indicator 1 x * f x := by
   simp only [indicator]; split_ifs <;> simp
 
@@ -346,35 +481,99 @@ lemma norm_indicator_one_le {α E}
 lemma norm_exp_I_mul_ofReal (x : ℝ) : ‖exp (.I * x)‖ = 1 := by
   rw [mul_comm, Complex.norm_exp_ofReal_mul_I]
 
+lemma enorm_exp_I_mul_ofReal (x : ℝ) : ‖exp (.I * x)‖ₑ = 1 := by
+  rw [← enorm_norm, mul_comm, Complex.norm_exp_ofReal_mul_I, enorm_one]
+
 lemma norm_exp_I_mul_sub_ofReal (x y: ℝ) : ‖exp (.I * (x - y))‖ = 1 := by
   rw [mul_comm, ← ofReal_sub, Complex.norm_exp_ofReal_mul_I]
 
+lemma norm_exp_I_mul_ofReal_sub_one {x : ℝ} : ‖exp (I * x) - 1‖ = ‖2 * Real.sin (x / 2)‖ := by
+  rw [show ‖2 * Real.sin (x / 2)‖ = ‖2 * sin (x / 2)‖ by norm_cast, two_sin]
+  nth_rw 2 [← one_mul (_ - _), ← exp_zero]
+  rw [← neg_add_cancel (x / 2 * I), exp_add, mul_assoc _ _ (_ - _), mul_sub, ← exp_add, ← exp_add,
+    ← add_mul, ← add_mul]; norm_cast
+  rw [add_neg_cancel, ofReal_zero, zero_mul, exp_zero, add_halves, ← neg_mul, norm_mul, norm_I,
+    mul_one, norm_mul, show -(ofReal (x / 2)) = ofReal (-x / 2) by norm_cast; exact neg_div' 2 x,
+    norm_exp_ofReal_mul_I, one_mul, ← norm_neg, neg_sub, mul_comm]
+
+lemma norm_exp_I_mul_ofReal_sub_one_le {x : ℝ} : ‖exp (I * x) - 1‖ ≤ ‖x‖ := by
+  rw [norm_exp_I_mul_ofReal_sub_one]
+  calc
+    _ = 2 * |Real.sin (x / 2)| := by simp
+    _ ≤ 2 * |x / 2| := (mul_le_mul_iff_of_pos_left zero_lt_two).mpr Real.abs_sin_le_abs
+    _ = _ := by rw [abs_div, Nat.abs_ofNat, Real.norm_eq_abs]; ring
+
+lemma enorm_exp_I_mul_ofReal_sub_one_le {x : ℝ} : ‖exp (I * x) - 1‖ₑ ≤ ‖x‖ₑ := by
+  iterate 2 rw [← enorm_norm, Real.enorm_of_nonneg (norm_nonneg _)]
+  exact ENNReal.ofReal_le_ofReal norm_exp_I_mul_ofReal_sub_one_le
+
 end Norm
+
+section BddAbove
+-- move near BddAbove.range_add if that imports Finset.sum
+
+variable {ι ι' α M : Type*} [Preorder M]
+
+@[simp]
+theorem BddAbove.range_const {c : M} : BddAbove (range (fun _ : ι ↦ c)) :=
+  bddAbove_singleton.mono Set.range_const_subset
+
+variable [One M] in
+@[to_additive (attr := simp)]
+theorem BddAbove.range_one : BddAbove (range (1 : ι → M)) :=
+  .range_const
+
+variable [AddCommMonoid M] [AddLeftMono M] [AddRightMono M] in
+theorem BddAbove.range_finsetSum {s : Finset ι} {f : ι → ι' → M}
+    (hf : ∀ i ∈ s, BddAbove (range (f i))) :
+    BddAbove (range (fun x ↦ ∑ i ∈ s, f i x)) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert j s hjs IH =>
+    simp_rw [Finset.sum_insert hjs]
+    apply BddAbove.range_add
+    · exact hf _ (Finset.mem_insert_self j s)
+    · exact IH fun _ hi ↦ hf _ (Finset.mem_insert_of_mem hi)
+
+open Bornology
+@[to_additive isBounded_iff_bddAbove_norm]
+lemma isBounded_iff_bddAbove_norm' {E} [SeminormedCommGroup E] {s : Set E} :
+    IsBounded s ↔ BddAbove (Norm.norm '' s) := by
+  simp [isBounded_iff_forall_norm_le', bddAbove_def]
+
+@[to_additive isBounded_range_iff_bddAbove_norm]
+lemma isBounded_range_iff_bddAbove_norm' {ι E} [SeminormedAddCommGroup E] {f : ι → E} :
+    IsBounded (range f) ↔ BddAbove (range (‖f ·‖)) := by
+  rw [isBounded_iff_bddAbove_norm, ← range_comp, Function.comp_def]
+
+@[to_additive isBounded_image_iff_bddAbove_norm]
+lemma isBounded_image_iff_bddAbove_norm' {ι E} [SeminormedAddCommGroup E] {f : ι → E} {s : Set ι} :
+    IsBounded (f '' s) ↔ BddAbove ((‖f ·‖) '' s) := by
+  rw [isBounded_iff_bddAbove_norm, ← image_comp, Function.comp_def]
+
+end BddAbove
 
 namespace MeasureTheory
 
 open Metric Bornology
-
-variable {X 𝕜: Type*}
-variable [RCLike 𝕜] {f : X → 𝕜}
+variable {𝕜 : Type*} [RCLike 𝕜] {X α : Type*}
 
 namespace HasCompactSupport
 
-variable [PseudoMetricSpace X]
+variable [Zero α] {f : X → α}
 
--- mathlib? also `ball` variant, remove `Nonempty`
+variable [PseudoMetricSpace X] [ProperSpace X]
+
 theorem of_support_subset_closedBall {x : X}
- {r : ℝ} [ProperSpace X] [Nonempty X] (hf : support f ⊆ closedBall x r) :
-    HasCompactSupport f := by
-  apply HasCompactSupport.of_support_subset_isCompact ?_ hf
-  exact isCompact_closedBall ..
+    {r : ℝ} (hf : support f ⊆ closedBall x r) :
+    HasCompactSupport f :=
+  HasCompactSupport.of_support_subset_isCompact (isCompact_closedBall ..) hf
 
 theorem of_support_subset_isBounded {s : Set X}
-    [ProperSpace X] [Nonempty X] (hs : IsBounded s) (hf : support f ⊆ s) :
-    HasCompactSupport f := by
-  let x₀ : X := Classical.choice (by infer_instance)
-  obtain ⟨r₀, hr₀⟩ := hs.subset_closedBall x₀
-  exact HasCompactSupport.of_support_subset_closedBall <| Trans.trans hf hr₀
+    (hs : IsBounded s) (hf : support f ⊆ s) :
+    HasCompactSupport f :=
+  IsCompact.closure_of_subset hs.isCompact_closure <| Trans.trans hf subset_closure
 
 end HasCompactSupport
 
@@ -383,13 +582,16 @@ namespace Integrable
 variable [MeasureSpace X]
 
 -- must be in mathlib but can't find it
-theorem indicator_const {c : ℝ} {s: Set X}
-    (hs: MeasurableSet s) (h2s : volume s < ⊤) : Integrable (s.indicator (fun _ ↦ c)) :=
-  (integrable_indicator_iff hs).mpr <| integrableOn_const.mpr <| Or.inr h2s
+theorem indicator_const {c : ℝ} {s : Set X}
+    (hs : MeasurableSet s) (h2s : volume s < ⊤) : Integrable (s.indicator (fun _ ↦ c)) :=
+  (integrable_indicator_iff hs).mpr <| integrableOn_const h2s.ne
 
 end Integrable
 
--- Currently unused
+
+
+-- Currently unused.
+-- The assumption `int_f` can likely be removed, as otherwise the integral is zero.
 open Classical in
 theorem setIntegral_biUnion_le_sum_setIntegral {X : Type*} {ι : Type*} [MeasurableSpace X]
     {f : X → ℝ} (s : Finset ι) {S : ι → Set X} {μ : Measure X}
@@ -399,7 +601,7 @@ theorem setIntegral_biUnion_le_sum_setIntegral {X : Type*} {ι : Type*} [Measura
   have res_res : ∀ i ∈ s, (μ.restrict (⋃ i ∈ s, S i)).restrict (S i) = μ.restrict (S i) :=
     fun i hi ↦ by rw [Measure.restrict_restrict_of_subset]; exact (subset_biUnion_of_mem hi)
   -- Show that it suffices to prove the result in the case where the integrand is measurable
-  let g := AEMeasurable.mk f int_f.aemeasurable
+  set g := AEMeasurable.mk f int_f.aemeasurable with hg
   have g_ae_nonneg : ∀ᵐ (x : X) ∂μ.restrict (⋃ i ∈ s, S i), 0 ≤ g x := by
     apply f_ae_nonneg.congr ∘ int_f.aemeasurable.ae_eq_mk.mp
     exact Filter.Eventually.of_forall (fun _ h ↦ by rw [h])
@@ -432,8 +634,114 @@ theorem setIntegral_biUnion_le_sum_setIntegral {X : Type*} {ι : Type*} [Measura
     rw [Filter.EventuallyLE, this, Measure.ae_sum_iff' (by exact meas)]
     intro i
     by_cases hi : i ∈ s
-    · simp only [Pi.zero_apply, hi, reduceIte, μ₀, ← res_res i hi, ae_restrict_iff meas]
+    · simp only [Pi.zero_apply, hi, reduceIte, μ₀, ← res_res i hi, ae_restrict_iff meas, ← hg]
       exact g_ae_nonneg.mono (fun _ h _ ↦ h)
     · simp [hi, μ₀]
+
+-- Analogous to `MeasureTheory.integral_smul_const` in Mathlib
+theorem average_smul_const {X : Type*} {E : Type*} [MeasurableSpace X]
+    {μ : MeasureTheory.Measure X} [NormedAddCommGroup E] [NormedSpace ℝ E] {𝕜 : Type*}
+    [RCLike 𝕜] [NormedSpace 𝕜 E] [CompleteSpace E] (f : X → 𝕜) (c : E) :
+    ⨍ (x : X), f x • c ∂μ = (⨍ (x : X), f x ∂μ) • c :=
+  integral_smul_const f c
+
+end MeasureTheory
+
+namespace ENNReal
+
+theorem lintegral_Lp_smul {α : Type*} [MeasurableSpace α] {μ : MeasureTheory.Measure α}
+    {f : α → ℝ≥0∞} (hf : AEMeasurable f μ) {p : ℝ} (hp : p > 0) (c : NNReal) :
+    (∫⁻ x : α, (c • f) x ^ p ∂μ) ^ (1 / p) = c • (∫⁻ x : α, f x ^ p ∂μ) ^ (1 / p) := by
+  simp_rw [smul_def, Pi.smul_apply, smul_eq_mul, mul_rpow_of_nonneg _ _ hp.le,
+    MeasureTheory.lintegral_const_mul'' _ (hf.pow_const p),
+    mul_rpow_of_nonneg _ _ (one_div_nonneg.mpr hp.le), ← rpow_mul, mul_one_div_cancel hp.ne.symm,
+    rpow_one]
+
+-- Analogous to `ENNReal.ofReal_pow` in Mathlib
+-- Currently unused
+theorem ofReal_zpow {p : ℝ} (hp : 0 < p) (n : ℤ) :
+    ENNReal.ofReal (p ^ n) = ENNReal.ofReal p ^ n := by
+  rw [ofReal_eq_coe_nnreal hp.le, ← coe_zpow, ← ofReal_coe_nnreal, NNReal.coe_zpow, NNReal.coe_mk]
+  exact NNReal.coe_ne_zero.mp hp.ne.symm
+
+end ENNReal
+
+
+--TODO: to mathlib
+@[to_additive (attr := simp)]
+theorem prod_attach_insert {α β : Type*} {s : Finset α} {a : α} [DecidableEq α] [CommMonoid β]
+    {f : { i // i ∈ insert a s } → β} (ha : a ∉ s) :
+    ∏ x ∈ (insert a s).attach, f x =
+    f ⟨a, Finset.mem_insert_self a s⟩ * ∏ x ∈ s.attach, f ⟨x, Finset.mem_insert_of_mem x.2⟩ := by
+  rw [Finset.attach_insert, Finset.prod_insert, Finset.prod_image]
+  · intros x hx y hy h
+    ext
+    simpa using h
+  · simp [ha]
+
+@[to_additive]
+lemma Finset.prod_finset_product_filter_right {α β γ : Type*} {s : Finset α} {t : Finset β}
+    {p : α → Prop} {q : α → β → Prop} [DecidablePred p] [DecidableRel q]
+    [DecidablePred fun r : α × β ↦ p r.1 ∧ q r.1 r.2] {f : α → β → γ} [CommMonoid γ] :
+    ∏ x ∈ s with p x, ∏ y ∈ t with q x y, f x y =
+    ∏ r ∈ s ×ˢ t with p r.1 ∧ q r.1 r.2, f r.1 r.2 := by
+  convert (prod_finset_product_right' ((t ×ˢ s).filter fun r ↦ p r.2 ∧ q r.2 r.1) _ _ _).symm
+  · refine Finset.prod_equiv (Equiv.prodComm α β) (fun r ↦ ?_) (by simp)
+    simp_rw [mem_filter, mem_product, Equiv.prodComm_apply, Prod.fst_swap, Prod.snd_swap]
+    tauto
+  · intro r; simp only [mem_filter, mem_product]; tauto
+
+open Classical ComplexConjugate in
+lemma Finset.sum_range_mul_conj_sum_range {α : Type*} {s : Finset α} {f : α → ℂ} :
+    ∑ j ∈ s, f j * conj (f j) + ∑ j ∈ s, ∑ j' ∈ s with j ≠ j', f j * conj (f j') =
+    (∑ j ∈ s, f j) * conj (∑ j' ∈ s, f j') := by
+  calc
+    _ = ∑ j ∈ s, ∑ j' ∈ s with j = j', f j * conj (f j') +
+        ∑ j ∈ s, ∑ j' ∈ s with j ≠ j', f j * conj (f j') := by
+      rw [add_left_inj]
+      congr! with j mj; simp_rw [filter_eq, mj, ite_true, sum_singleton]
+    _ = _ := by
+      conv_lhs =>
+        rw [← sum_add_distrib]; enter [2, j]; rw [sum_filter_add_sum_filter_not, ← mul_sum]
+      rw [sum_mul, map_sum]
+
+lemma Finset.pow_sum_comm {ι R : Type*} [Semiring R] {s : Finset ι} {f : ι → R}
+    (hf : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → f i * f j = 0) {n : ℕ} (hn : 1 ≤ n) :
+    (∑ i ∈ s, f i) ^ n = ∑ i ∈ s, f i ^ n := by
+  induction n, hn using Nat.le_induction with
+  | base => simp
+  | succ n hn ih =>
+    simp_rw [pow_succ, ih, sum_mul, mul_sum]
+    congr! 1 with x mx
+    refine Finset.sum_eq_single _ (fun y my hn ↦ ?_) (fun _ ↦ by contradiction)
+    rw [← Nat.sub_one_add_one (show n ≠ 0 by omega), pow_succ, mul_assoc, hf _ mx _ my hn.symm,
+      mul_zero]
+
+namespace MeasureTheory
+
+lemma sum_sq_eLpNorm_indicator_le_of_pairwiseDisjoint
+    {α ι F : Type*} [MeasurableSpace α] [NormedAddCommGroup F] {μ : Measure α}
+    {s : Finset ι} {f : α → F} {t : ι → Set α} (meast : ∀ i, MeasurableSet (t i))
+    (hpd : s.toSet.PairwiseDisjoint t) :
+    ∑ i ∈ s, eLpNorm ((t i).indicator f) 2 μ ^ 2 ≤ eLpNorm f 2 μ ^ 2 := by
+  simp_rw [sq_eLpNorm_two]
+  conv_lhs =>
+    enter [2, i, 2, x]
+    rw [enorm_indicator_eq_indicator_enorm, sq, ← inter_indicator_mul, inter_self]
+    enter [2, y]; rw [← sq]
+  conv_lhs => enter [2, i]; rw [lintegral_indicator (meast i)]
+  rw [← lintegral_biUnion_finset hpd fun _ _ ↦ meast _]
+  exact setLIntegral_le_lintegral _ _
+
+theorem measurable_measure_ball {α : Type*} [PseudoMetricSpace α] [SecondCountableTopology α]
+    [MeasurableSpace α] [OpensMeasurableSpace α] {μ : Measure α} [SFinite μ] :
+    Measurable fun (a, r) ↦ μ (Metric.ball a r) := by
+  let s : Set (α × α × ℝ) := setOf fun (b, a, r) ↦ b ∈ Metric.ball a r
+  apply measurable_measure_prodMk_right (s := s)
+  unfold s Metric.ball
+  simp_rw [mem_setOf]
+  apply measurableSet_lt
+  · fun_prop
+  · fun_prop
 
 end MeasureTheory

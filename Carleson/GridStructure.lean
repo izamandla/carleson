@@ -35,7 +35,8 @@ class GridStructure {A : outParam ℝ≥0} [PseudoMetricSpace X] [DoublingMeasur
   ball_subset_Grid {i} : ball (c i) (D ^ s i / 4) ⊆ coeGrid i --2.0.10
   Grid_subset_ball {i} : coeGrid i ⊆ ball (c i) (4 * D ^ s i) --2.0.10
   small_boundary {i} {t : ℝ≥0} (ht : D ^ (- S - s i) ≤ t) :
-    volume.real { x ∈ coeGrid i | EMetric.infEdist x (coeGrid i)ᶜ ≤ t * (D ^ (s i):ℝ≥0∞)} ≤ 2 * t ^ κ * volume.real (coeGrid i)
+    volume.real { x ∈ coeGrid i | EMetric.infEdist x (coeGrid i)ᶜ ≤ t * (D ^ (s i):ℝ≥0∞)} ≤
+    2 * t ^ κ * volume.real (coeGrid i)
   coeGrid_measurable {i} : MeasurableSet (coeGrid i)
 
 export GridStructure (range_s_subset Grid_subset_biUnion ball_subset_Grid Grid_subset_ball small_boundary
@@ -74,6 +75,12 @@ so that we don't accidentally use it. We can put it back if useful after all. -/
 @[simp] lemma Grid.mem_def {x : X} : x ∈ i ↔ x ∈ (i : Set X) := .rfl
 @[simp] lemma Grid.le_def : i ≤ j ↔ (i : Set X) ⊆ (j : Set X) ∧ s i ≤ s j := .rfl
 
+lemma Grid.mem_mono {x:X} : Monotone (x ∈ · : Grid X → Prop) := by
+  intro u u' hle hu
+  rw [Grid.mem_def] at hu ⊢
+  rw [Grid.le_def] at hle
+  exact hle.left hu
+
 lemma fundamental_dyadic :
     s i ≤ s j → (i : Set X) ⊆ (j : Set X) ∨ Disjoint (i : Set X) (j : Set X) :=
   GridStructure.fundamental_dyadic'
@@ -82,7 +89,7 @@ lemma le_or_disjoint (h : s i ≤ s j) : i ≤ j ∨ Disjoint (i : Set X) (j : S
   fundamental_dyadic h |>.imp (⟨·, h⟩) id
 
 lemma le_or_ge_or_disjoint : i ≤ j ∨ j ≤ i ∨ Disjoint (i : Set X) (j : Set X) := by
-  rcases le_or_lt (s i) (s j) with h | h
+  rcases le_or_gt (s i) (s j) with h | h
   · have := le_or_disjoint h; tauto
   · have := le_or_disjoint h.le; tauto
 
@@ -96,17 +103,25 @@ lemma eq_or_disjoint (hs : s i = s j) : i = j ∨ Disjoint (i : Set X) (j : Set 
   Or.elim (le_or_disjoint hs.le) (fun ij ↦ Or.elim (le_or_disjoint hs.ge)
      (fun ji ↦ Or.inl (le_antisymm ij ji)) (fun h ↦ Or.inr h.symm)) (fun h ↦ Or.inr h)
 
-lemma subset_of_nmem_Iic_of_not_disjoint (i : Grid X) (j : Grid X)
+lemma disjoint_of_not_le_not_le {i j : Grid X} (h : ¬i ≤ j) (h' : ¬j ≤ i) :
+    Disjoint (i : Set X) j := by
+  -- Assume wlog that s u₁ ≤ s u₂.
+  obtain (hs | hs) := le_total (s i) (s j)
+  · -- If u₁ and u₂ were not disjoint, we'd have J u₁ ⊆ J u₂, contradicting h.
+    by_contra hndisjoint
+    exact h <| (le_or_disjoint hs).resolve_right hndisjoint
+  · by_contra hdisjoint
+    exact h' <| (le_or_disjoint hs).resolve_right (fun a ↦ hdisjoint a.symm)
+
+lemma subset_of_notMem_Iic_of_not_disjoint (i : Grid X) (j : Grid X)
     (h : i ∉ Iic j)
     (notDisjoint : ¬ Disjoint (i : Set X) j) :
     (j : Set X) ⊆ i := by
-  rw [Iic, Set.nmem_setOf_iff, Grid.le_def, not_and_or] at h
-  have h_le_cases := le_or_ge_or_disjoint (i := i) (j := j)
-  rcases h_le_cases with i_le | j_le | disjoint
-  · exact (h.neg_resolve_left i_le.1 i_le.2).elim
-  · rw [disjoint_comm] at notDisjoint
-    exact (GridStructure.fundamental_dyadic' j_le.2).resolve_right notDisjoint
-  · exact (notDisjoint disjoint).elim
+  by_contra hdisj
+  have : ¬(j ≤ i) := by
+    rw [Grid.le_def]
+    exact not_and.mpr fun a a_1 ↦ hdisj a
+  exact notDisjoint (disjoint_of_not_le_not_le h this)
 
 lemma scale_mem_Icc : s i ∈ Icc (-S : ℤ) S := mem_Icc.mp (range_s_subset ⟨i, rfl⟩)
 
@@ -118,7 +133,13 @@ lemma volume_coeGrid_pos (hD : 0 < D) : 0 < volume (i : Set X) := by
 
 @[aesop (rule_sets := [finiteness]) safe apply]
 lemma volume_coeGrid_lt_top : volume (i : Set X) < ⊤ :=
-  measure_lt_top_of_subset Grid_subset_ball (measure_ball_ne_top _ _)
+  measure_lt_top_of_subset Grid_subset_ball measure_ball_ne_top
+
+/- lemma volumeNNReal_coeGrid_pos (hD : 0 < D) : 0 < volume.nnreal (i : Set X) := by
+  rw [lt_iff_le_and_ne]
+  refine ⟨zero_le _, ?_⟩
+  rw [ne_eq, eq_comm, measureNNReal_eq_zero_iff]
+  exact ne_of_gt (volume_coeGrid_pos hD) -/
 
 namespace Grid
 
@@ -152,6 +173,7 @@ variable {X : Type*} [PseudoMetricSpace X] {a : ℕ} {q : ℝ} {K : X → X → 
 
 notation "dist_{" I "}" => @dist (WithFunctionDistance (c I) (D ^ s I / 4)) _
 notation "nndist_{" I "}" => @nndist (WithFunctionDistance (c I) (D ^ s I / 4)) _
+notation "edist_{" I "}" => @edist (WithFunctionDistance (c I) (D ^ s I / 4)) _
 notation "ball_{" I "}" => @ball (WithFunctionDistance (c I) (D ^ s I / 4)) _
 
 section GridManipulation
@@ -163,6 +185,20 @@ lemma c_mem_Grid {i : Grid X} : c i ∈ (i : Set X) := by
   exact mem_of_mem_of_subset (Metric.mem_ball_self (by positivity)) ball_subset_Grid
 
 lemma nonempty (i : Grid X) : (i : Set X).Nonempty := ⟨c i, c_mem_Grid⟩
+
+lemma scale_eq_scale_topCube_iff (i : Grid X) : s i = s (topCube : Grid X) ↔ i = topCube := by
+  refine ⟨(eq_or_disjoint · |>.resolve_right ?_), (· ▸ rfl)⟩
+  exact Set.not_disjoint_iff.mpr ⟨c i, c_mem_Grid, subset_topCube c_mem_Grid⟩
+
+lemma scale_lt_scale_topCube {i : Grid X} (hi : i ≠ topCube) : s i < s (topCube : Grid X) := by
+  have : s i ≤ s topCube (X := X) := by rw [s, s_topCube]; exact scale_mem_Icc.2
+  apply this.lt_of_ne
+  rwa [ne_eq, scale_eq_scale_topCube_iff]
+
+lemma eq_topCube_of_S_eq_zero (i : Grid X) (hS : S = 0) : i = topCube := by
+  have hsi : s i = 0                  := by simpa [hS] using scale_mem_Icc (i := i)
+  have hst : s (topCube : Grid X) = 0 := by simpa [hS] using scale_mem_Icc (i := (topCube : Grid X))
+  rw [← scale_eq_scale_topCube_iff, hsi, hst]
 
 lemma le_dyadic {i j k : Grid X} (h : s i ≤ s j) (li : k ≤ i) (lj : k ≤ j) : i ≤ j := by
   obtain ⟨c, mc⟩ := k.nonempty
@@ -211,8 +247,9 @@ lemma exists_unique_succ (i : Grid X) (h : ¬IsMax i) :
   obtain ⟨j, mj, hj⟩ := incs.exists_minimal ine
   simp only [gt_iff_lt, Finset.mem_filter, Finset.mem_univ, true_and, incs] at mj hj
   replace hj : ∀ (x : Grid X), i < x → j ≤ x := fun x mx ↦ by
-    rcases lt_or_le (s x) (s j) with c | c
-    · exact (eq_of_le_of_not_lt (le_dyadic c.le mx.le mj.le) (hj x mx)).symm.le
+    rcases lt_or_ge (s x) (s j) with c | c
+    · refine (eq_of_le_of_not_lt (le_dyadic c.le mx.le mj.le) ?_).symm.le
+      exact not_lt_iff_le_imp_ge.mpr (hj mx)
     · exact le_dyadic c mj.le mx.le
   use j, ⟨mj, hj⟩, fun k ⟨hk₁, hk₂⟩ ↦ le_antisymm (hk₂ j mj) (hj k hk₁)
 
@@ -238,6 +275,12 @@ lemma le_succ : i ≤ i.succ := by
 lemma max_of_le_succ : i.succ ≤ i → IsMax i := fun h ↦ by
   contrapose! h; by_contra! k; have l := (succ_spec h).1.trans_le k
   rwa [lt_self_iff_false] at l
+
+lemma not_isMax_of_scale_lt {j W : Grid X} (h : s j < s W) : ¬IsMax j := by
+  rw [Grid.isMax_iff]
+  intro top
+  rw [top, show s topCube = ↑S by exact s_topCube (X := X)] at h
+  linarith [(scale_mem_Icc (i := W)).2]
 
 lemma succ_le_of_lt (h : i < j) : i.succ ≤ j := by
   by_cases k : IsMax i
@@ -280,6 +323,12 @@ lemma scale_succ (h : ¬IsMax i) : s i.succ = s i + 1 := by
     exists_sandwiched (le_succ (i := i)) (s i + 1) (by rw [mem_Icc]; omega)
   have l := (lt_def.mpr ⟨hz₃.1, hz₁.symm ▸ h₀⟩).trans_le (h₂ z (lt_def.mpr ⟨hz₂.1, by omega⟩))
   rwa [lt_self_iff_false] at l
+
+lemma exists_scale_succ {j W : Grid X} (h : s j < s W) : ∃ J, j ≤ J ∧ s J = s j + 1 := by
+  use j.succ
+  constructor
+  · exact Grid.le_succ
+  · exact Grid.scale_succ (Grid.not_isMax_of_scale_lt h)
 
 lemma opSize_succ_lt (h : ¬IsMax i) : i.succ.opSize < i.opSize := by
   simp only [opSize, Int.lt_toNat]
