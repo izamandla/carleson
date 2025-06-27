@@ -7,7 +7,7 @@ open Walsh
 
 
 
-theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1: 0≤ x) (hx2 : x<1):
+theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1):
   Walsh.walshFourierPartialSum f N x = (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * Walsh.walsh N x * Kernel.kernel N x y) := by
   unfold Walsh.walshFourierPartialSum
   by_cases hN : N = 0
@@ -30,7 +30,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1: 0≤ x) (hx2 : x<
   set N' := N - 2^M with hN'
   rw[partition hM1, lemma1_2 hM1 hM2 , lemma2 hM1 hM2 hN']
   · unfold walshInnerProduct
-    simp_rw[← MeasureTheory.integral_mul_right]
+    simp_rw[← MeasureTheory.integral_mul_const]
     rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
     · rw[← MeasureTheory.integral_add']
       · simp only [Pi.mul_apply, Pi.add_apply]
