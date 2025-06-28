@@ -4,6 +4,8 @@ import Carleson.Project.modules.Walsh
 import Carleson.Project.modules.BinaryRepresentationSet
 open Function Set
 open unitInterval
+
+
 noncomputable section
 
 
@@ -419,7 +421,7 @@ theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : 
     exact h2
   apply aboutprodrad hN1 hy1 hy2 hx1 hx2 hk
 
-theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
+theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y)) *

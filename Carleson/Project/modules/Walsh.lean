@@ -1,4 +1,5 @@
 import Mathlib
+import Carleson.ToMathlib.BoundedCompactSupport
 open Function Set --Classical
 noncomputable section
 
@@ -925,5 +926,7 @@ theorem intofeven {n k : ℕ} (hk : 2 * k = n): ∫ x in Set.Ico 0 1,  walsh n x
 
 end Walsh
 
+
+theorem bcs_walsh {n : ℕ } : BoundedCompactSupport
 
 ---measurability
