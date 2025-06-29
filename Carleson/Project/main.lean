@@ -1,14 +1,21 @@
 import Carleson.Project.modules.Utiles
 open Extra
 open BinaryRepresentationSet
-open Walsh
+open Walsh Function Set MeasureTheory
 /- ## Main result -/
 
 
 
 
-theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1):
+theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) (hf : MeasureTheory.LocallyIntegrable f):
   Walsh.walshFourierPartialSum f N x = (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * Walsh.walsh N x * Kernel.kernel N x y) := by
+  have hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
+      refine MeasureTheory.IntegrableOn.integrable ?_
+      apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
+      · rw[MeasureTheory.locallyIntegrable_iff] at hf
+        apply hf
+        exact isCompact_Icc
+      · exact Ico_subset_Icc_self
   unfold Walsh.walshFourierPartialSum
   by_cases hN : N = 0
   · rw[hN]
@@ -28,7 +35,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
   have hM1 : 2^M ≤ N := aboutM1 hM.1
   have hM2 : N < 2^(M+1) := aboutM2 hM.2
   set N' := N - 2^M with hN'
-  rw[partition hM1, lemma1_2 hM1 hM2 , lemma2 hM1 hM2 hN']
+  rw[partition hM1, lemma1_2 hM1 hM2 f hf , lemma2 hM1 hM2 hN' f hf]
   · unfold walshInnerProduct
     simp_rw[← MeasureTheory.integral_mul_const]
     rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
@@ -42,7 +49,22 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         sorry
       · sorry
       · sorry
-    · sorry
+    · intro i hi
+      have : (fun a ↦ (Haar.rademacherFunction M * f) a * walsh i a * Haar.rademacherFunction M x * walsh i x) = (fun a ↦ Haar.rademacherFunction M x * walsh i x * Haar.rademacherFunction M a * walsh i a *  f a) := by
+        ext a
+        simp only [Pi.mul_apply]
+        linarith
+      simp_rw[this]
+      apply MeasureTheory.BoundedCompactSupport.integrable_mul
+      · simp_rw[mul_assoc]
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.restrict
+        apply MeasureTheory.BoundedCompactSupport.mul
+        · exact Haar.bcs_rademacher
+        · exact bcs_walsh
+      · exact hf'
+
     · sorry
   · exact hx1
   · exact hx2
