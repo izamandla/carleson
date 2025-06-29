@@ -1,4 +1,10 @@
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Data.Int.Star
+import Mathlib.MeasureTheory.Integral.Bochner.Set
+import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+import Mathlib.Order.CompletePartialOrder
+import Carleson.ToMathlib.BoundedCompactSupport
+import Mathlib.Tactic.Measurability
 open Function Set MeasureTheory
 noncomputable section
 
@@ -127,6 +133,68 @@ theorem haar_integral_sqr : ∫ x in Set.Ico 0 1, (haarFunction x) ^ 2 = 1 := by
     simp
   rw [MeasureTheory.setIntegral_congr_fun h1 h]
   simp
+
+theorem haar_as_fun : haarFunction = Set.indicator (Set.Ico 0 0.5) (fun _ ↦ 1 : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun _ ↦ -1 : ℝ → ℝ ) := by
+  ext x
+  simp only [Pi.add_apply]
+  rw[indicator, indicator]
+  split_ifs with h1 h2 h3
+  · exfalso
+    simp at h1
+    simp at h2
+    linarith
+  · simp only [add_zero]
+    simp at h1
+    ring_nf at h1
+    refine haarFunction_left_half x h1
+  · simp only [zero_add]
+    simp at h3
+    ring_nf at h3
+    refine haarFunction_right_half x h3
+  · simp only [add_zero]
+    simp only [mem_Ico, not_and, not_lt] at h3
+    simp only [mem_Ico, not_and, not_lt] at h1
+    rw[haarFunction_outside]
+    by_contra h
+    push_neg at h
+    obtain ⟨hx₀, hx₁⟩ := h
+    have h0_5 : 0.5 ≤ x := h1 hx₀
+    have h1' : 1 ≤ x := h3 h0_5
+    linarith
+
+
+
+theorem measurability_of_haar : Measurable haarFunction := by
+  rw[haar_as_fun]
+  measurability
+
+
+theorem bcs_haar: BoundedCompactSupport (haarFunction) MeasureTheory.volume := by
+  refine { memLp_top := ?_, hasCompactSupport := ?_ }
+  · apply MeasureTheory.memLp_top_of_bound (C := 1)
+    · apply Measurable.aestronglyMeasurable (measurability_of_haar)
+    · apply Filter.Eventually.of_forall
+      simp only [Real.norm_eq_abs]
+      intro x
+      rw [← @sq_le_one_iff_abs_le_one]
+      rw [haar_sqr]
+      split_ifs with h1
+      · simp
+      · simp
+  · refine exists_compact_iff_hasCompactSupport.mp ?_
+    use Icc 0 1
+    constructor
+    · exact isCompact_Icc
+    · intro x hx
+      apply haarFunction_outside
+      simp only [mem_Icc, Decidable.not_and_iff_or_not, not_le] at hx
+      simp only [ge_iff_le]
+      cases hx with
+      | inl h => exact Or.inl h
+      |  inr h => exact Or.inr (le_of_lt h)
+
+theorem integrability_of_haar : Integrable haarFunction := by
+  apply BoundedCompactSupport.integrable bcs_haar
 
 
 /--
@@ -494,12 +562,51 @@ theorem haarsumzero2 (k : ℕ) (x : ℝ) (hx : x ∈ Ico 0.5 1) : ∑ n ∈ Fins
   · exact hn
   · exact hx
 
+theorem measurability_of_haarscaled {n k : ℤ} : Measurable (haarFunctionScaled k n) := by sorry
+
+theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) MeasureTheory.volume := by
+  unfold haarFunctionScaled
+  simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
+  apply MeasureTheory.BoundedCompactSupport.const_mul
+  refine { memLp_top := ?_, hasCompactSupport := ?_ }
+  · apply MeasureTheory.memLp_top_of_bound (C := 1)
+    · apply Measurable.aestronglyMeasurable
+      sorry
+    · apply Filter.Eventually.of_forall
+      simp only [Real.norm_eq_abs]
+      intro x
+      rw [← @sq_le_one_iff_abs_le_one]
+      rw [haar_sqr]
+      split_ifs with h1
+      · simp
+      · simp
+  · refine exists_compact_iff_hasCompactSupport.mp ?_
+    use Icc (n*(2^k : ℝ)) ((n+1)*(2^k : ℝ))
+    constructor
+    · exact isCompact_Icc
+    · intro x hx
+      apply haarFunction_outside
+      simp only [mem_Icc, Decidable.not_and_iff_or_not, not_le] at hx
+      simp only [ge_iff_le, sub_neg]
+      cases hx with
+      | inl h => sorry
+      |  inr h => sorry
+
+
+theorem bcs_haarscaled' {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) MeasureTheory.volume := by
+  unfold haarFunctionScaled
+  apply MeasureTheory.BoundedCompactSupport.const_mul
+
+
+
+  sorry
+
 
 /--
 Definition of the Rademacher function `r_n(x)`.
 -/
 def rademacherFunction (k : ℕ) (t : ℝ) : ℝ :=
-  2^(- k / 2 : ℝ ) * ∑ n in Finset.range (2^k), haarFunctionScaled (-k) n t
+  2^(- k / 2 : ℝ ) * ∑ n ∈ Finset.range (2 ^ k), haarFunctionScaled (-k) n t
 
 
 def rademacherFunctionzeroleft {t : ℝ} (h1 : 0 ≤ t) (h2 : t < 0.5): rademacherFunction 0 t = 1 := by
@@ -806,6 +913,12 @@ theorem rad_sqr {k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : (rademacherF
         · exact hx
         · exact hx2
 
+theorem bcs_rademacher {k : ℕ}: BoundedCompactSupport (rademacherFunction k) := by
+  unfold rademacherFunction
+  apply MeasureTheory.BoundedCompactSupport.const_mul
+  apply MeasureTheory.BoundedCompactSupport.finset_sum
+  intro i hi
+  apply bcs_haarscaled
 
 
 
