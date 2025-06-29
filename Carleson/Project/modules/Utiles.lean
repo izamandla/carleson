@@ -1,10 +1,10 @@
+import Mathlib.Data.Nat.Bitwise
 import Carleson.Project.modules.DyadicStructures
 import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 import Carleson.Project.modules.BinaryRepresentationSet
 open Function Set
 open unitInterval
-
 
 noncomputable section
 
@@ -16,7 +16,8 @@ namespace Kernel
 Kernel function defined using Haar functions and binary representation sets.
 -/
 def kernel (N : ℕ) (x y : ℝ) : ℝ :=
-    1 + ∑ m in BinaryRepresentationSet.binaryRepresentationSet N, ∑ n in Finset.range (2^m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y)
+    1 + ∑ m ∈ BinaryRepresentationSet.binaryRepresentationSet N,
+      ∑ n ∈ Finset.range (2 ^ m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y)
 
 
 /--
@@ -427,6 +428,13 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y)) *
         Walsh.walsh N x *
       (Haar.haarFunctionScaled M k x) := by
+  have hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
+      refine MeasureTheory.IntegrableOn.integrable ?_
+      apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
+      · rw[MeasureTheory.locallyIntegrable_iff] at hf
+        apply hf
+        exact isCompact_Icc
+      · exact Ico_subset_Icc_self
   rw [lemma1_1 h1 h2 ]
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
@@ -442,13 +450,42 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
       · exact hx1
       · exact hx2
   · intro i hi
-    simp_all only [Finset.mem_range]
-    --rw[MeasureTheory.MemLp.integrable_mul]
-    --MeasureTheory.Integrable.mul_of_top_right
-    sorry
+    have : (fun a ↦
+    f a * Walsh.walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * Walsh.walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x )= (fun a ↦
+    Walsh.walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x * Walsh.walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+      ext a
+      linarith
+    simp_rw[this]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · apply MeasureTheory.BoundedCompactSupport.restrict
+      simp_rw[mul_assoc]
+      apply MeasureTheory.BoundedCompactSupport.const_mul
+      apply MeasureTheory.BoundedCompactSupport.const_mul
+      apply MeasureTheory.BoundedCompactSupport.mul
+      · exact Walsh.bcs_walsh
+      · exact Haar.bcs_haarscaled
+    · exact hf'
   · simp only [Finset.mem_range]
-    sorry
---f integrable (new assumption)
+    intro i hi
+    have : (fun y ↦
+    f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (↑M) (↑i) y * Walsh.walsh (2 ^ M) x *
+      Haar.haarFunctionScaled (↑M) (↑i) x) = (fun y ↦
+    Walsh.walsh (2 ^ M) x *
+      Haar.haarFunctionScaled (↑M) (↑i) x * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (↑M) (↑i) y * f y ) := by
+      ext a
+      linarith
+    simp_rw[this]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · simp_rw[mul_assoc]
+      apply MeasureTheory.BoundedCompactSupport.restrict
+      apply MeasureTheory.BoundedCompactSupport.const_mul
+      apply MeasureTheory.BoundedCompactSupport.const_mul
+      apply MeasureTheory.BoundedCompactSupport.mul
+      · exact Walsh.bcs_walsh
+      · exact Haar.bcs_haarscaled
+    · exact hf'
+
+
 /--
 Lemma 3
 -/
@@ -478,10 +515,19 @@ theorem lemma2helphelp' {M : ℕ} {y : ℝ} {i : ℕ}: Walsh.walsh i y * Haar.ra
 
 theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
   (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) (x : ℝ):
-  ∑ i in Finset.range (N+1)  \ Finset.range (2^M), ∫ (y : ℝ) in Ico 0 1,
-      f y * Walsh.walsh i y * Walsh.walsh i x  =
-  ∑ i in Finset.range (N'+1),  ∫ (y : ℝ) in Ico 0 1,
-      f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x  * Haar.rademacherFunction M x:= by
+  ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M),
+    ∫ (y : ℝ) in Ico 0 1, f y * Walsh.walsh i y * Walsh.walsh i x  =
+  ∑ i ∈ Finset.range (N' + 1),
+    ∫ (y : ℝ) in Ico 0 1,
+      f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x *
+        Haar.rademacherFunction M x:= by
+  have hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
+      refine MeasureTheory.IntegrableOn.integrable ?_
+      apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
+      · rw[MeasureTheory.locallyIntegrable_iff] at hf
+        apply hf
+        exact isCompact_Icc
+      · exact Ico_subset_Icc_self
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · congr
     ext y
@@ -533,19 +579,39 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
       · rw[Nat.xor_comm ]
         apply BinaryRepresentationSet.about_altern_and_add' hk'
   · intro i hi
-
-    sorry
+    have : (fun y ↦ f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x * Haar.rademacherFunction M x )= (fun y ↦ Walsh.walsh i x * Haar.rademacherFunction M x *Walsh.walsh i y * Haar.rademacherFunction M y *   f y ) := by
+      ext y
+      linarith
+    simp_rw[this]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · apply MeasureTheory.BoundedCompactSupport.restrict
+      apply MeasureTheory.BoundedCompactSupport.mul
+      · apply MeasureTheory.BoundedCompactSupport.const_mul
+        exact Walsh.bcs_walsh
+      · exact Haar.bcs_rademacher
+    · exact hf'
   · intro i hi
-    sorry
+    have : (fun y ↦ f y * Walsh.walsh i y * Walsh.walsh i x)= (fun y ↦ Walsh.walsh i x * Walsh.walsh i y *  f y ) := by
+      ext y
+      linarith
+    simp_rw[this]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · apply MeasureTheory.BoundedCompactSupport.restrict
+      apply MeasureTheory.BoundedCompactSupport.const_mul
+      exact Walsh.bcs_walsh
+    · exact hf'
+
 
 theorem lemma2 {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
-  (f : ℝ → ℝ) (x : ℝ) :
-  ∑ i in Finset.range (N+1)  \ Finset.range (2^M), Walsh.walshInnerProduct f i  * Walsh.walsh i x =
-  ∑ i in Finset.range (N' +1), Walsh.walshInnerProduct (Haar.rademacherFunction M * f ) i * (Haar.rademacherFunction M x) *(Walsh.walsh i x) := by
+  (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) (x : ℝ) :
+  ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
+  ∑ i ∈ Finset.range (N' + 1),
+    Walsh.walshInnerProduct (Haar.rademacherFunction M * f) i * (Haar.rademacherFunction M x) *
+      (Walsh.walsh i x) := by
   unfold Walsh.walshInnerProduct
   simp only [Pi.mul_apply]
   simp_rw[← MeasureTheory.integral_mul_const]
-  rw[lemma2help h10 h11 h2]
+  rw[lemma2help h10 h11 h2 f hf]
   apply Finset.sum_congr
   · simp
   · intro k hk
