@@ -32,7 +32,8 @@ theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
 /--
 Kernel function for binary powers `N = 2^m`.
 -/
-theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n in Finset.range (2^N), (Haar.haarFunctionScaled N n x) * (Haar.haarFunctionScaled N n y) := by
+theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n ∈ Finset.range (2 ^ N),
+  (Haar.haarFunctionScaled N n x) * (Haar.haarFunctionScaled N n y) := by
   simp only [kernel, add_right_inj, BinaryRepresentationSet.binaryforpower,Finset.sum_singleton]
 
 

@@ -207,12 +207,10 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
         apply MeasureTheory.integral_congr_ae
         rw[Filter.EventuallyEq ]
         apply Filter.Eventually.of_forall
+        simp only [indicator, mem_Ico, Pi.add_apply]
         intro y
-
-        sorry
-
-        /- ext y
-          rw[mul_comm] at hg
+        split_ifs with h1
+        · rw[mul_comm] at hg
           rw[hg]
           simp only [Pi.mul_apply]
           have : (∑ i ∈ Finset.range (2 ^ M),
@@ -223,14 +221,48 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
             ext i
             linarith
           rw[this ]
-          have h1 : (Haar.rademacherFunction M * walsh N') x = walsh N x:= by
+          have h1_1 : (Haar.rademacherFunction M * walsh N') x = walsh N x:= by
             simp only [Pi.mul_apply]
             rw[hN', walshRademacherRelationresult hM.1 hx1 hx2]
             rw[differentwalshRademacherRelation hx1 hx2]
             simp only [mul_eq_mul_left_iff]
             left
             exact walshRademacherRelation hx1 hx2
-            sorry-/
+          have h1_2 : Haar.rademacherFunction M y * walsh N' y = walsh N y:= by
+            rw[hN', walshRademacherRelationresult hM.1 h1.1 h1.2]
+            rw[differentwalshRademacherRelation h1.1 h1.2]
+            simp only [mul_eq_mul_left_iff]
+            left
+            exact walshRademacherRelation h1.1 h1.2
+          have: (f y * Haar.rademacherFunction M y * walsh N' y * walsh N' x * Kernel.kernel N' x y * Haar.rademacherFunction M x) = f y * walsh N y * walsh N x * Kernel.kernel N' x y := by
+            rw[← h1_2, ← h1_1]
+            simp only [Pi.mul_apply]
+            linarith
+          rw[this]
+          have : (f y * walsh N y * walsh N x *
+      ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x +
+    f y * walsh N y * walsh N x * Kernel.kernel N' x y)= f y * walsh N y * walsh N x *
+      (∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x + Kernel.kernel N' x y) := by
+            linarith
+          rw[this]
+          simp only [mul_eq_mul_left_iff, mul_eq_zero]
+          left
+          simp only [Kernel.kernel]
+          rw[← add_assoc, add_comm, ← add_assoc, add_comm, add_right_inj]
+          rw[← remove_bit N M hM.1]
+          have : ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x = ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x := by sorry
+
+
+
+
+
+
+
+
+
+          sorry
+
+        · linarith
 
       · sorry
       · sorry
