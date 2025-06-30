@@ -6,9 +6,6 @@ open Walsh Function Set MeasureTheory
 
 
 
-
-
-
 theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f):
   MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
   refine MeasureTheory.IntegrableOn.integrable ?_
