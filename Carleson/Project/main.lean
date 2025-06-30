@@ -182,6 +182,42 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
   have hM1 : 2^M ≤ N := aboutM1 hM.1
   have hM2 : N < 2^(M+1) := aboutM2 hM.2
   set N' := N - 2^M with hN'
-  have hN'' : N' < N := by sorry
+  have hN'' : N' < N := by
+    rw[hN']
+    omega
   rw[partition hM1, lemma1_2 hM1 hM2 f hf , lemma2 hM1 hM2 hN' f hf]
-  sorry
+  · set g:= Haar.rademacherFunction M * f with hg
+    have hg2 :  Integrable g (volume.restrict (Ico 0 1)) := by
+      rw[hg]
+      -- to tez powinno isc z bcs
+      sorry
+    have :( ∑ i ∈ Finset.range (N' + 1), walshInnerProduct g i * Haar.rademacherFunction M x * walsh i x) = Haar.rademacherFunction M x * (∑ x_1 ∈ Finset.range (N' + 1),  walshInnerProduct g x_1 * walsh x_1 x):= by
+      conv_rhs => rw[mul_comm, Finset.sum_mul ]
+      congr
+      ext i
+      linarith
+    rw[this, ih N' hN'' g hg2 ]
+    simp_rw[← MeasureTheory.integral_mul_const]
+    rw[← MeasureTheory.integral_finset_sum]
+    · rw[mul_comm, ← MeasureTheory.integral_mul_const]
+      rw[← MeasureTheory.integral_add']
+      · congr
+        simp only [Pi.add_apply]
+        ext y
+        rw[mul_comm] at hg
+        rw[hg]
+        simp only [Pi.mul_apply]
+        have : (∑ i ∈ Finset.range (2 ^ M),
+      f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
+       Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x) := by
+          sorry
+
+        rw[this ]
+        have h1 : Haar.rademacherFunction M * walsh N' = walsh N := by sorry
+
+        sorry
+      · sorry
+      · sorry
+    sorry
+  · sorry
+  · sorry

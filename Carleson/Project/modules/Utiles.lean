@@ -457,20 +457,12 @@ theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : 
     exact h2
   apply aboutprodrad hN1 hy1 hy2 hx1 hx2 hk
 
-theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf : MeasureTheory.Integrable f) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
+theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y)) *
         Walsh.walsh N x *
       (Haar.haarFunctionScaled M k x) := by
-  have hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
-      refine MeasureTheory.IntegrableOn.integrable ?_
-      apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
-      · /-rw[MeasureTheory.locallyIntegrable_iff] at hf
-        apply hf
-        exact isCompact_Icc-/
-        exact MeasureTheory.Integrable.integrableOn hf
-      · exact Ico_subset_Icc_self
   rw [lemma1_1 h1 h2 ]
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
@@ -550,22 +542,13 @@ theorem lemma2helphelp' {M : ℕ} {y : ℝ} {i : ℕ}: Walsh.walsh i y * Haar.ra
 
 
 theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
-  (f : ℝ → ℝ) (hf : MeasureTheory.Integrable f) (x : ℝ):
+  (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ):
   ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M),
     ∫ (y : ℝ) in Ico 0 1, f y * Walsh.walsh i y * Walsh.walsh i x  =
   ∑ i ∈ Finset.range (N' + 1),
     ∫ (y : ℝ) in Ico 0 1,
       f y * Walsh.walsh i y * Haar.rademacherFunction M y * Walsh.walsh i x *
         Haar.rademacherFunction M x:= by
-  have hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
-      refine MeasureTheory.IntegrableOn.integrable ?_
-      apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
-      · /-rw[MeasureTheory.locallyIntegrable_iff] at hf
-        apply hf
-        exact isCompact_Icc-/
-        exact MeasureTheory.Integrable.integrableOn hf
-
-      · exact Ico_subset_Icc_self
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · congr
     ext y
@@ -641,7 +624,7 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
 
 
 theorem lemma2 {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
-  (f : ℝ → ℝ) (hf : MeasureTheory.Integrable f) (x : ℝ) :
+  (f : ℝ → ℝ) (hf : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ i ∈ Finset.range (N' + 1),
     Walsh.walshInnerProduct (Haar.rademacherFunction M * f) i * (Haar.rademacherFunction M x) *
