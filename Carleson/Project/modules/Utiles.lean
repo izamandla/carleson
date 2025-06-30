@@ -231,6 +231,7 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ BinaryRep
   rw[← BinaryRepresentationSet.remove_bit N M h]
   exact Finset.prod_eq_mul_prod_diff_singleton h fun x_1 ↦ Haar.rademacherFunction x_1 x
 
+
 --co jak M nie jest w rozwinieciu binarnym N?
 
 /--

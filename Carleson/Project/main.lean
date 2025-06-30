@@ -150,7 +150,7 @@ open Walsh Function Set MeasureTheory
 
 
 
-theorem inthelp (f : ℝ → ℝ)  (hf : MeasureTheory.LocallyIntegrable f):
+theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f):
   MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
   refine MeasureTheory.IntegrableOn.integrable ?_
   apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
@@ -189,8 +189,10 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
   · set g:= Haar.rademacherFunction M * f with hg
     have hg2 :  Integrable g (volume.restrict (Ico 0 1)) := by
       rw[hg]
-      -- to tez powinno isc z bcs
-      sorry
+      apply BoundedCompactSupport.integrable_mul
+      · refine BoundedCompactSupport.restrict ?_
+        exact Haar.bcs_rademacher
+      · exact hf
     have :( ∑ i ∈ Finset.range (N' + 1), walshInnerProduct g i * Haar.rademacherFunction M x * walsh i x) = Haar.rademacherFunction M x * (∑ x_1 ∈ Finset.range (N' + 1),  walshInnerProduct g x_1 * walsh x_1 x):= by
       conv_rhs => rw[mul_comm, Finset.sum_mul ]
       congr
@@ -201,21 +203,35 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
     rw[← MeasureTheory.integral_finset_sum]
     · rw[mul_comm, ← MeasureTheory.integral_mul_const]
       rw[← MeasureTheory.integral_add']
-      · congr
-        simp only [Pi.add_apply]
-        ext y
-        rw[mul_comm] at hg
-        rw[hg]
-        simp only [Pi.mul_apply]
-        have : (∑ i ∈ Finset.range (2 ^ M),
-      f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
-       Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x) := by
-          sorry
-
-        rw[this ]
-        have h1 : Haar.rademacherFunction M * walsh N' = walsh N := by sorry
+      · rw[← MeasureTheory.integral_indicator (measurableSet_Ico), ← MeasureTheory.integral_indicator (measurableSet_Ico)]
+        apply MeasureTheory.integral_congr_ae
+        rw[Filter.EventuallyEq ]
+        apply Filter.Eventually.of_forall
+        intro y
 
         sorry
+
+        /- ext y
+          rw[mul_comm] at hg
+          rw[hg]
+          simp only [Pi.mul_apply]
+          have : (∑ i ∈ Finset.range (2 ^ M),
+        f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
+        Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x) := by
+            conv_rhs => rw[mul_comm, Finset.sum_mul ]
+            congr
+            ext i
+            linarith
+          rw[this ]
+          have h1 : (Haar.rademacherFunction M * walsh N') x = walsh N x:= by
+            simp only [Pi.mul_apply]
+            rw[hN', walshRademacherRelationresult hM.1 hx1 hx2]
+            rw[differentwalshRademacherRelation hx1 hx2]
+            simp only [mul_eq_mul_left_iff]
+            left
+            exact walshRademacherRelation hx1 hx2
+            sorry-/
+
       · sorry
       · sorry
     sorry
