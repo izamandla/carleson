@@ -352,12 +352,38 @@ theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
 
 --w def walshhaar musi być dodatkowy warunek na k
 
+theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by
+  have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
+    refine Eq.symm (Ico_union_Ico_eq_Ico ?_ ?_)
+    · linarith
+    · linarith
+  simp_rw[this]
+  rw[MeasureTheory.integral_union_ae]
+  · refine Disjoint.aedisjoint ?_
+    simp
+  · simp
+  · unfold walshhaar
+    simp only
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · refine MeasureTheory.BoundedCompactSupport.restrict ?_
+      exact Walsh.bcs_walsh
+    · apply MeasureTheory.BoundedCompactSupport.integrable
+      refine MeasureTheory.BoundedCompactSupport.restrict ?_
+      exact Haar.bcs_haarscaled
+  · unfold walshhaar
+    simp only
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · refine MeasureTheory.BoundedCompactSupport.restrict ?_
+      exact Walsh.bcs_walsh
+    · apply MeasureTheory.BoundedCompactSupport.integrable
+      refine MeasureTheory.BoundedCompactSupport.restrict ?_
+      exact Haar.bcs_haarscaled
+
 theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
-  have h : (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by sorry
-  rw[← h]
+  rw[← walshhaar_s]
   simp_rw[walshhaar]
-  induction' M using Nat.evenOddRec with n ih n ih
-  · simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
+  induction' 2^M using Nat.evenOddRec with n ih n ih
+  · /-simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
     have h11: EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0 0.5) := by
       unfold EqOn
       intro x hx
@@ -395,7 +421,9 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
       MeasureTheory.measureReal_restrict_apply, univ_inter, Real.volume_real_Ico, sub_zero,
       smul_eq_mul, mul_one]
     ring_nf
-    simp
+    simp-/
+
+    sorry
   · sorry
   · sorry
 --cos jest jakos zle w tym dowodzie
