@@ -47,8 +47,37 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         intro y
         -- to musi zostac zrobione przez indukcje
         sorry
-      · sorry
-      · sorry
+      · apply MeasureTheory.integrable_finset_sum
+        intro i hi
+        have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+          ext a
+          linarith
+        rw[this]
+        apply MeasureTheory.BoundedCompactSupport.integrable_mul
+        · simp_rw[mul_assoc]
+          apply MeasureTheory.BoundedCompactSupport.const_mul
+          apply MeasureTheory.BoundedCompactSupport.const_mul
+          apply MeasureTheory.BoundedCompactSupport.restrict
+          apply MeasureTheory.BoundedCompactSupport.mul
+          · exact bcs_walsh
+          · exact Haar.bcs_haarscaled
+        · exact hf'
+      · apply MeasureTheory.integrable_finset_sum
+        intro i hi
+        have : (fun a ↦ (Haar.rademacherFunction M * f) a * walsh i a * Haar.rademacherFunction M x * walsh i x) = (fun a ↦ Haar.rademacherFunction M x * walsh i x * Haar.rademacherFunction M  a * walsh i a * f a  ) := by
+          ext a
+          simp only [Pi.mul_apply]
+          linarith
+        rw[this]
+        apply MeasureTheory.BoundedCompactSupport.integrable_mul
+        · simp_rw[mul_assoc]
+          apply MeasureTheory.BoundedCompactSupport.const_mul
+          apply MeasureTheory.BoundedCompactSupport.const_mul
+          apply MeasureTheory.BoundedCompactSupport.restrict
+          apply MeasureTheory.BoundedCompactSupport.mul
+          · exact Haar.bcs_rademacher
+          · exact bcs_walsh
+        · exact hf'
     · intro i hi
       have : (fun a ↦ (Haar.rademacherFunction M * f) a * walsh i a * Haar.rademacherFunction M x * walsh i x) = (fun a ↦ Haar.rademacherFunction M x * walsh i x * Haar.rademacherFunction M a * walsh i a *  f a) := by
         ext a
@@ -64,7 +93,19 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         · exact Haar.bcs_rademacher
         · exact bcs_walsh
       · exact hf'
-
-    · sorry
+    · intro i hi
+      have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x  * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+        ext a
+        linarith
+      simp_rw[this]
+      apply MeasureTheory.BoundedCompactSupport.integrable_mul
+      · simp_rw[mul_assoc]
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.restrict
+        apply MeasureTheory.BoundedCompactSupport.mul
+        · exact bcs_walsh
+        · exact Haar.bcs_haarscaled
+      · exact hf'
   · exact hx1
   · exact hx2
