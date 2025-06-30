@@ -248,13 +248,13 @@ theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (
 
 
 
-theorem prodofwalsh {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
+/-theorem prodofwalsh {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : k = M^^^N ↔ Walsh.walsh k x = Walsh.walsh M x * Walsh.walsh N x:= by
   rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, BinaryRepresentationSet.differenceofbinaryrepset, BinaryRepresentationSet.binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
   · --nie jestem pewna jak to zrobic - z załozen o funkcji redamachera powiino to jakosc isc ale jak?
     sorry
   · intro k
     apply Haar.rad_sqr hx1 hx2
-
+-/
 
 
 theorem walsh_int {n : ℕ} (h : n > 0) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x = 0 := by
@@ -353,10 +353,28 @@ theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
 theorem wlashhaar_norm {M k : ℕ} : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
   have h : (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by sorry
   rw[← h]
-  simp_rw[walshhaar, Haar.haarFunctionScaled]
-  simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
+  simp_rw[walshhaar]
+  --simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
   induction' M using Nat.evenOddRec with n ih n ih
   · simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
+    have : EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0 0.5) := by
+      unfold EqOn
+      intro x hx
+      simp at hx
+      ring_nf at hx
+      simp only [Pi.mul_apply, Pi.one_apply]
+      rw[Walsh.walsh_one_left x hx.1 hx.2, one_mul]
+      simp only [Haar.haarFunctionScaled, Int.cast_zero, neg_zero, zero_div, Real.rpow_zero,
+        zpow_zero, one_mul, Int.cast_natCast]
+      by_cases hk : k = 0
+      · rw[hk]
+        simp only [CharP.cast_eq_zero, sub_zero]
+        apply Haar.haarFunction_left_half
+        exact hx
+      · push_neg at hk
+        set y := x - k with hk'
+
+        sorry
 
     --simp_rw[Walsh.walsh_one_left]
     sorry
