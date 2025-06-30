@@ -350,14 +350,13 @@ theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k'):  ∫ y in Set.Ico 0 1, wals
 
 --w def walshhaar musi być dodatkowy warunek na k
 
-theorem wlashhaar_norm {M k : ℕ} : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
+theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
   have h : (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by sorry
   rw[← h]
   simp_rw[walshhaar]
-  --simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
   induction' M using Nat.evenOddRec with n ih n ih
   · simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
-    have : EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0 0.5) := by
+    have h11: EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0 0.5) := by
       unfold EqOn
       intro x hx
       simp at hx
@@ -366,29 +365,53 @@ theorem wlashhaar_norm {M k : ℕ} : ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 
       rw[Walsh.walsh_one_left x hx.1 hx.2, one_mul]
       simp only [Haar.haarFunctionScaled, Int.cast_zero, neg_zero, zero_div, Real.rpow_zero,
         zpow_zero, one_mul, Int.cast_natCast]
-      by_cases hk : k = 0
-      · rw[hk]
-        simp only [CharP.cast_eq_zero, sub_zero]
-        apply Haar.haarFunction_left_half
-        exact hx
-      · push_neg at hk
-        set y := x - k with hk'
-
-        sorry
-
-    --simp_rw[Walsh.walsh_one_left]
-    sorry
+      simp only [pow_zero, tsub_self, nonpos_iff_eq_zero] at hk
+      rw[hk]
+      simp only [CharP.cast_eq_zero, sub_zero]
+      apply Haar.haarFunction_left_half
+      exact hx
+    have h21: EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0.5 1) := by
+      unfold EqOn
+      intro x hx
+      simp at hx
+      ring_nf at hx
+      simp only [Pi.mul_apply, Pi.one_apply]
+      rw[Walsh.walsh_one_right x hx.1 hx.2]
+      simp only [neg_mul, one_mul]
+      simp only [Haar.haarFunctionScaled, Int.cast_zero, neg_zero, zero_div, Real.rpow_zero,
+        zpow_zero, one_mul, Int.cast_natCast]
+      simp only [pow_zero, tsub_self, nonpos_iff_eq_zero] at hk
+      rw[hk]
+      simp only [CharP.cast_eq_zero, sub_zero]
+      rw [@neg_eq_iff_eq_neg]
+      apply Haar.haarFunction_right_half
+      exact hx
+    simp_rw[← Pi.mul_apply]
+    rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h11]
+    rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h21]
+    simp only [Pi.one_apply, MeasureTheory.integral_const, MeasurableSet.univ,
+      MeasureTheory.measureReal_restrict_apply, univ_inter, Real.volume_real_Ico, sub_zero,
+      smul_eq_mul, mul_one]
+    ring_nf
+    simp
   · sorry
   · sorry
+--cos jest jakos zle w tym dowodzie
 
 --theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
+theorem wlashhaar_norm' {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
+  induction' M using Nat.strong_induction_on with M ih
 
+  sorry
 
 
 --sumowanie jest do 2^M - 1 wiec tu przedzialy sa ok
 theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
-  ∑ k in Finset.range (2^M) , (∫ y in Set.Ico 0 1, f y * Walsh.walsh (2^M) y * (Haar.haarFunctionScaled M k y)  * Walsh.walsh (2^M) x  * (Haar.haarFunctionScaled M k x) ):= by
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled M k y) * Walsh.walsh (2 ^ M) x *
+        (Haar.haarFunctionScaled M k x)):= by
 
 
 

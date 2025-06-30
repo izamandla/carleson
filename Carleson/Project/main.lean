@@ -16,8 +16,9 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         apply hf
         exact isCompact_Icc
       · exact Ico_subset_Icc_self
+
   unfold Walsh.walshFourierPartialSum
-  induction' N using Nat.strong_induction_on with N ih
+  induction' N using Nat.strong_induction_on with N ih generalizing f
   by_cases hN : N = 0
   · rw[hN]
     simp only [zero_add, Finset.range_one, Finset.sum_singleton]
@@ -36,16 +37,35 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
   have hM1 : 2^M ≤ N := aboutM1 hM.1
   have hM2 : N < 2^(M+1) := aboutM2 hM.2
   set N' := N - 2^M with hN'
+  have hN'' : N' < N := by sorry
+  have h0 :∫ (y : ℝ) in Ico 0 1, ∑ x_1 ∈ Finset.range (N' + 1),
+      Haar.rademacherFunction M y * f y * walsh x_1 y  * walsh x_1 x = ∫ (y : ℝ) in Ico 0 1,
+      Haar.rademacherFunction M y * f y * walsh N' y * Kernel.kernel N' x y  * walsh N' x := by
+      simp only [walshInnerProduct] at ih
+      set g := Haar.rademacherFunction M  * f with hg
+      have hg' : LocallyIntegrable g volume := by sorry
+      have hg2 :  Integrable g (volume.restrict (Ico 0 1)) := by sorry
+      simp_rw[← MeasureTheory.integral_mul_const] at ih
+      simp_rw[← Pi.mul_apply (f:= Haar.rademacherFunction M ), ← hg]
+      rw[MeasureTheory.integral_finset_sum]
+      · rw[ih N' hN'' g hg' hg2]
+        congr
+        ext y
+        linarith
+      sorry
+
   rw[partition hM1, lemma1_2 hM1 hM2 f hf , lemma2 hM1 hM2 hN' f hf]
   · unfold walshInnerProduct
     simp_rw[← MeasureTheory.integral_mul_const]
     rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
     · rw[← MeasureTheory.integral_add']
       · simp only [Pi.mul_apply, Pi.add_apply]
+
         apply MeasureTheory.integral_congr_ae
         rw[Filter.EventuallyEq ]
         apply Filter.Eventually.of_forall
         intro y
+
         /- chyba bez sensu have : (∑ i ∈ Finset.range (2 ^ M),
       f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x +
     ∑ x_1 ∈ Finset.range (N' + 1),
