@@ -17,6 +17,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         exact isCompact_Icc
       · exact Ico_subset_Icc_self
   unfold Walsh.walshFourierPartialSum
+  induction' N using Nat.strong_induction_on with N ih
   by_cases hN : N = 0
   · rw[hN]
     simp only [zero_add, Finset.range_one, Finset.sum_singleton]
@@ -45,8 +46,26 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         rw[Filter.EventuallyEq ]
         apply Filter.Eventually.of_forall
         intro y
-        -- to musi zostac zrobione przez indukcje
+        /- chyba bez sensu have : (∑ i ∈ Finset.range (2 ^ M),
+      f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x +
+    ∑ x_1 ∈ Finset.range (N' + 1),
+      Haar.rademacherFunction M y * f y * walsh x_1 y * Haar.rademacherFunction M x * walsh x_1 x )= (
+      f y * walsh N y * walsh N x * (∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y *  Haar.haarFunctionScaled (↑M) (↑i) x)+
+
+      Haar.rademacherFunction M x * Haar.rademacherFunction M y * f y * (∑ x_1 ∈ Finset.range (N' + 1), walsh x_1 y *  walsh x_1 x )):= by sorry--/
+        --teraz jest jakies zamieszanie z tym kiedy jest calka a kiedy nie
+
         sorry
+
+
+        /-simp only [Pi.mul_apply, Pi.add_apply]
+        apply MeasureTheory.integral_congr_ae
+        rw[Filter.EventuallyEq ]
+        apply Filter.Eventually.of_forall
+        intro y-/
+
+
+        -- to musi zostac zrobione przez indukcje
       · apply MeasureTheory.integrable_finset_sum
         intro i hi
         have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
