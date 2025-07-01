@@ -328,7 +328,7 @@ def walshhaar (M k : ℕ) : ℝ → ℝ
   Walsh.walsh (2^M) x * (Haar.haarFunctionScaled (-M) k x)
 
 
-theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  walshhaar M k x = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2)) x:= by
+theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  walshhaar M k x = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2 : ℝ)) x:= by
   unfold walshhaar
   simp only
   rw[differentwalshRademacherRelation hx1 hx2]
@@ -353,7 +353,11 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
   rw[mul_assoc, h, indicator]
   split_ifs with h1
   · rw[← pow_two, Haar.haarFunctionScaled_sqr]
-    · simp only [neg_neg, zpow_natCast, Pi.one_apply]
+    · simp only [neg_neg, Pi.one_apply]
+      simp only [Pi.pow_apply, Pi.ofNat_apply]
+
+      --rw[Real.rpow_div_two_eq_sqrt, Real.rpow_div_two_eq_sqrt]
+
       --problemy z typem
       sorry
     · simp only [zpow_neg, zpow_natCast, mem_Ico] at h1
@@ -376,7 +380,6 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
       · rw[inv_mul_le_iff₀] at h1
         · rw[le_sub_iff_add_le, add_comm]
           exact h1
-
         · simp
       · simp
 
@@ -435,54 +438,51 @@ theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) +
       refine MeasureTheory.BoundedCompactSupport.restrict ?_
       exact Haar.bcs_haarscaled
 
-theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, walshhaar M k y  = 1 := by
-  rw[← walshhaar_s]
-  simp_rw[walshhaar]
-  induction' 2^M using Nat.evenOddRec with n ih n ih
-  · /-simp only [pow_zero, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, inv_one, one_mul]
-    have h11: EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0 0.5) := by
-      unfold EqOn
-      intro x hx
-      simp at hx
-      ring_nf at hx
-      simp only [Pi.mul_apply, Pi.one_apply]
-      rw[Walsh.walsh_one_left x hx.1 hx.2, one_mul]
-      simp only [Haar.haarFunctionScaled, Int.cast_zero, neg_zero, zero_div, Real.rpow_zero,
-        zpow_zero, one_mul, Int.cast_natCast]
-      simp only [pow_zero, tsub_self, nonpos_iff_eq_zero] at hk
-      rw[hk]
-      simp only [CharP.cast_eq_zero, sub_zero]
-      apply Haar.haarFunction_left_half
-      exact hx
-    have h21: EqOn (Walsh.walsh 1  * Haar.haarFunctionScaled 0 (↑k) ) 1 (Ico 0.5 1) := by
-      unfold EqOn
-      intro x hx
-      simp at hx
-      ring_nf at hx
-      simp only [Pi.mul_apply, Pi.one_apply]
-      rw[Walsh.walsh_one_right x hx.1 hx.2]
-      simp only [neg_mul, one_mul]
-      simp only [Haar.haarFunctionScaled, Int.cast_zero, neg_zero, zero_div, Real.rpow_zero,
-        zpow_zero, one_mul, Int.cast_natCast]
-      simp only [pow_zero, tsub_self, nonpos_iff_eq_zero] at hk
-      rw[hk]
-      simp only [CharP.cast_eq_zero, sub_zero]
-      rw [@neg_eq_iff_eq_neg]
-      apply Haar.haarFunction_right_half
-      exact hx
-    simp_rw[← Pi.mul_apply]
-    rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h11]
-    rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h21]
-    simp only [Pi.one_apply, MeasureTheory.integral_const, MeasurableSet.univ,
-      MeasureTheory.measureReal_restrict_apply, univ_inter, Real.volume_real_Ico, sub_zero,
-      smul_eq_mul, mul_one]
-    ring_nf
-    simp-/
 
+
+theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
+  rw[← MeasureTheory.integral_indicator (measurableSet_Ico)]
+  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), ((Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M  : ℝ))) x  := by --tu chyba powinno być x^2
+    congr
+    ext x
+    conv_lhs => simp[indicator, ← pow_two]
+    split_ifs with h
+    · rw[walshhaarprop ?_ h.1 h.2]
+      · simp
+        sorry
+      · simp only [Finset.mem_range]
+        rw[Nat.lt_iff_le_pred ]
+        · exact hk
+        · simp
+    · simp only [indicator]
+      split_ifs with h0
+      · exfalso
+        simp only [zpow_neg, zpow_natCast, mem_Ico] at h0
+        have h01 : 0 ≤ ((2 ^ M)⁻¹: ℝ ) * ↑k := by
+          sorry
+        have h02 : ((2 ^ M)⁻¹: ℝ ) * (↑k + 1) < 1 := by sorry
+        obtain ⟨ h0_01, h0_02⟩ := h0
+        apply lt_trans h0_02 at h02
+        apply le_trans h01 at h0_01
+        push_neg at h
+        simp[h0_01] at h
+        linarith
+      · simp
+  rw[h1]
+
+  rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
+  simp only [zpow_neg, zpow_natCast, Pi.pow_apply, Pi.ofNat_apply, MeasureTheory.integral_const,
+    MeasurableSet.univ, MeasureTheory.measureReal_restrict_apply, univ_inter, Real.volume_real_Ico,
+    smul_eq_mul]
+  have h : max (((2 ^ M)⁻¹: ℝ ) * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) 0 = ((2 ^ M)⁻¹ * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) := by sorry
+  rw[h]
+  have : (((2 ^ M)⁻¹: ℝ ) * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) = (2 ^ M)⁻¹ := by
     sorry
-  · sorry
-  · sorry
---cos jest jakos zle w tym dowodzie
+  rw[this]
+  simp
+
+
+
 
 --theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
 
