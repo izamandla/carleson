@@ -439,16 +439,18 @@ theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) +
       exact Haar.bcs_haarscaled
 
 
-
+---NO JA NWM IZA CZY TO DZIAŁA
 theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
   rw[← MeasureTheory.integral_indicator (measurableSet_Ico)]
-  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), ((Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M  : ℝ))) x  := by --tu chyba powinno być x^2
-    congr
+  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), ((Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator  (fun y ↦ 2 ^ (M  : ℝ) * y^2)) x  := by
+
+    sorry
+    /-congr
     ext x
     conv_lhs => simp[indicator, ← pow_two]
     split_ifs with h
     · rw[walshhaarprop ?_ h.1 h.2]
-      · simp
+      · simp[indicator]
         sorry
       · simp only [Finset.mem_range]
         rw[Nat.lt_iff_le_pred ]
@@ -467,19 +469,13 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
         push_neg at h
         simp[h0_01] at h
         linarith
-      · simp
+      · simp-/
   rw[h1]
-
-  rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
-  simp only [zpow_neg, zpow_natCast, Pi.pow_apply, Pi.ofNat_apply, MeasureTheory.integral_const,
-    MeasurableSet.univ, MeasureTheory.measureReal_restrict_apply, univ_inter, Real.volume_real_Ico,
-    smul_eq_mul]
-  have h : max (((2 ^ M)⁻¹: ℝ ) * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) 0 = ((2 ^ M)⁻¹ * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) := by sorry
-  rw[h]
-  have : (((2 ^ M)⁻¹: ℝ ) * (↑k + 1) - (2 ^ M)⁻¹ * ↑k) = (2 ^ M)⁻¹ := by
-    sorry
-  rw[this]
-  simp
+  rw[ MeasureTheory.integral_indicator (measurableSet_Ico), MeasureTheory.integral_const_mul ]
+  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+  rw[← intervalIntegral.integral_of_le]
+  · sorry
+  · simp
 
 
 
