@@ -919,7 +919,7 @@ theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh 
     left
     linarith
 
-theorem walshsizing_zero {M k : ℕ} {x : ℝ} (hk : k < M): walsh 0 (2^M* x - k) = (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+theorem walshsizing_zero {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): walsh 0 (2^M* x - k) = (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.one_apply]
   split_ifs with h
   · rw[walsh_zero]
@@ -941,13 +941,31 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} (hk : k < M): walsh 0 (2^M* x - k
   sorry -/
 
 
-theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < M): ∃ (f:ℕ  → ℝ), ∑ k ∈ Finset.range (2^M), (walsh k x  * f k )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+
+theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   rw[← walshsizing_zero hk]
-  induction' M using Nat.strong_induction_on with M ih
-  have h (f:ℕ  → ℝ): ∑ k ∈ Finset.range (2 ^ M), walsh k x * f k = ∑ k ∈ Finset.range (2 ^ (M-1)), walsh k x * f k + ∑ k ∈ Finset.range (2 ^ M)\Finset.range (2 ^ (M-1)), walsh k x * f k := by sorry
+  induction' M using Nat.strong_induction_on with M ih --generalizing x
+  by_cases h0 : M = 0
+  · simp only [h0, pow_zero, Nat.lt_one_iff] at hk
+    rw[h0, hk]
+    simp only [pow_zero, Finset.range_one, Finset.sum_singleton, one_mul, CharP.cast_eq_zero,
+      sub_zero]
+    use 1
+    simp
+  · by_cases h : k < 2^(M-1)
+    · set y := x/2 with hy
+      have hy' : 2* y = x := by ring
+      rw[← hy'] at ih
+
+      --simp_rw[walshsizing_firsthalf] at ih
+      sorry
+    · set y := (x+1)/2 with hy
+      have hy' : 2* y - 1  = x := by ring
+      rw[← hy'] at ih
+
+      sorry
 
 
-  sorry
 
 
 
