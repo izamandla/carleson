@@ -385,6 +385,20 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
 
 
 
+theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  (walshhaar M k x)*(walshhaar M k x) = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x:= by
+  rw[walshhaarprop hk hx1 hx2]
+  rw[indicator, indicator]
+  simp only [zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, mul_ite, ite_mul,
+    zero_mul, mul_zero]
+  by_cases h : (2 ^ M)⁻¹ * ↑k ≤ x ∧ x < (2 ^ M)⁻¹ * (↑k + 1)
+  · simp only [h, and_self, ↓reduceIte]
+    ring_nf
+    sorry
+  · simp[h]
+
+
+
+
 --był bład w definicji walshhaar - UWAZAJ!
 
 theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k'):  walshhaar M k x * walshhaar M k' x = 0 := by
@@ -439,44 +453,51 @@ theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) +
       exact Haar.bcs_haarscaled
 
 
----NO JA NWM IZA CZY TO DZIAŁA
+
 theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
   rw[← MeasureTheory.integral_indicator (measurableSet_Ico)]
-  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), ((Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator  (fun y ↦ 2 ^ (M  : ℝ) * y^2)) x  := by
-
-    sorry
-    /-congr
+  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x := by
+    congr
     ext x
-    conv_lhs => simp[indicator, ← pow_two]
+    conv_lhs => simp[indicator]
     split_ifs with h
-    · rw[walshhaarprop ?_ h.1 h.2]
-      · simp[indicator]
-        sorry
-      · simp only [Finset.mem_range]
-        rw[Nat.lt_iff_le_pred ]
-        · exact hk
-        · simp
+    · rw[walshhaarpropsqr ?_ h.1 h.2]
+      simp only [Finset.mem_range]
+      rw[Nat.lt_iff_le_pred ]
+      · exact hk
+      · simp
     · simp only [indicator]
       split_ifs with h0
       · exfalso
         simp only [zpow_neg, zpow_natCast, mem_Ico] at h0
         have h01 : 0 ≤ ((2 ^ M)⁻¹: ℝ ) * ↑k := by
-          sorry
-        have h02 : ((2 ^ M)⁻¹: ℝ ) * (↑k + 1) < 1 := by sorry
+          rw [@mul_nonneg_iff]
+          left
+          constructor
+          · linarith
+          · linarith
+        have h02 : ((2 ^ M)⁻¹: ℝ ) * (↑k + 1) ≤ 1 := by
+          refine inv_mul_le_one_of_le₀ ?_ ?_
+          · norm_cast
+            refine Nat.add_le_of_le_sub ?_ hk
+            exact Nat.one_le_two_pow
+          · simp
         obtain ⟨ h0_01, h0_02⟩ := h0
-        apply lt_trans h0_02 at h02
+        apply lt_of_lt_of_le h0_02 at h02
         apply le_trans h01 at h0_01
         push_neg at h
         simp[h0_01] at h
         linarith
-      · simp-/
+      · simp
   rw[h1]
-  rw[ MeasureTheory.integral_indicator (measurableSet_Ico), MeasureTheory.integral_const_mul ]
-  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-  rw[← intervalIntegral.integral_of_le]
-  · sorry
-  · simp
-
+  rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
+  simp only [zpow_neg, zpow_natCast, Pi.pow_apply, Pi.ofNat_apply, Real.rpow_natCast,
+    MeasureTheory.integral_const, MeasurableSet.univ, MeasureTheory.measureReal_restrict_apply,
+    univ_inter, Real.volume_real_Ico, smul_eq_mul]
+  have : ((2 ^ M)⁻¹ : ℝ )* (↑k + 1) - (2 ^ M)⁻¹ * ↑k = (2 ^ M)⁻¹ := by
+    linarith
+  simp_rw[this]
+  simp
 
 
 
