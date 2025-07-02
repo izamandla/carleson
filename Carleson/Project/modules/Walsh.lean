@@ -891,10 +891,73 @@ theorem bcs_walsh {n : ℕ}: BoundedCompactSupport (walsh n) MeasureTheory.volum
       apply walsh_zero_outside_domain
       simp only [mem_Icc, Decidable.not_and_iff_or_not, not_le] at hx
       simp only [ge_iff_le]
-      cases hx with
-      | inl h => exact Or.inl h
-      |  inr h => exact Or.inr (le_of_lt h)
 
+
+      sorry
+
+
+
+theorem walshsizing_firsthalf {n : ℕ} {x : ℝ}: 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
+  by_cases h : x < 1/2
+  · rw[walsh_even_odd_left h, walsh_odd_left h, two_mul]
+  · push_neg at h
+    rw[walsh_even_odd_right h]
+    simp only [neg_add_cancel, mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
+    rw[walsh_zero_outside_domain]
+    right
+    linarith
+
+theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
+  by_cases h : 1/2 ≤ x
+  · rw[walsh_even_odd_right h, walsh_odd_right h]
+    simp only [neg_neg, sub_neg_eq_add]
+    linarith
+  · push_neg at h
+    rw[walsh_even_odd_left h]
+    simp only [sub_self, mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
+    rw[walsh_zero_outside_domain]
+    left
+    linarith
+
+theorem walshsizing_zero {M k : ℕ} {x : ℝ} (hk : k < M): walsh 0 (2^M* x - k) = (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+  simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.one_apply]
+  split_ifs with h
+  · rw[walsh_zero]
+    · obtain ⟨ h1, h2⟩ := h
+      rw [@sub_nonneg]
+      --rw[mul_inv_le_iff_le_mul (a:= k) (b:= 2^M) (c:= x)] at h1
+      sorry
+    · rw [@sub_lt_iff_lt_add']
+
+      sorry
+  · rw[walsh_zero_outside_domain]
+    simp only [Decidable.not_and_iff_or_not, not_le, not_lt ] at h
+
+    sorry
+
+
+/-theorem walshindicatorhelp {M : ℕ} {x : ℝ} : ∑ k ∈ Finset.range (2 ^ M)\Finset.range (2 ^ (M-1)), walsh k x   = ∑ k ∈ Finset.range (2 ^ (M-1))\Finset.range (2 ^ M), walsh k x   := by
+
+  sorry -/
+
+
+theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < M): ∃ (f:ℕ  → ℝ), ∑ k ∈ Finset.range (2^M), (walsh k x  * f k )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+  rw[← walshsizing_zero hk]
+  induction' M using Nat.strong_induction_on with M ih
+  have h (f:ℕ  → ℝ): ∑ k ∈ Finset.range (2 ^ M), walsh k x * f k = ∑ k ∈ Finset.range (2 ^ (M-1)), walsh k x * f k + ∑ k ∈ Finset.range (2 ^ M)\Finset.range (2 ^ (M-1)), walsh k x * f k := by sorry
+
+
+  sorry
+
+
+
+/- 2* walsh n x * (Ico 0 0.5).indicator 1 x = walsh (2*n) x + walsh (2* n + 1) x
+theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n x * (Ico 0.5 1).indicator 1 x = walsh (2*n) x - walsh (2* n - 1) x := by sorry
+
+-- czy nie mozna zmienic M k na ℕ ?
+theorem walshsizing_firsthalfgen {n k M : ℕ} {x : ℝ} (hk: k ∈ Finset.range (2 ^ M) ) : 2* walsh n x * (Ico (2*k * 2 ^ (-(M+1) : ℤ ) : ℝ ) ((2*k+1)* 2 ^ (-(M+1) : ℤ ) : ℝ ) ).indicator 1 x = walsh (2*n) x * (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x - walsh (2* n - 1) x* (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by sorry
+
+theorem walshsizing_secondhalfgen {n M k : ℕ } {x : ℝ}: 2* walsh n x * (Ico (( 2*k+1) * 2 ^ (-(M+1) : ℤ ) : ℝ ) (((2*k+2)* 2 ^ (-(M+1) : ℤ ) : ℝ ) )).indicator 1 x = walsh (2*n) x * (Ico (k * 2 ^ (-M :ℤ ) : ℝ ) ((k+1)* 2 ^ (-M :ℤ )  : ℝ ) ).indicator 1 x - walsh (2* n - 1) x* (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M :ℤ )  : ℝ ) ).indicator 1 x := by sorry-/
 
 end Walsh
 
