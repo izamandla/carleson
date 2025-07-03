@@ -979,6 +979,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       simp_rw[walshsizing_firsthalf'] at ih
       obtain ⟨g, hg⟩ := ih
       rw[← hg]
+      --rw[← Finset.sum_mul]
 
       sorry
     · push_neg at h
@@ -987,10 +988,11 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       specialize ih (k:=k-2^M) (x:=2*x-1) hk
       rw[mul_sub, ← mul_assoc, ← pow_succ   ] at ih
       simp only [mul_one] at ih
-      --rw[Int.ofNat_sub h, sub_sub_eq_add_sub (a:= (2 ^ M * (2 * x)))] at ih
+      rw[Nat.cast_sub h, sub_sub_eq_add_sub] at ih
       simp_rw[walshsizing_secondhalf'] at ih
+      simp only [Nat.cast_pow, Nat.cast_ofNat, sub_add_cancel] at ih
       obtain ⟨g, hg⟩ := ih
-      --rw[← hg]
+      rw[← hg]
       sorry
 
 
