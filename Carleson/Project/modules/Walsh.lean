@@ -910,6 +910,11 @@ theorem walshsizing_firsthalf {n : ℕ} {x : ℝ}: 2* walsh n (2* x) = walsh (2*
     right
     linarith
 
+
+theorem walshsizing_firsthalf' {n : ℕ} {x : ℝ}: walsh n (2* x) = 1/2 *  (walsh (2*n) x + walsh (2* n + 1) x ):= by
+  rw [← @walshsizing_firsthalf]
+  simp
+
 theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
   by_cases h : 1/2 ≤ x
   · rw[walsh_even_odd_right h, walsh_odd_right h]
@@ -921,6 +926,10 @@ theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh 
     rw[walsh_zero_outside_domain]
     left
     linarith
+
+theorem walshsizing_secondhalf' {n : ℕ} {x : ℝ}: walsh n (2*x -1) = 1/2 *(walsh (2*n) x - walsh (2* n + 1) x ):= by
+  rw [← @walshsizing_secondhalf]
+  simp
 
 theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.one_apply]
@@ -967,21 +976,21 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
   · by_cases h : k < 2^M
     · specialize ih (k:=k) (x:=2*x) h
       simp_rw[← mul_assoc, ← pow_succ] at ih
+      simp_rw[walshsizing_firsthalf'] at ih
+      obtain ⟨g, hg⟩ := ih
+      rw[← hg]
 
-
-      --simp_rw[walshsizing_firsthalf] at ih
-      all_goals sorry
+      sorry
     · push_neg at h
       rw[pow_succ,mul_two] at hk
       apply Nat.sub_lt_left_of_lt_add h  at hk
-      specialize ih (k:=k-2^M) (x:=2*x) hk
-      simp_rw[← mul_assoc, ← pow_succ  ] at ih
+      specialize ih (k:=k-2^M) (x:=2*x-1) hk
+      rw[mul_sub, ← mul_assoc, ← pow_succ   ] at ih
+      simp only [mul_one] at ih
       --rw[Int.ofNat_sub h, sub_sub_eq_add_sub (a:= (2 ^ M * (2 * x)))] at ih
-
-      --musi być jakaś zmiana sumy
-      --push_neg at h
-      --specialize ih (k:=k) (x:=2*x- 1) h
-
+      simp_rw[walshsizing_secondhalf'] at ih
+      obtain ⟨g, hg⟩ := ih
+      --rw[← hg]
       sorry
 
 
