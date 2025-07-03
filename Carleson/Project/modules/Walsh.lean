@@ -964,6 +964,7 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
 
 
 
+
 theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   rw[← walshsizing_zero]
   induction' M with M ih generalizing k x
@@ -973,13 +974,34 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       sub_zero]
     use 1
     simp
-  · by_cases h : k < 2^M
+  · set s:= {l | l ∈ Finset.range (2^(M+1)) ∧  Odd l} with hs
+    have hs' :s.Finite := by sorry
+    set s' := hs'.toFinset
+    have hs2 : s' = {l | l ∈ Finset.range (2^(M+1)) ∧  Odd l} := by sorry
+    set t := {l | l ∈ Finset.range (2^(M+1)) ∧  Even l}  with ht
+    have ht' :t.Finite := by sorry
+    set t' := ht'.toFinset
+    have ht2 : t' = {l | l ∈ Finset.range (2^(M+1)) ∧  Even l} := sorry
+    have hp : Finset.range (2^(M+1)) = s ∪ t := by
+      rw[hs, ht]
+      ext k
+      simp only [Finset.coe_range, mem_Iio, Finset.mem_range, mem_union, mem_setOf_eq]
+      rw[← and_or_left, @iff_self_and]
+      exact fun a ↦ Or.symm (Nat.even_or_odd k)
+
+
+    have (f:ℕ  → ℝ) : ∑ x_1 ∈ Finset.range (2 ^ (M + 1)), f x_1 * walsh x_1 x = ∑ x_1 ∈ s', f x_1 * walsh x_1 x + ∑ x_1 ∈ t', f x_1 * walsh x_1 x := sorry
+    by_cases h : k < 2^M
     · specialize ih (k:=k) (x:=2*x) h
       simp_rw[← mul_assoc, ← pow_succ] at ih
       simp_rw[walshsizing_firsthalf'] at ih
       obtain ⟨g, hg⟩ := ih
       rw[← hg]
+      simp_rw[mul_comm, ← mul_assoc, mul_add, Finset.sum_add_distrib]
+      set f: ℕ → ℝ := (fun x ↦ g (2*x -1)) with hf
       --rw[← Finset.sum_mul]
+
+
 
       sorry
     · push_neg at h
@@ -993,6 +1015,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       simp only [Nat.cast_pow, Nat.cast_ofNat, sub_add_cancel] at ih
       obtain ⟨g, hg⟩ := ih
       rw[← hg]
+      simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib]
       sorry
 
 
