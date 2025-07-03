@@ -562,7 +562,7 @@ theorem haarsumzero2 (k : ℕ) (x : ℝ) (hx : x ∈ Ico 0.5 1) : ∑ n ∈ Fins
   · exact hn
   · exact hx
 
-theorem measurability_of_haarscaled {n k : ℤ} : Measurable (haarFunctionScaled k n) := by sorry
+--theorem measurability_of_haarscaled {n k : ℤ} : Measurable (haarFunctionScaled k n) := by sorry
 
 theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) MeasureTheory.volume := by
   unfold haarFunctionScaled
@@ -571,7 +571,10 @@ theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
     · apply Measurable.aestronglyMeasurable
-      sorry
+      apply Measurable.comp'
+      · exact measurability_of_haar
+      · apply Measurable.add_const
+        exact measurable_const_mul (2 ^ k)⁻¹
     · apply Filter.Eventually.of_forall
       simp only [Real.norm_eq_abs]
       intro x
@@ -588,18 +591,18 @@ theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k
       apply haarFunction_outside
       simp only [mem_Icc, Decidable.not_and_iff_or_not, not_le] at hx
       simp only [ge_iff_le, sub_neg]
-      cases hx with
-      | inl h => sorry
-      |  inr h => sorry
+      rcases hx with hx | hx
+      · left
+        rw[mul_comm, mul_inv_lt_iff₀ (zpow_pos (zero_lt_two) k)]
+        exact hx
+      · right
+        rw [@le_sub_iff_add_le']
+        rw[le_inv_mul_iff₀ (zpow_pos (zero_lt_two) k), mul_comm]
+        exact hx.le
 
 
-theorem bcs_haarscaled' {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) MeasureTheory.volume := by
-  unfold haarFunctionScaled
-  apply MeasureTheory.BoundedCompactSupport.const_mul
 
 
-
-  sorry
 
 
 /--
