@@ -1,10 +1,11 @@
 import Mathlib.Data.Nat.Bitwise
-import Carleson.Project.modules.DyadicStructures
+import Mathlib.Analysis.SpecialFunctions.ContinuousFunctionalCalculus.Rpow.Basic
 import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 import Carleson.Project.modules.BinaryRepresentationSet
+import Carleson.Project.modules.DyadicStructures
 open Function Set
-open unitInterval
+open unitInterval DyadicStructures
 
 noncomputable section
 
@@ -355,11 +356,10 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
   · rw[← pow_two, Haar.haarFunctionScaled_sqr]
     · simp only [neg_neg, Pi.one_apply]
       simp only [Pi.pow_apply, Pi.ofNat_apply]
-
-      --rw[Real.rpow_div_two_eq_sqrt, Real.rpow_div_two_eq_sqrt]
-
-      --problemy z typem
-      sorry
+      rw[←Real.rpow_intCast, ← Real.rpow_add (by norm_num)]
+      congr
+      push_cast
+      ring
     · simp only [zpow_neg, zpow_natCast, mem_Ico] at h1
       simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_nonneg]
       rw[ ← inv_mul_le_iff₀]
@@ -392,8 +392,8 @@ theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M))
     zero_mul, mul_zero]
   by_cases h : (2 ^ M)⁻¹ * ↑k ≤ x ∧ x < (2 ^ M)⁻¹ * (↑k + 1)
   · simp only [h, and_self, ↓reduceIte]
-    ring_nf
-    sorry
+    rw[ ← Real.rpow_add (by norm_num)]
+    simp
   · simp[h]
 
 
@@ -512,7 +512,7 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     (∫ y in Set.Ico 0 1,
       f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled M k y) * Walsh.walsh (2 ^ M) x *
         (Haar.haarFunctionScaled M k x)):= by
-
+--jak na analizie funkcjonalnej
   sorry
 
 /--
@@ -549,7 +549,9 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
           · rw[or_iff_right h_1] at h
             left
             rw[Haar.haarFunctionScaled_outside M k y h]
-        · simp at h
+        · have hi1 : x ∈ dyadicInterval (-M) k := by sorry
+          have hi2 : y ∈ dyadicInterval (-M) k := by sorry
+          --simp only [zpow_neg, zpow_natCast, sub_neg, ge_iff_le, not_or, not_lt, not_le] at h
           left
           rw[← Finset.prod_mul_distrib]
           apply Finset.prod_eq_one
@@ -561,16 +563,23 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
             · simp
             · intro l hl
               simp at hl
-              by_cases hh : Haar.haarFunctionScaled (-↑i) (↑l) y = 1
+              rw[Haar.haarscl_di, Haar.haarscl_di]
+
+              --obtain ⟨ h_1, h_2 ⟩ := h
+
+              sorry
+              /-intro l hl
+              simp at hl
+              by_cases hh : Haar.haarFunctionScaled (-↑i) (↑l) y = 2 ^ ((i / 2) : ℝ)
               · sorry
-              · by_cases hh1 : Haar.haarFunctionScaled (-↑i) (↑l) y = - 1
+              · by_cases hh1 : Haar.haarFunctionScaled (-↑i) (↑l) y = - 2 ^ ((-i / 2) : ℝ)
                 · sorry
                 · have hh_1 : Haar.haarFunctionScaled (-↑i) (↑l) y  = 0 := by sorry
                   rw[hh_1]
                   rw[Haar.haarFunctionScaled_outside]
                   simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
 
-                  sorry
+                  sorry-/
               --tu trzeba się dobrze zastanowić jak przeprowadzić argumentację
           rw[hr, ← pow_two, Haar.rad_sqr hx1 hx2]
 

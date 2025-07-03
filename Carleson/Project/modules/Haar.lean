@@ -5,7 +5,8 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 import Mathlib.Order.CompletePartialOrder
 import Carleson.ToMathlib.BoundedCompactSupport
 import Mathlib.Tactic.Measurability
-open Function Set MeasureTheory
+import Carleson.Project.modules.DyadicStructures
+open Function Set MeasureTheory DyadicStructures
 noncomputable section
 
 /- ## Haar and Rademacher functions -/
@@ -218,6 +219,7 @@ theorem haarFunctionScaled_left_half (k n : ℤ) (x : ℝ) (h1 : 0 ≤ 2 ^ (-k) 
     · linarith
     · linarith
 
+
 --theorem haarFunctionScaled_left_half_as_fun
 
 /--
@@ -244,6 +246,36 @@ theorem haarFunctionScaled_outside (k n : ℤ) (x : ℝ)
   unfold haarFunctionScaled
   rw [haarFunction_outside _ h]
   simp
+
+
+
+theorem haarscl_di (k n : ℤ) (x : ℝ) :
+  haarFunctionScaled k n x = (dyadicInterval (k-1) (2*n) ).indicator (2 ^ ((-k / 2) : ℝ)) x + (dyadicInterval (k-1) (2*n + 1) ).indicator (-2 ^ ((-k / 2) : ℝ)) x := by
+    unfold dyadicInterval
+    simp only [indicator, mem_setOf_eq, Pi.pow_apply, Pi.ofNat_apply]
+    simp only [Int.cast_mul, Int.cast_ofNat]
+    /-split_ifs with h
+    · rw[haarFunctionScaled_left_half]
+      · obtain ⟨ h1, h2 ⟩ := h
+        rw[zpow_neg, sub_nonneg]
+        rw[le_inv_mul_iff₀ ]
+        · rw[← mul_assoc, ← zpow_add_one₀ (a:= 2) (n:= (k-1)) ] at h1
+          · simp only [sub_add_cancel] at h1
+            exact h1
+          · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
+        · refine zpow_pos ?_ k
+          exact zero_lt_two
+      · obtain ⟨ h1, h2 ⟩ := h
+        /-rw[mul_comm, ← mul_inv_lt_iff₀ (zpow_pos (zero_lt_two) k )] at h2
+        rw[zpow_neg, sub_lt_iff_lt_add', mul_comm]
+        apply lt_trans-/
+
+        sorry
+    · rw[haarFunctionScaled_outside]
+-/
+    sorry
+
+
 
 
 /--

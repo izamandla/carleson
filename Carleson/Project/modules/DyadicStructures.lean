@@ -78,7 +78,7 @@ theorem intervalform_dyadicInterval {k n : ℤ}: dyadicInterval k n = Set.Ico ((
 Points inside the same dyadic interval at scale `k` are within `(2^k : ℝ)` of each other.
 -/
 
-theorem dyadicInterval_length (k n : ℤ) (x y : ℝ ) (h : x ∈ dyadicInterval k n ∧ y ∈ dyadicInterval k n) : |x - y| ≤ (2^k : ℝ) := by
+theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval k n ∧ y ∈ dyadicInterval k n) : |x - y| ≤ (2^k : ℝ) := by
   simp [dyadicInterval] at h
   rw[abs_sub_le_iff]
   constructor

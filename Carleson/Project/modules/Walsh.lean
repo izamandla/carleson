@@ -957,24 +957,30 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
 
 theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   rw[← walshsizing_zero]
-  induction' M using Nat.strong_induction_on with M ih --generalizing x
-  by_cases h0 : M = 0
-  · simp only [h0, pow_zero, Nat.lt_one_iff] at hk
-    rw[h0, hk]
+  induction' M with M ih generalizing k x
+  · simp only [ pow_zero, Nat.lt_one_iff] at hk
+    rw[ hk]
     simp only [pow_zero, Finset.range_one, Finset.sum_singleton, one_mul, CharP.cast_eq_zero,
       sub_zero]
     use 1
     simp
-  · by_cases h : k < 2^(M-1)
-    · set y := x/2 with hy
-      have hy' : 2* y = x := by ring
-      rw[← hy'] at ih
+  · by_cases h : k < 2^M
+    · specialize ih (k:=k) (x:=2*x) h
+      simp_rw[← mul_assoc, ← pow_succ] at ih
+
 
       --simp_rw[walshsizing_firsthalf] at ih
-      sorry
-    · set y := (x+1)/2 with hy
-      have hy' : 2* y - 1  = x := by ring
-      rw[← hy'] at ih
+      all_goals sorry
+    · push_neg at h
+      rw[pow_succ,mul_two] at hk
+      apply Nat.sub_lt_left_of_lt_add h  at hk
+      specialize ih (k:=k-2^M) (x:=2*x) hk
+      simp_rw[← mul_assoc, ← pow_succ  ] at ih
+      --rw[Int.ofNat_sub h, sub_sub_eq_add_sub (a:= (2 ^ M * (2 * x)))] at ih
+
+      --musi być jakaś zmiana sumy
+      --push_neg at h
+      --specialize ih (k:=k) (x:=2*x- 1) h
 
       sorry
 
