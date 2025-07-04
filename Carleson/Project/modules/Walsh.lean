@@ -990,7 +990,14 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       exact fun a ↦ Or.symm (Nat.even_or_odd k)
 
 
-    have (f:ℕ  → ℝ) : ∑ x_1 ∈ Finset.range (2 ^ (M + 1)), f x_1 * walsh x_1 x = ∑ x_1 ∈ s', f x_1 * walsh x_1 x + ∑ x_1 ∈ t', f x_1 * walsh x_1 x := sorry
+    have (f:ℕ  → ℝ) : ∑ x_1 ∈ Finset.range (2 ^ (M + 1)), f x_1 * walsh x_1 x = ∑ x_1 ∈ s', f x_1 * walsh x_1 x + ∑ x_1 ∈ t', f x_1 * walsh x_1 x := by
+      rw[← Finset.sum_union]
+      · congr
+        simp at hp
+
+
+        sorry
+      · sorry
     by_cases h : k < 2^M
     · specialize ih (k:=k) (x:=2*x) h
       simp_rw[← mul_assoc, ← pow_succ] at ih
@@ -1020,15 +1027,6 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
 
 
 
-
-
-/- 2* walsh n x * (Ico 0 0.5).indicator 1 x = walsh (2*n) x + walsh (2* n + 1) x
-theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n x * (Ico 0.5 1).indicator 1 x = walsh (2*n) x - walsh (2* n - 1) x := by sorry
-
--- czy nie mozna zmienic M k na ℕ ?
-theorem walshsizing_firsthalfgen {n k M : ℕ} {x : ℝ} (hk: k ∈ Finset.range (2 ^ M) ) : 2* walsh n x * (Ico (2*k * 2 ^ (-(M+1) : ℤ ) : ℝ ) ((2*k+1)* 2 ^ (-(M+1) : ℤ ) : ℝ ) ).indicator 1 x = walsh (2*n) x * (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x - walsh (2* n - 1) x* (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by sorry
-
-theorem walshsizing_secondhalfgen {n M k : ℕ } {x : ℝ}: 2* walsh n x * (Ico (( 2*k+1) * 2 ^ (-(M+1) : ℤ ) : ℝ ) (((2*k+2)* 2 ^ (-(M+1) : ℤ ) : ℝ ) )).indicator 1 x = walsh (2*n) x * (Ico (k * 2 ^ (-M :ℤ ) : ℝ ) ((k+1)* 2 ^ (-M :ℤ )  : ℝ ) ).indicator 1 x - walsh (2* n - 1) x* (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M :ℤ )  : ℝ ) ).indicator 1 x := by sorry-/
 
 end Walsh
 

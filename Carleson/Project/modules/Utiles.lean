@@ -510,8 +510,8 @@ theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
-      f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled M k y) * Walsh.walsh (2 ^ M) x *
-        (Haar.haarFunctionScaled M k x)):= by
+      f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled (-M) k y) * Walsh.walsh (2 ^ M) x *
+        (Haar.haarFunctionScaled (-M) k x)):= by
 --jak na analizie funkcjonalnej
   sorry
 
@@ -522,34 +522,58 @@ Lemma 2
 
 theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1) : ∑ i ∈ Finset.range (2 ^ M),
     (∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
-      Haar.haarFunctionScaled (↑M) (↑i) y *
+      Haar.haarFunctionScaled (-↑M) (↑i) y *
            ( ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
-          Haar.haarFunctionScaled (↑M) (↑i) x = ∑ i ∈ Finset.range (2 ^ M),
-      (Haar.haarFunctionScaled (↑M) (↑i) y *  Haar.haarFunctionScaled (↑M) (↑i) x) := by
+          Haar.haarFunctionScaled (-↑M) (↑i) x = ∑ i ∈ Finset.range (2 ^ M),
+      (Haar.haarFunctionScaled (-↑M) (↑i) y *  Haar.haarFunctionScaled (-↑M) (↑i) x) := by
       apply Finset.sum_congr
       · simp
       · intro k hk
         have : ((∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
-        Haar.haarFunctionScaled (↑M) (↑k) y *
+        Haar.haarFunctionScaled (-↑M) (↑k) y *
       ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
-    Haar.haarFunctionScaled (↑M) (↑k) x= ((∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
+    Haar.haarFunctionScaled (-↑M) (↑k) x= ((∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
       ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
-    (Haar.haarFunctionScaled (↑M) (↑k) y * Haar.haarFunctionScaled (↑M) (↑k) x ):= by
+    (Haar.haarFunctionScaled (-↑M) (↑k) y * Haar.haarFunctionScaled (-↑M) (↑k) x ):= by
           linarith
+
         rw[this]
-        conv_rhs => rw[← one_mul (a:= Haar.haarFunctionScaled (↑M) (↑k) y), mul_assoc]
+        conv_rhs => rw[← one_mul (a:= Haar.haarFunctionScaled (-↑M) (↑k) y), mul_assoc]
         simp only [mul_eq_mul_right_iff]
-        by_cases h : ( 2 ^ (-M : ℤ ) * x - k < 0 ∨ 2 ^ (-M : ℤ ) * x - k ≥ 1) ∨ ( 2 ^ (-M : ℤ ) * y - k < 0 ∨ 2 ^ (-M : ℤ ) * y - k ≥ 1)
+        by_cases h : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1) ∨ ( 2 ^ (M : ℤ ) * y - k < 0 ∨ 2 ^ (M : ℤ ) * y - k ≥ 1)
         · right
           simp only [mul_eq_zero]
-          by_cases h_1 : ( 2 ^ (-M : ℤ ) * x - k < 0 ∨ 2 ^ (-M : ℤ ) * x - k ≥ 1)
-          · rw[Haar.haarFunctionScaled_outside M k x h_1]
-            right
-            simp
+          by_cases h_1 : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1)
+          · rw[Haar.haarFunctionScaled_outside (-M) k x ?_]
+            · right
+              simp
+            · simp only [neg_neg]
+              exact h_1
           · rw[or_iff_right h_1] at h
             left
-            rw[Haar.haarFunctionScaled_outside M k y h]
-        · have hi1 : x ∈ dyadicInterval (-M) k := by sorry
+            rw[Haar.haarFunctionScaled_outside (-M) k y ?_]
+            rw[neg_neg]
+            exact h
+        by_cases h : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1) ∨ ( 2 ^ (M : ℤ ) * y - k < 0 ∨ 2 ^ (M : ℤ ) * y - k ≥ 1)
+        · right
+          simp only [mul_eq_zero]
+          by_cases h_1 : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1)
+          · rw[Haar.haarFunctionScaled_outside (-M) k x ?_]
+            · right
+              simp
+            · rw[neg_neg]
+              exact h_1
+          · rw[or_iff_right h_1] at h
+            left
+            rw[Haar.haarFunctionScaled_outside (-M) k y ?_]
+            rw[neg_neg]
+            exact h
+        · push_neg at h
+          have hi1 : x ∈ dyadicInterval (-M) k := by
+            simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
+
+
+            sorry
           have hi2 : y ∈ dyadicInterval (-M) k := by sorry
           --simp only [zpow_neg, zpow_natCast, sub_neg, ge_iff_le, not_or, not_lt, not_le] at h
           left
@@ -562,25 +586,25 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
             apply Finset.sum_congr
             · simp
             · intro l hl
-              simp at hl
+              simp only [Finset.mem_range] at hl
               rw[Haar.haarscl_di, Haar.haarscl_di]
-
-              --obtain ⟨ h_1, h_2 ⟩ := h
-
-              sorry
-              /-intro l hl
-              simp at hl
-              by_cases hh : Haar.haarFunctionScaled (-↑i) (↑l) y = 2 ^ ((i / 2) : ℝ)
-              · sorry
-              · by_cases hh1 : Haar.haarFunctionScaled (-↑i) (↑l) y = - 2 ^ ((-i / 2) : ℝ)
-                · sorry
-                · have hh_1 : Haar.haarFunctionScaled (-↑i) (↑l) y  = 0 := by sorry
-                  rw[hh_1]
-                  rw[Haar.haarFunctionScaled_outside]
-                  simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
-
-                  sorry-/
-              --tu trzeba się dobrze zastanowić jak przeprowadzić argumentację
+              have hdi : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l )) ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l)) ∪ (dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l+1))) =∅ := by sorry
+              rcases hdi with hdi|hdi|hdi
+              · have hxx: x ∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                have hyy: y∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                simp[ hxx, hyy, indicator, hxxc , hyyc]
+              · have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                have hxxc:  x ∈ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                have hyyc:  y ∈  dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                simp[ hxx, hyy, indicator, hxxc , hyyc]
+              · have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+                have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+                simp[ hxx, hyy, indicator, hxxc , hyyc]
           rw[hr, ← pow_two, Haar.rad_sqr hx1 hx2]
 
 
@@ -590,25 +614,25 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
 
 theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1):
   ∑ k ∈ Finset.range (2 ^ M),
-      f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled M k y * Walsh.walsh (2 ^ M) x *
-        Haar.haarFunctionScaled M k x =
+      f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (-M) k y * Walsh.walsh (2 ^ M) x *
+        Haar.haarFunctionScaled (-M : ℤ ) k x =
   ∑ k ∈ Finset.range (2 ^ M),
-     f y * Walsh.walsh N y * Haar.haarFunctionScaled M k y * Walsh.walsh N x *
-      Haar.haarFunctionScaled M k x := by
+     f y * Walsh.walsh N y * Haar.haarFunctionScaled (-M) k y * Walsh.walsh N x *
+      Haar.haarFunctionScaled (-M) k x := by
       simp_rw[mul_assoc, mul_comm (a:= f y), ← Finset.sum_mul ,mul_eq_mul_right_iff]
       left
       conv_rhs => rw[walshRademacherRelationresult (BinaryRepresentationSet.aboutMfinal h1 h2) hy1 hy2,walshRademacherRelationresult (BinaryRepresentationSet.aboutMfinal h1 h2) hx1 hx2 , mul_comm]
       have : (∑ i ∈ Finset.range (2 ^ M),
     (∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
         Walsh.walsh (2 ^ M) y *
-      (Haar.haarFunctionScaled (↑M) (↑i) y *
+      (Haar.haarFunctionScaled (-↑M) (↑i) y *
         ((Walsh.walsh (2 ^ M) x *
             ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
-          Haar.haarFunctionScaled (↑M) (↑i) x))) = ( ∑ i ∈ Finset.range (2 ^ M),
+          Haar.haarFunctionScaled (-↑M) (↑i) x))) = ( ∑ i ∈ Finset.range (2 ^ M),
     (∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
-      Haar.haarFunctionScaled (↑M) (↑i) y *
+      Haar.haarFunctionScaled (-↑M) (↑i) y *
            ( ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
-          Haar.haarFunctionScaled (↑M) (↑i) x) * Walsh.walsh (2 ^ M) y * Walsh.walsh (2 ^ M) x := by
+          Haar.haarFunctionScaled (-↑M) (↑i) x) * Walsh.walsh (2 ^ M) y * Walsh.walsh (2 ^ M) x := by
           rw[Finset.sum_mul, Finset.sum_mul]
           congr
           ext i
@@ -623,9 +647,9 @@ theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : 
 theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x=
   ∑ k ∈ Finset.range (2 ^ M),
-    (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled M k y)) *
+    (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled (-M) k y)) *
         Walsh.walsh N x *
-      (Haar.haarFunctionScaled M k x) := by
+      (Haar.haarFunctionScaled (-M) k x) := by
   rw [lemma1_1 h1 h2 ]
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
@@ -642,8 +666,8 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
       · exact hx2
   · intro i hi
     have : (fun a ↦
-    f a * Walsh.walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * Walsh.walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x )= (fun a ↦
-    Walsh.walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x * Walsh.walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+    f a * Walsh.walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * Walsh.walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x )= (fun a ↦
+    Walsh.walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x * Walsh.walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * f a ) := by
       ext a
       linarith
     simp_rw[this]
@@ -659,10 +683,10 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
   · simp only [Finset.mem_range]
     intro i hi
     have : (fun y ↦
-    f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (↑M) (↑i) y * Walsh.walsh (2 ^ M) x *
-      Haar.haarFunctionScaled (↑M) (↑i) x) = (fun y ↦
+    f y * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (-↑M) (↑i) y * Walsh.walsh (2 ^ M) x *
+      Haar.haarFunctionScaled (-↑M) (↑i) x) = (fun y ↦
     Walsh.walsh (2 ^ M) x *
-      Haar.haarFunctionScaled (↑M) (↑i) x * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (↑M) (↑i) y * f y ) := by
+      Haar.haarFunctionScaled (-↑M) (↑i) x * Walsh.walsh (2 ^ M) y * Haar.haarFunctionScaled (-↑M) (↑i) y * f y ) := by
       ext a
       linarith
     simp_rw[this]
@@ -675,6 +699,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
       · exact Walsh.bcs_walsh
       · exact Haar.bcs_haarscaled
     · exact hf'
+
 
 
 /--
