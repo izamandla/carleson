@@ -501,19 +501,41 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
 
 
 
+
+
+
+
+
+theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
+  ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * walshhaar M k y) * walshhaar M k x:= by
+  simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
+
+  sorry
+
+
+
 --theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
-
-
-
---sumowanie jest do 2^M - 1 wiec tu przedzialy sa ok
 theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled (-M) k y) * Walsh.walsh (2 ^ M) x *
         (Haar.haarFunctionScaled (-M) k x)):= by
---jak na analizie funkcjonalnej
-  sorry
+  rw[lemma1_1' h1 h2]
+  congr
+  ext k
+  rw[← MeasureTheory.integral_mul_const]
+  congr
+  ext y
+  simp_rw[walshhaar, ← mul_assoc]
+
+
+
+
+
 
 /--
 Lemma 2
@@ -571,11 +593,26 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
         · push_neg at h
           have hi1 : x ∈ dyadicInterval (-M) k := by
             simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
-
-
-            sorry
-          have hi2 : y ∈ dyadicInterval (-M) k := by sorry
-          --simp only [zpow_neg, zpow_natCast, sub_neg, ge_iff_le, not_or, not_lt, not_le] at h
+            constructor
+            · simp only [zpow_neg, zpow_natCast]
+              rw[mul_comm , mul_inv_le_iff₀ (pow_pos (zero_lt_two) M) ]
+              rw[← sub_nonneg, mul_comm]
+              exact h.1.1
+            · simp only [zpow_neg, zpow_natCast]
+              rw[lt_inv_mul_iff₀ (pow_pos (zero_lt_two) M) ]
+              rw [← sub_lt_iff_lt_add']
+              exact h.1.2
+          have hi2 : y ∈ dyadicInterval (-M) k := by
+            simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
+            constructor
+            · simp only [zpow_neg, zpow_natCast]
+              rw[mul_comm , mul_inv_le_iff₀ (pow_pos (zero_lt_two) M) ]
+              rw[← sub_nonneg, mul_comm]
+              exact h.2.1
+            · simp only [zpow_neg, zpow_natCast]
+              rw[lt_inv_mul_iff₀ (pow_pos (zero_lt_two) M) ]
+              rw [← sub_lt_iff_lt_add']
+              exact h.2.2
           left
           rw[← Finset.prod_mul_distrib]
           apply Finset.prod_eq_one
@@ -588,7 +625,9 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
             · intro l hl
               simp only [Finset.mem_range] at hl
               rw[Haar.haarscl_di, Haar.haarscl_di]
-              have hdi : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l )) ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l)) ∪ (dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l+1))) =∅ := by sorry
+              have hdi : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l )) ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l)) ∪ (dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l+1))) =∅ := by
+
+                sorry
               rcases hdi with hdi|hdi|hdi
               · have hxx: x ∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
                 have hyy: y∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
