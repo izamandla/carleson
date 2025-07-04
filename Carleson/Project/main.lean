@@ -70,8 +70,8 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
           rw[hg]
           simp only [Pi.mul_apply]
           have : (∑ i ∈ Finset.range (2 ^ M),
-        f y * walsh N y * Haar.haarFunctionScaled (↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
-        Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x) := by
+        f y * walsh N y * Haar.haarFunctionScaled (-↑M) (↑i) y * walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
+        Haar.haarFunctionScaled (-↑M) (↑i) y * Haar.haarFunctionScaled (-↑M) (↑i) x) := by
             conv_rhs => rw[mul_comm, Finset.sum_mul ]
             congr
             ext i
@@ -96,9 +96,9 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
             linarith
           rw[this]
           have : (f y * walsh N y * walsh N x *
-      ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x +
+      ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (-↑M) (↑i) y * Haar.haarFunctionScaled (-↑M) (↑i) x +
     f y * walsh N y * walsh N x * Kernel.kernel N' x y)= f y * walsh N y * walsh N x *
-      (∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x + Kernel.kernel N' x y) := by
+      (∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (-↑M) (↑i) y * Haar.haarFunctionScaled (-↑M) (↑i) x + Kernel.kernel N' x y) := by
             linarith
           rw[this]
           simp only [mul_eq_mul_left_iff, mul_eq_zero]
@@ -106,8 +106,8 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
           simp only [Kernel.kernel]
           rw[← add_assoc, add_comm, ← add_assoc, add_comm, add_right_inj]
           rw[← remove_bit N M hM.1]
-          have : ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (↑M) (↑i) y * Haar.haarFunctionScaled (↑M) (↑i) x = ∑ m ∈ {M},
-      ∑ n ∈ Finset.range (2 ^ m), Haar.haarFunctionScaled (↑m) (↑n) x * Haar.haarFunctionScaled (↑m) (↑n) y:= by
+          have : ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (-↑M) (↑i) y * Haar.haarFunctionScaled (-↑M) (↑i) x = ∑ m ∈ {M},
+      ∑ n ∈ Finset.range (2 ^ m), Haar.haarFunctionScaled (-↑m) (↑n) x * Haar.haarFunctionScaled (-↑m) (↑n) y:= by
             simp only [Finset.sum_singleton]
             congr
             ext i
@@ -121,7 +121,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         · linarith
       · apply MeasureTheory.integrable_finset_sum
         intro i hi
-        have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+        have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x * walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * f a ) := by
           ext a
           linarith
         rw[this]
@@ -165,7 +165,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
               exact Haar.bcs_haarscaled
             · exact hf
     intro i hi
-    have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (↑M) (↑i) x  * walsh N a * Haar.haarFunctionScaled (↑M) (↑i) a * f a ) := by
+    have : (fun a ↦ f a * walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x) = (fun a ↦ walsh N x * Haar.haarFunctionScaled (-↑M) (↑i) x  * walsh N a * Haar.haarFunctionScaled (-↑M) (↑i) a * f a ) := by
       ext a
       linarith
     simp_rw[this]

@@ -18,7 +18,7 @@ Kernel function defined using Haar functions and binary representation sets.
 -/
 def kernel (N : ℕ) (x y : ℝ) : ℝ :=
     1 + ∑ m ∈ BinaryRepresentationSet.binaryRepresentationSet N,
-      ∑ n ∈ Finset.range (2 ^ m), (Haar.haarFunctionScaled m n x) * (Haar.haarFunctionScaled m n y)
+      ∑ n ∈ Finset.range (2 ^ m), (Haar.haarFunctionScaled (-m) n x) * (Haar.haarFunctionScaled (-m) n y)
 
 
 /--
@@ -34,7 +34,7 @@ theorem kernel_zero (x y : ℝ) : kernel 0 x y = 1 := by
 Kernel function for binary powers `N = 2^m`.
 -/
 theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n ∈ Finset.range (2 ^ N),
-  (Haar.haarFunctionScaled N n x) * (Haar.haarFunctionScaled N n y) := by
+  (Haar.haarFunctionScaled (-N) n x) * (Haar.haarFunctionScaled (-N) n y) := by
   simp only [kernel, add_right_inj, BinaryRepresentationSet.binaryforpower,Finset.sum_singleton]
 
 
