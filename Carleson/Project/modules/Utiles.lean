@@ -625,24 +625,48 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
             · intro l hl
               simp only [Finset.mem_range] at hl
               rw[Haar.haarscl_di, Haar.haarscl_di]
+              have hdih : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l ) ∪ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ) ∩  (dyadicInterval (-↑i - 1) (2 * ↑l) ∪ dyadicInterval (-↑i - 1) (2 * ↑l+1)))= ∅  := by sorry
               have hdi : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l )) ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l)) ∪ (dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l+1))) =∅ := by
 
                 sorry
+              have obv : Disjoint (dyadicInterval (-↑i - 1) (2 * ↑l )) (dyadicInterval (-↑i - 1) (2 * ↑l+1)) := by
+                rw [@disjoint_iff_inter_eq_empty]
+                apply dyadicInterval_disjoint
+                simp
+              have obv2: Disjoint (dyadicInterval (-↑i - 1) (2 * ↑l+1)) (dyadicInterval (-↑i - 1) (2 * ↑l ))  := by
+                exact id (Disjoint.symm obv)
               rcases hdi with hdi|hdi|hdi
-              · have hxx: x ∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
-                have hyy: y∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
-                have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
-                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+              · have hxxc:  x ∈ dyadicInterval (-↑i - 1) (2 * ↑l ) := Set.mem_of_mem_of_subset hi1 hdi
+                have hyyc:  y ∈  dyadicInterval (-↑i - 1) (2 * ↑l ) := Set.mem_of_mem_of_subset hi2 hdi
+                have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by
+                  rw [Set.disjoint_left ] at obv
+                  exact obv hxxc
+                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by
+                  rw [Set.disjoint_left ] at obv
+                  exact obv hyyc
                 simp[ hxx, hyy, indicator, hxxc , hyyc]
-              · have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
-                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
-                have hxxc:  x ∈ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
-                have hyyc:  y ∈  dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
+              · have hxx: x ∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := Set.mem_of_mem_of_subset hi1 hdi
+                have hyy: y∈ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := Set.mem_of_mem_of_subset hi2 hdi
+                have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by
+                  rw [Set.disjoint_left ] at obv2
+                  exact obv2 hxx
+                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by
+                  rw [Set.disjoint_left ] at obv2
+                  exact obv2 hyy
                 simp[ hxx, hyy, indicator, hxxc , hyyc]
-              · have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
-                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by sorry
-                have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
-                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by sorry
+              · simp only [union_empty_iff] at hdi
+                simp_rw[← Set.disjoint_iff_inter_eq_empty] at hdi
+                obtain ⟨hdi1, hdi2⟩ := hdi
+                rw [Set.disjoint_left ] at hdi1
+                rw [Set.disjoint_left ] at hdi2
+                have hxxc:  x ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by
+                  exact hdi1 hi1
+                have hyyc:  y ∉ dyadicInterval (-↑i - 1) (2 * ↑l ) := by
+                  exact hdi1 hi2
+                have hxx: x ∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by
+                  exact hdi2 hi1
+                have hyy: y∉ dyadicInterval (-↑i - 1) (2 * ↑l + 1) := by
+                  exact hdi2 hi2
                 simp[ hxx, hyy, indicator, hxxc , hyyc]
           rw[hr, ← pow_two, Haar.rad_sqr hx1 hx2]
 
