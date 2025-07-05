@@ -475,4 +475,7 @@ theorem aboutMfinal {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) : M �
   rw[mem_binaryRepresentationSet_iff, ← hk', add_comm, Nat.testBit_two_pow_add_eq, Bool.not_eq_eq_eq_not, Bool.not_true]
   exact Nat.testBit_lt_two_pow h2
 
+
+
+
 end BinaryRepresentationSet

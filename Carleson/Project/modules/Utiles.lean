@@ -625,10 +625,48 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
             · intro l hl
               simp only [Finset.mem_range] at hl
               rw[Haar.haarscl_di, Haar.haarscl_di]
-              have hdih : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l ) ∪ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ) ∩  (dyadicInterval (-↑i - 1) (2 * ↑l) ∪ dyadicInterval (-↑i - 1) (2 * ↑l+1)))= ∅  := by sorry
+              have hdih0 : dyadicInterval (-↑i - 1) (2 * ↑l ) ∪ dyadicInterval (-↑i - 1) (2 * ↑l  +1) = dyadicInterval (-↑i) ( ↑l ) := by
+                exact Eq.symm (dyadicInterval_split (-↑i) ↑l)
+              have hdih : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l ) ∪ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ) ∩  (dyadicInterval (-↑i - 1) (2 * ↑l) ∪ dyadicInterval (-↑i - 1) (2 * ↑l+1)))= ∅  := by
+                simp_rw[hdih0]
+                have hh1: ((dyadicInterval (-↑M) ↑k ) ∩  dyadicInterval (-↑i) ( ↑l ))= ∅ ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i) ( ↑l )) ∨ (dyadicInterval (-↑i) ( ↑l )⊆ dyadicInterval (-↑M) ↑k ):= by
+                  exact dyadic_intervals_disjoint_or_contained (-↑M) (-↑i) ↑k ↑l
+                have hh2 :  (dyadicInterval (-↑i) ( ↑l )⊆ dyadicInterval (-↑M) ↑k ) = False := by
+                  refine eq_false ?_
+                  by_contra hh22
+                  apply MeasureTheory.measure_mono (μ := MeasureTheory.volume ) at hh22
+                  simp_rw[dyadicInterval_measure] at hh22
+                  have hh222: M ≤ i := by
+                    rw[← Int.ofNat_le ]
+                    rw[← neg_le_neg_iff]
+                    rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
+                    · sorry
+                    · exact one_lt_two
+                  have : i < M := by
+                    apply BinaryRepresentationSet.aboutM1 at hi
+                    rw[le_tsub_iff_right h1 ] at hi
+                    apply lt_of_le_of_lt  hi at h2
+                    rw[pow_add,pow_one, mul_two, add_lt_add_iff_right] at h2
+                    rw[← pow_lt_pow_iff_right₀ (Nat.one_lt_two) ]
+                    exact h2
+                  linarith
+                rcases hh1 with hh1|hh1|hh1
+                · right
+                  exact hh1
+                · left
+                  exact hh1
+                · exfalso
+                  simp only [eq_iff_iff, iff_false] at hh2
+                  exact hh2 hh1
               have hdi : (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l )) ∨ (dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l  +1)) ∨ ((dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l)) ∪ (dyadicInterval (-↑M) ↑k ∩  dyadicInterval (-↑i - 1) (2 * ↑l+1))) =∅ := by
+                rw[← or_assoc]
+                rcases hdih with hdih|hdih
+                · left
 
-                sorry
+                  sorry
+                · right
+                  rw[← Set.inter_union_distrib_left ]
+                  exact hdih
               have obv : Disjoint (dyadicInterval (-↑i - 1) (2 * ↑l )) (dyadicInterval (-↑i - 1) (2 * ↑l+1)) := by
                 rw [@disjoint_iff_inter_eq_empty]
                 apply dyadicInterval_disjoint

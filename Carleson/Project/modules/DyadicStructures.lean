@@ -1,4 +1,5 @@
 import Mathlib.Analysis.RCLike.Basic
+import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 open Function Set
 noncomputable section
 
@@ -84,6 +85,16 @@ theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval 
   constructor
   · linarith
   · linarith
+
+theorem dyadicInterval_measure (k n : ℤ): MeasureTheory.volume (dyadicInterval k n) = 2^k := by
+  rw[intervalform_dyadicInterval, Real.volume_Ico]
+  have : ((2 ^ k : ℝ ) * (↑n + 1) - 2 ^ k * ↑n) = (2^k :ℝ ) := by
+    linarith
+  rw[this]
+
+
+
+  sorry
 
 /--
 A dyadic interval at scale `k` can be expressed as a union of two smaller intervals of the scale `k - 1`.
