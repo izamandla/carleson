@@ -617,6 +617,13 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
           rw[← Finset.prod_mul_distrib]
           apply Finset.prod_eq_one
           intro i hi
+          have hiM: i < M := by
+                    apply BinaryRepresentationSet.aboutM1 at hi
+                    rw[le_tsub_iff_right h1 ] at hi
+                    apply lt_of_le_of_lt  hi at h2
+                    rw[pow_add,pow_one, mul_two, add_lt_add_iff_right] at h2
+                    rw[← pow_lt_pow_iff_right₀ (Nat.one_lt_two) ]
+                    exact h2
           have hr: Haar.rademacherFunction i y = Haar.rademacherFunction i x := by
             simp only [Haar.rademacherFunction, mul_eq_mul_left_iff, Nat.ofNat_nonneg]
             left
@@ -642,13 +649,6 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                     rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
                     · sorry
                     · exact one_lt_two
-                  have : i < M := by
-                    apply BinaryRepresentationSet.aboutM1 at hi
-                    rw[le_tsub_iff_right h1 ] at hi
-                    apply lt_of_le_of_lt  hi at h2
-                    rw[pow_add,pow_one, mul_two, add_lt_add_iff_right] at h2
-                    rw[← pow_lt_pow_iff_right₀ (Nat.one_lt_two) ]
-                    exact h2
                   linarith
                 rcases hh1 with hh1|hh1|hh1
                 · right
@@ -662,8 +662,14 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                 rw[← or_assoc]
                 rcases hdih with hdih|hdih
                 · left
-
-                  sorry
+                  by_cases hhhh : dyadicInterval (-↑M) ↑k ⊆ dyadicInterval (-↑i - 1) (2 * ↑l)
+                  · left
+                    exact hhhh
+                  · right
+                    apply Disjoint.subset_right_of_subset_union hdih
+                    rw [@disjoint_iff_inter_eq_empty]
+                    --apply dyadic_intervals_relation2  at hiM
+                    sorry
                 · right
                   rw[← Set.inter_union_distrib_left ]
                   exact hdih

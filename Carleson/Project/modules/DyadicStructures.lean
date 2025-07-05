@@ -275,6 +275,21 @@ theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
 
 
 
+theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k < k') :
+  dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
+  dyadicInterval k n ⊆ dyadicInterval k' n':= by
+  have h : dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
+  dyadicInterval k n ⊆ dyadicInterval k' n' ∨
+  dyadicInterval k' n' ⊆ dyadicInterval k n := by
+    apply dyadic_intervals_relation h1
+  rw[← or_assoc] at h
+  rcases h with h|h
+  · exact h
+  · exfalso
+    apply MeasureTheory.measure_mono (μ := MeasureTheory.volume ) at h
+    simp_rw[dyadicInterval_measure] at h
+    sorry
+
 /--
 Theorem: Two dyadic intervals are either disjoint or one is contained in the other.
 -/
