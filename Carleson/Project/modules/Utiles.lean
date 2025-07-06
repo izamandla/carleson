@@ -384,6 +384,85 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
       · simp
 
 
+theorem walshhaarprop' {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) :  walshhaar M k x = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2 : ℝ)) x:= by
+  unfold walshhaar
+  simp only
+  by_cases hx : x< 0 ∨  1≤ x
+  · rw[Walsh.walsh_not_in x hx ]
+    simp only [zero_mul, zpow_neg, zpow_natCast]
+    unfold indicator
+    split_ifs with h1
+    · exfalso
+      simp only [mem_Ico] at h1
+      obtain ⟨ h11, h12⟩ := h1
+      rcases hx with hx|hx
+      · have : 0 ≤ ((2 ^ M)⁻¹:ℝ ) * ↑k := by
+          simp
+        apply le_trans this at h11
+        linarith
+      · have : ((2 ^ M)⁻¹:ℝ ) * (↑k + 1) ≤  1 := by
+          simp only [Finset.mem_range] at hk
+          apply Nat.add_one_le_of_lt at hk
+          have : ((2 ^ M)⁻¹ :ℝ ) * (↑k + 1) ≤  (2 ^ M)⁻¹*  (2 ^ M) := by
+            refine (mul_le_mul_left ?_).mpr ?_
+            · simp
+            · norm_cast
+          refine inv_mul_le_one_of_le₀ ?_ ?_
+          · norm_cast
+          · simp
+        apply le_trans this at hx
+        linarith
+    · simp
+  · push_neg at hx
+    obtain ⟨ hx1, hx2 ⟩ := hx
+    rw[differentwalshRademacherRelation hx1 hx2, Haar.rademacherFunction]
+    have h : (∑ n ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (-↑M) (↑n) x) *
+      Haar.haarFunctionScaled (-↑M) (↑k) x = Haar.haarFunctionScaled (-↑M) (↑k) x *
+      Haar.haarFunctionScaled (-↑M) (↑k) x := by
+        rw[Finset.sum_mul]
+        have : ∑ i ∈ Finset.range (2 ^ M), Haar.haarFunctionScaled (-↑M) (↑i) x * Haar.haarFunctionScaled (-↑M) (↑k) x = ∑ i ∈ Finset.range (2 ^ M)\ {k}, Haar.haarFunctionScaled (-↑M) (↑i) x * Haar.haarFunctionScaled (-↑M) (↑k) x  +  Haar.haarFunctionScaled (-↑M) (↑k) x * Haar.haarFunctionScaled (-↑M) (↑k) x := by
+          exact
+            Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦
+              Haar.haarFunctionScaled (-↑M) (↑x_1) x * Haar.haarFunctionScaled (-↑M) (↑k) x
+        rw[this]
+        simp only [add_eq_right]
+        apply Finset.sum_eq_zero
+        intro l hl
+        rw[← Haar.haarFunctionScaled_mul (k := -M) (n:= l) (n':= k) (x:= x)]
+        simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hl
+        push_neg at hl
+        norm_cast
+        exact hl.2
+    rw[mul_assoc, h, indicator]
+    split_ifs with h1
+    · rw[← pow_two, Haar.haarFunctionScaled_sqr]
+      · simp only [neg_neg, Pi.one_apply]
+        simp only [Pi.pow_apply, Pi.ofNat_apply]
+        rw[←Real.rpow_intCast, ← Real.rpow_add (by norm_num)]
+        congr
+        push_cast
+        ring
+      · simp only [zpow_neg, zpow_natCast, mem_Ico] at h1
+        simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_nonneg]
+        rw[ ← inv_mul_le_iff₀]
+        · exact h1.1
+        · simp
+      · simp only [zpow_neg, zpow_natCast, mem_Ico] at h1
+        simp only [neg_neg, zpow_natCast, Int.cast_natCast]
+        rw[sub_lt_iff_lt_add, add_comm, ← lt_inv_mul_iff₀]
+        · exact h1.2
+        · simp
+    · rw[Haar.haarFunctionScaled_outside]
+      · simp
+      · simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
+        simp only [zpow_neg, zpow_natCast, mem_Ico, Decidable.not_and_iff_or_not, not_le, not_lt] at h1
+        rw[ ← lt_inv_mul_iff₀]
+        · rw[inv_mul_le_iff₀] at h1
+          · rw[le_sub_iff_add_le, add_comm]
+            exact h1
+          · simp
+        · simp
+
 
 theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  (walshhaar M k x)*(walshhaar M k x) = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x:= by
   rw[walshhaarprop hk hx1 hx2]
@@ -500,9 +579,30 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
   simp
 
 
+theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x:= by
+  rw[walshhaarprop']
+  · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator (2 ^ (↑M / 2)) x = (2 ^ (↑M / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
+      simp[indicator]
+    --rw[this]
+
+    sorry
+  · simp only [Finset.mem_range]
+    exact hk
 
 
 
+--(Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x
+theorem lemma1_1'help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * walshhaar M k y) * walshhaar M k x = ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))) * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))  := by
+      have hp (k : ℕ  ) : k < 2^M  → ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x := by
+        apply walshindicatorrightform
+
+
+      sorry
 
 
 
@@ -512,6 +612,7 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
     (∫ y in Set.Ico 0 1,
       f y * walshhaar M k y) * walshhaar M k x:= by
   simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
+
 
   sorry
 
