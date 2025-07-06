@@ -4,6 +4,10 @@ import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 import Carleson.Project.modules.BinaryRepresentationSet
 import Carleson.Project.modules.DyadicStructures
+import Mathlib.Analysis.InnerProductSpace.Projection
+
+
+open InnerProductSpace MeasureTheory Set BigOperators
 open Function Set
 open unitInterval DyadicStructures
 
@@ -613,10 +617,70 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
       f y * walshhaar M k y) * walshhaar M k x:= by
   simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
 
+  sorry
+
+
+
+
+
+
+variable {k : ℕ}
+
+/-theorem bighelp
+  (w v : Fin k → L2 ℝ volume 2 (Icc 0 1))
+  (f : L2 ℝ volume 2 (Icc 0 1))
+  (x : ℝ)
+  (hspan : ∀ i, v i ∈ span ({w j | j : Fin k} : Set (L2 ℝ volume 2 (Icc 0 1))))
+  (hortho : Orthonormal (fun i => w i))
+  : ∑ i in Finset.range k, ⟪f, w i⟫ • w i = ∑ i, ⟪f, v i⟫ • v i := by
+  let K := span ({w j | j : Fin k} : Set _)
+  -- The projection onto K can be written using the w-orthonormal family
+  have hw : ∀ i, w i = (OrthogonalProjection K) w i :=
+    by intro i; apply orthonormal_orthonormalFamily.isOrthonormalProjection hortho
+  -- And thus: orthProj w = ∑ ⟪f, w i⟫ • w i
+  have w_proj : OrthogonalProjection K f = ∑ i, ⟪f, w i⟫ • w i :=
+    orthoProj_eq_sum_orthonormal hspan hortho
+  -- Since each v i ∈ K, ∑ ⟪f, v i⟫ • v i is also a projection onto K
+  have v_proj : OrthogonalProjection K f = ∑ i, ⟪f, v i⟫ • v i :=
+    orthoProj_eq_sum_of_mem hspan hortho
+  -- Hence the two sums are equal, as they both equal proj_K(f)
+  calc
+     ∑ i, ⟪f, w i⟫ • w i = OrthogonalProjection K f := by rw [w_proj]
+  _  = ∑ i, ⟪f, v i⟫ • v i := by rw [← v_proj]-/
+
+
+
+--bład w zapisie hf i hg
+theorem bighelpextra  {M k k' : ℕ} {x : ℝ} (h0 : k ≠ k') (hk : k < 2 ^ M)  (hk' : k' < 2 ^ M) (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f j * g j = 0 := by
+  have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
+    refine walshHaar_ort h0
+  rw[← h]
+  have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k' y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * g j)) := by
+    congr
+    ext y
+    --rw[hf, hg]
+    --simp
+    sorry
+
+
+  have h1 :  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j)) = 0 := by
+    rw [@Finset.sum_mul_sum]
+    simp_rw[← mul_assoc, mul_comm, ← mul_assoc]
+    sorry
 
   sorry
 
 
+
+
+theorem bighelp {k : ℕ} (v : ℕ → (ℝ → ℝ)) (w : ℕ → (ℝ → ℝ)) (f : ℝ → ℝ) (x : ℝ) (hf : ∀ i : Fin k, ∃ f : ℕ → ℝ, ∀ y : ℝ, v i y = ∑ j ∈ Finset.range k, f j * w j y) (hort : ∀ i j : ℕ , ∫ y in  Set.Ico 0 1, w i y * w j y = if i = j then 1 else 0):
+  ∑ i ∈ Finset.range k, ∫ y in Set.Ico 0 1, f y * w i y * w i x =
+  ∑ i ∈ Finset.range k, ∫ y in Set.Ico 0 1, f y * v i y * v i x :=
+by
+
+
+
+  sorry
 
 --theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
 theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
