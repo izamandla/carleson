@@ -304,6 +304,24 @@ theorem walsh_ort_dif {n m : ℕ} (h : m ≠ n) : Walsh.walshInnerProduct (Walsh
   refine Nat.zero_lt_of_ne_zero ?_
   exact Nat.xor_ne_zero.mpr h
 
+theorem walsh_ort {n m : ℕ} (h : m ≠ n) : ∫ (x : ℝ) in Ico 0 1, Walsh.walsh n x * Walsh.walsh m x = 0 := by
+  set k := m^^^n with hk
+  simp_rw[← Pi.mul_apply]
+  have h1 : EqOn (Walsh.walsh n * Walsh.walsh m) (Walsh.walsh k) (Set.Ico 0 1):= by
+    unfold EqOn
+    intro z hz
+    simp only [mem_Ico] at hz
+    rw[prodofwalshworse (M:=n) (N:= m) ]
+    · simp only [Pi.mul_apply]
+    · exact hz.1
+    · exact hz.2
+    · exact Nat.xor_comm m n
+  have h2: MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
+    simp
+  rw[MeasureTheory.setIntegral_congr_fun h2 h1, walsh_int]
+  refine Nat.zero_lt_of_ne_zero ?_
+  exact Nat.xor_ne_zero.mpr h
+
 
 
 theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ) : Haar.rademacherFunction M x *(Walsh.walshFourierPartialSum (Haar.rademacherFunction M * f)  N ) x = ∑
@@ -585,9 +603,11 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
 
 theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x:= by
   rw[walshhaarprop']
-  · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator (2 ^ (↑M / 2)) x = (2 ^ (↑M / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
+  · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
       simp[indicator]
-    --rw[this]
+
+    rw[this]
+
 
     sorry
   · simp only [Finset.mem_range]
@@ -610,75 +630,56 @@ theorem lemma1_1'help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f :
 
 
 
-theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
-  ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
-  ∑ k ∈ Finset.range (2 ^ M),
-    (∫ y in Set.Ico 0 1,
-      f y * walshhaar M k y) * walshhaar M k x:= by
-  simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
-
-  sorry
 
 
 
 
-
-
-variable {k : ℕ}
-
-/-theorem bighelp
-  (w v : Fin k → L2 ℝ volume 2 (Icc 0 1))
-  (f : L2 ℝ volume 2 (Icc 0 1))
-  (x : ℝ)
-  (hspan : ∀ i, v i ∈ span ({w j | j : Fin k} : Set (L2 ℝ volume 2 (Icc 0 1))))
-  (hortho : Orthonormal (fun i => w i))
-  : ∑ i in Finset.range k, ⟪f, w i⟫ • w i = ∑ i, ⟪f, v i⟫ • v i := by
-  let K := span ({w j | j : Fin k} : Set _)
-  -- The projection onto K can be written using the w-orthonormal family
-  have hw : ∀ i, w i = (OrthogonalProjection K) w i :=
-    by intro i; apply orthonormal_orthonormalFamily.isOrthonormalProjection hortho
-  -- And thus: orthProj w = ∑ ⟪f, w i⟫ • w i
-  have w_proj : OrthogonalProjection K f = ∑ i, ⟪f, w i⟫ • w i :=
-    orthoProj_eq_sum_orthonormal hspan hortho
-  -- Since each v i ∈ K, ∑ ⟪f, v i⟫ • v i is also a projection onto K
-  have v_proj : OrthogonalProjection K f = ∑ i, ⟪f, v i⟫ • v i :=
-    orthoProj_eq_sum_of_mem hspan hortho
-  -- Hence the two sums are equal, as they both equal proj_K(f)
-  calc
-     ∑ i, ⟪f, w i⟫ • w i = OrthogonalProjection K f := by rw [w_proj]
-  _  = ∑ i, ⟪f, v i⟫ • v i := by rw [← v_proj]-/
-
-
-
---bład w zapisie hf i hg
-theorem bighelpextra  {M k k' : ℕ} {x : ℝ} (h0 : k ≠ k') (hk : k < 2 ^ M)  (hk' : k' < 2 ^ M) (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f j * g j = 0 := by
+theorem bighelpextra {M k k' : ℕ} {x : ℝ} (h0 : k ≠ k') (hk : k < 2 ^ M)  (hk' : k' < 2 ^ M) (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f j * g j = 0 := by
   have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
     refine walshHaar_ort h0
   rw[← h]
   have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k' y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * g j)) := by
     congr
     ext y
-    --rw[hf, hg]
-    --simp
-    sorry
+    rw[hf y, hg]
+  rw[hr]
+  simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc]
+  rw[MeasureTheory.integral_finset_sum]
+  · apply Finset.sum_congr
+    · simp
+    · intro k hk
+      rw[MeasureTheory.integral_finset_sum]
+      · have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, g i * f k * Walsh.walsh k a * Walsh.walsh i a = g i * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh i a := by
+          rw[← MeasureTheory.integral_const_mul]
+          congr
+          ext a
+          rw[← mul_assoc]
+        simp_rw[this]
+        have : ∑ x ∈ Finset.range (2 ^ M), g x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a =(g k * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh k a) +  ∑ x ∈ Finset.range (2 ^ M) \ {k}, g x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a   := by
+          exact
+            Finset.sum_eq_add_sum_diff_singleton hk fun x ↦
+              g x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a
+        rw[this]
+        rw[Walsh.walsh_norm' k, mul_comm]
+        simp only [mul_one, left_eq_add]
+        apply Finset.sum_eq_zero
+        intro p hp
+        rw [@mul_eq_zero]
+        right
+        rw[walsh_ort]
+        simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
+        push_neg at hp
+        exact hp.2
+      · sorry
+  · sorry
 
 
-  have h1 :  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j)) = 0 := by
-    rw [@Finset.sum_mul_sum]
-    simp_rw[← mul_assoc, mul_comm, ← mul_assoc]
-    sorry
-
-  sorry
-
-
-
-
-theorem bighelp {k : ℕ} (v : ℕ → (ℝ → ℝ)) (w : ℕ → (ℝ → ℝ)) (f : ℝ → ℝ) (x : ℝ) (hf : ∀ i : Fin k, ∃ f : ℕ → ℝ, ∀ y : ℝ, v i y = ∑ j ∈ Finset.range k, f j * w j y) (hort : ∀ i j : ℕ , ∫ y in  Set.Ico 0 1, w i y * w j y = if i = j then 1 else 0):
-  ∑ i ∈ Finset.range k, ∫ y in Set.Ico 0 1, f y * w i y * w i x =
-  ∑ i ∈ Finset.range k, ∫ y in Set.Ico 0 1, f y * v i y * v i x :=
-by
-
-
+theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
+  ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * walshhaar M k y) * walshhaar M k x:= by
+  simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
 
   sorry
 
@@ -833,8 +834,12 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                   · right
                     apply Disjoint.subset_right_of_subset_union hdih
                     rw [@disjoint_iff_inter_eq_empty]
-                    --apply dyadic_intervals_relation2  at hiM
-                    sorry
+                    rw[← Int.ofNat_lt , Int.lt_iff_add_one_le, ← Int.neg_le_neg_iff , neg_add] at hiM
+                    apply dyadic_intervals_relation2 (k := ((-M) : ℤ) ) (k':= -i -1) (n':= 2* (l:ℤ )) (n:= (k:ℤ) ) at hiM
+                    rcases hiM with hiM|hiM
+                    · exact hiM
+                    · exfalso
+                      exact hhhh hiM
                 · right
                   rw[← Set.inter_union_distrib_left ]
                   exact hdih

@@ -94,6 +94,7 @@ theorem dyadicInterval_measure (k n : ℤ): MeasureTheory.volume (dyadicInterval
 
 
 
+
   sorry
 
 /--
@@ -275,13 +276,26 @@ theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
 
 
 
-theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k < k') :
+theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
   dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
   dyadicInterval k n ⊆ dyadicInterval k' n':= by
+  by_cases hk : k = k'
+  · by_cases hn : n= n'
+    · rw[hn, hk]
+      simp
+    · left
+      rw[hk]
+      exact dyadicInterval_disjoint hn
+  have h11: k < k' := by
+    push_neg at hk
+    rw [@Int.lt_iff_le_and_ne]
+    constructor
+    · exact h1
+    · exact hk
   have h : dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
   dyadicInterval k n ⊆ dyadicInterval k' n' ∨
   dyadicInterval k' n' ⊆ dyadicInterval k n := by
-    apply dyadic_intervals_relation h1
+    apply dyadic_intervals_relation h11
   rw[← or_assoc] at h
   rcases h with h|h
   · exact h

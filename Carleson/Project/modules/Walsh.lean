@@ -515,6 +515,17 @@ theorem walsh_norm (n : ℕ) :
   rw[MeasureTheory.setIntegral_congr_fun hs h1]
   simp
 
+theorem walsh_norm' (n : ℕ) :  ∫ (x : ℝ) in Ico 0 1, walsh n x * walsh n x = 1:= by
+  have hs : MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
+    simp
+  have h1 : EqOn ((walsh n)*(walsh n)) 1  (Set.Ico 0 (1:ℝ)):= by
+    intro x hx
+    rw [Pi.mul_apply, Pi.one_apply, sqr_walsh ]
+    · simp_all
+    · simp_all
+  change ∫ (x : ℝ) in Ico 0 1, (walsh n * walsh n) x = 1
+  rw[MeasureTheory.setIntegral_congr_fun hs h1]
+  simp
 /--
 Walsh functions are orthogonal.
 -/
