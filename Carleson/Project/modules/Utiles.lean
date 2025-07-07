@@ -622,7 +622,7 @@ theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:�
 
 
 
-
+-- chyba bez sensu
 theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
@@ -716,7 +716,7 @@ theorem bighelpextra {M k k' : ℕ} (h0 : k ≠ k') (f : ℕ → ℝ) (g : ℕ �
 
 
 
-
+--jak dostac 2^m-1 funkcji z walshindicatorrightform
 theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
