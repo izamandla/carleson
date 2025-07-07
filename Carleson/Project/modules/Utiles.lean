@@ -605,11 +605,18 @@ theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:�
   rw[walshhaarprop']
   · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
       simp[indicator]
-
     rw[this]
-
-
-    sorry
+    have hp : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+      exact Walsh.walshindicator hk
+    obtain ⟨ g, hg⟩ := hp
+    simp_rw[mul_comm]
+    rw[← hg]
+    rw[mul_comm, Finset.sum_mul]
+    use g * 2 ^ (M / 2 :ℝ )
+    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply]
+    congr
+    ext i
+    linarith
   · simp only [Finset.mem_range]
     exact hk
 
@@ -625,7 +632,6 @@ theorem lemma1_1'help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f :
       have hp (k : ℕ  ) : k < 2^M  → ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x := by
         apply walshindicatorrightform
 
-
       sorry
 
 
@@ -634,7 +640,7 @@ theorem lemma1_1'help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f :
 
 
 
-theorem bighelpextra {M k k' : ℕ} {x : ℝ} (h0 : k ≠ k') (hk : k < 2 ^ M)  (hk' : k' < 2 ^ M) (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f j * g j = 0 := by
+theorem bighelpextra {M k k' : ℕ} (h0 : k ≠ k') (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f j * g j = 0 := by
   have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
     refine walshHaar_ort h0
   rw[← h]
@@ -670,8 +676,28 @@ theorem bighelpextra {M k k' : ℕ} {x : ℝ} (h0 : k ≠ k') (hk : k < 2 ^ M)  
         simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
         push_neg at hp
         exact hp.2
-      · sorry
-  · sorry
+      · intro i hi
+        simp at hi
+        simp_rw[mul_assoc]
+        apply MeasureTheory.Integrable.const_mul
+        apply MeasureTheory.Integrable.const_mul
+        apply BoundedCompactSupport.integrable
+        apply BoundedCompactSupport.restrict
+        apply BoundedCompactSupport.mul
+        · exact Walsh.bcs_walsh
+        · exact Walsh.bcs_walsh
+  · intro i hi
+    apply MeasureTheory.integrable_finset_sum
+    intro j hj
+    simp_rw[mul_assoc]
+    apply MeasureTheory.Integrable.const_mul
+    apply MeasureTheory.Integrable.const_mul
+    apply BoundedCompactSupport.integrable
+    apply BoundedCompactSupport.restrict
+    apply BoundedCompactSupport.mul
+    · exact Walsh.bcs_walsh
+    · exact Walsh.bcs_walsh
+
 
 
 theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
@@ -683,7 +709,7 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
 
   sorry
 
---theorem walshortbas (N : ℕ ): OrthonormalBasis (Fin N) _ _ := by sorry
+
 theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
