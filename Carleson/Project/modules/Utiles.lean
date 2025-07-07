@@ -927,7 +927,8 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                     rw[← Int.ofNat_le ]
                     rw[← neg_le_neg_iff]
                     rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
-                    · sorry
+                    ·
+                      sorry
                     · exact one_lt_two
                   linarith
                 rcases hh1 with hh1|hh1|hh1

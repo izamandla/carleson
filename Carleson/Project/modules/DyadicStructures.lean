@@ -86,13 +86,13 @@ theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval 
   · linarith
   · linarith
 
-theorem dyadicInterval_measure (k n : ℤ): MeasureTheory.volume (dyadicInterval k n) = 2^k := by
+theorem dyadicInterval_measure (k n : ℤ): MeasureTheory.volume (dyadicInterval k n) = 2^k  := by
   rw[intervalform_dyadicInterval, Real.volume_Ico]
   have : ((2 ^ k : ℝ ) * (↑n + 1) - 2 ^ k * ↑n) = (2^k :ℝ ) := by
     linarith
   rw[this]
 
-
+--proove this lemma for ENNReal.ofReal_pow but for ℤ
 
 
   sorry
@@ -302,7 +302,15 @@ theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
   · exfalso
     apply MeasureTheory.measure_mono (μ := MeasureTheory.volume ) at h
     simp_rw[dyadicInterval_measure] at h
-    sorry
+    rw[← ENNReal.rpow_intCast, ← ENNReal.rpow_intCast] at  h
+    have : (k :ℝ ) < (k' : ℝ ) := by
+      norm_cast
+    apply ENNReal.rpow_lt_rpow_of_exponent_lt  (x := 2) at this
+    · order
+    · norm_num
+    · simp
+
+
 
 /--
 Theorem: Two dyadic intervals are either disjoint or one is contained in the other.
