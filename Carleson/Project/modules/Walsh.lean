@@ -1224,8 +1224,8 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           congr
           exact Eq.symm (Nat.div_two_mul_two_add_one_of_odd hii)
 
-
-
+theorem domain {n :ℕ } {x :ℝ } (h: ¬ walsh n x = 0 ) : 0≤ x ∧ x <1 := by
+  sorry
 
 
 end Walsh

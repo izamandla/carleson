@@ -600,7 +600,7 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1): ∫ y in Set.Ico 0 1,
   simp_rw[this]
   simp
 
-
+--chyba powinno byc inaczej - powinno być dla wszystkich x zamiast na początku podany x
 theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x:= by
   rw[walshhaarprop']
   · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
@@ -619,6 +619,49 @@ theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:�
     linarith
   · simp only [Finset.mem_range]
     exact hk
+
+theorem walshindicatorrightform' {M k : ℕ} {x : ℝ}: ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x:= by
+  by_cases hk : k < 2 ^ M
+  · rw[walshhaarprop']
+    · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
+        simp[indicator]
+      rw[this]
+      have hp : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+        exact Walsh.walshindicator hk
+      obtain ⟨ g, hg⟩ := hp
+      simp_rw[mul_comm]
+      rw[← hg]
+      rw[mul_comm, Finset.sum_mul]
+      use g * 2 ^ (M / 2 :ℝ )
+      simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply]
+      congr
+      ext i
+      linarith
+    · simp only [Finset.mem_range]
+      exact hk
+  · use 0
+    simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero]
+    simp only [walshhaar, zero_eq_mul]
+    by_cases h : Walsh.walsh (2 ^ M) x = 0
+    · left
+      exact h
+    · right
+      apply Walsh.domain at h
+      rw[Haar.haarFunctionScaled_outside]
+      simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
+      left
+      simp only [not_lt] at hk
+      have : 2 ^ M * x < 2^M := by
+        norm_num
+        exact h.2
+      apply lt_of_lt_of_le this
+      norm_cast
+
+
+def coef (M k : ℕ) (x : ℝ) : ℕ → ℝ :=
+  (walshindicatorrightform' (M := M) (k := k) (x := x)).choose
+
+
 
 
 
