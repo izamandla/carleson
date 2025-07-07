@@ -622,17 +622,32 @@ theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:�
 
 
 
---(Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x
-theorem lemma1_1'help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
+
+theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * walshhaar M k y) * walshhaar M k x = ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
-      f y * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))) * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))  := by
-      have hp (k : ℕ  ) : k < 2^M  → ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * f j )= walshhaar M k x := by
-        apply walshindicatorrightform
+      f y * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j y  * g j ))) * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))  := by
+      have hp (k : ℕ ) : k < 2^M  → ∃ (f:ℕ  → ℝ),(fun y ↦  ∑ j ∈ Finset.range (2^M), (Walsh.walsh j y * f j ) )= (fun y ↦ walshhaar M k y) := by
+        intro hk
+        simp_rw[funext_iff]
 
-      sorry
+        sorry
+      induction' M with M ih generalizing x
+      · simp only [pow_zero, Nat.lt_one_iff, Finset.range_one, Finset.sum_singleton,
+        forall_eq] at hp
+        obtain ⟨ g, hg ⟩ := hp
+        rw [funext_iff] at hg
+        simp only [pow_zero, Finset.range_one, Finset.sum_singleton, Finset.sum_const,
+          Finset.card_singleton, one_smul]
+        use g
+        congr
+        · ext y
+          rw[hg]
+        · rw[hg]
+      ·
+        sorry
 
 
 
@@ -700,12 +715,19 @@ theorem bighelpextra {M k k' : ℕ} (h0 : k ≠ k') (f : ℕ → ℝ) (g : ℕ �
 
 
 
+
+
 theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * walshhaar M k y) * walshhaar M k x:= by
   simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
+  --rw [← sub_eq_zero, ← Finset.sum_sub_distrib]
+
+
+
+
 
   sorry
 
