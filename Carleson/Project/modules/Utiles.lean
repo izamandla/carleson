@@ -623,7 +623,7 @@ theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:�
 
 
 -- chyba bez sensu
-theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
+/-theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * walshhaar M k y) * walshhaar M k x = ∑ k ∈ Finset.range (2 ^ M),
@@ -648,7 +648,7 @@ theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  →
         · rw[hg]
       ·
         sorry
-
+-/
 
 
 
@@ -713,6 +713,72 @@ theorem bighelpextra {M k k' : ℕ} (h0 : k ≠ k') (f : ℕ → ℝ) (g : ℕ �
     · exact Walsh.bcs_walsh
     · exact Walsh.bcs_walsh
 
+
+theorem bighelpextra' {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') (f : ℕ → ℝ) (g : ℕ → ℝ) (hf : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * f j) = walshhaar M k x) (hg : ∀ x, ∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j x * g j) = walshhaar M k' x) : ∑ j ∈ Finset.range (2^M), f
+j * g j = 1 := by
+  have hp : f= g := by
+    rw[h0] at hf
+    have (x :ℝ ): ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x * f j = ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x * g j :=by
+      rw[hf,hg]
+    -- to jest prawda tylko dla j < 2^M -1 -> trzeba zmienić dowód
+    sorry
+  rw[← h0] at hg
+  have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k y = 1:= by
+    apply wlashhaar_norm hk
+  rw[← h]
+  have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) := by
+    congr
+    ext y
+    rw[hf y]
+  rw[hr]
+  simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc, ← hp]
+  rw[MeasureTheory.integral_finset_sum]
+  · apply Finset.sum_congr
+    · simp
+    · intro k hk
+      rw[MeasureTheory.integral_finset_sum]
+      · have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, f i * f k * Walsh.walsh k a * Walsh.walsh i a = f i * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh i a := by
+          rw[← MeasureTheory.integral_const_mul]
+          congr
+          ext a
+          rw[← mul_assoc]
+        simp_rw[this]
+        have : ∑ x ∈ Finset.range (2 ^ M), f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a =(f k * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh k a) +  ∑ x ∈ Finset.range (2 ^ M) \ {k}, f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a   := by
+          exact
+            Finset.sum_eq_add_sum_diff_singleton hk fun x ↦
+              f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a
+        rw[this]
+        rw[Walsh.walsh_norm' k, mul_comm]
+        simp only [mul_one, left_eq_add]
+        apply Finset.sum_eq_zero
+        intro p hp
+        rw [@mul_eq_zero]
+        right
+        rw[walsh_ort]
+        simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
+        push_neg at hp
+        exact hp.2
+      · intro i hi
+        simp at hi
+        simp_rw[mul_assoc]
+        apply MeasureTheory.Integrable.const_mul
+        apply MeasureTheory.Integrable.const_mul
+        apply BoundedCompactSupport.integrable
+        apply BoundedCompactSupport.restrict
+        apply BoundedCompactSupport.mul
+        · exact Walsh.bcs_walsh
+        · exact Walsh.bcs_walsh
+  · intro i hi
+    apply MeasureTheory.integrable_finset_sum
+    intro j hj
+    simp_rw[mul_assoc]
+    apply MeasureTheory.Integrable.const_mul
+    apply MeasureTheory.Integrable.const_mul
+    apply BoundedCompactSupport.integrable
+    apply BoundedCompactSupport.restrict
+    apply BoundedCompactSupport.mul
+    · exact Walsh.bcs_walsh
+    · exact Walsh.bcs_walsh
 
 
 
