@@ -664,34 +664,16 @@ def coef (M k : ℕ) (x : ℝ) : ℕ → ℝ :=
 
 
 
+--kurde no nwm co z tym-- inne dowód wcześniejszego? co poczać?1
+theorem coefeq {M k j : ℕ} {x y : ℝ} (hj : j < 2 ^ M) :  coef M k x j= coef M k y j:= by
+  have h1:  ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x *  coef M k x j = walshhaar M k x := (walshindicatorrightform' (M := M) (k := k) (x := x)).choose_spec
+  have h2:  ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j y *  coef M k y j = walshhaar M k y := (walshindicatorrightform' (M := M) (k := k) (x := y)).choose_spec
+  simp_rw[walshhaar] at h1
 
--- chyba bez sensu
-/-theorem lemma1_1'help {M N : ℕ} (f : ℝ → ℝ) (x : ℝ) : ∃ (g: ℕ  → ℝ),
-  ∑ k ∈ Finset.range (2 ^ M),
-    (∫ y in Set.Ico 0 1,
-      f y * walshhaar M k y) * walshhaar M k x = ∑ k ∈ Finset.range (2 ^ M),
-    (∫ y in Set.Ico 0 1,
-      f y * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j y  * g j ))) * (∑ j ∈ Finset.range (2^M), (Walsh.walsh j x  * g j ))  := by
-      have hp (k : ℕ ) : k < 2^M  → ∃ (f:ℕ  → ℝ),(fun y ↦  ∑ j ∈ Finset.range (2^M), (Walsh.walsh j y * f j ) )= (fun y ↦ walshhaar M k y) := by
-        intro hk
-        simp_rw[funext_iff]
 
-        sorry
-      induction' M with M ih generalizing x
-      · simp only [pow_zero, Nat.lt_one_iff, Finset.range_one, Finset.sum_singleton,
-        forall_eq] at hp
-        obtain ⟨ g, hg ⟩ := hp
-        rw [funext_iff] at hg
-        simp only [pow_zero, Finset.range_one, Finset.sum_singleton, Finset.sum_const,
-          Finset.card_singleton, one_smul]
-        use g
-        congr
-        · ext y
-          rw[hg]
-        · rw[hg]
-      ·
-        sorry
--/
+  sorry
+
+
 
 
 
