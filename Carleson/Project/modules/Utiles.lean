@@ -786,7 +786,7 @@ def coef (M k : ℕ) : ℕ → ℝ :=
 
 
 
-theorem bighelpextrarightone {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 0 := by
+theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 0 := by
   have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
     refine walshHaar_ort h0
   rw[← h]
@@ -853,43 +853,49 @@ theorem bighelpextrarightone {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.r
 
 
 
-theorem bighelpextra' {M k k' : ℕ} {M k k' : ℕ} (hk:  k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
+theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
   rw[h0]
   have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k y = 1:= by
     apply wlashhaar_norm hk
   rw[← h]
-  have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * f j)) := by
+  have hf (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x * coef M k j = walshhaar M k x :=by
+    apply congrFun ((walshindicatorrightform1 (M := M) (k := k)).choose_spec) x
+  have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * coef M k j)) * (∑ j ∈ Finset.range (2 ^ M), (Walsh.walsh j y * coef M k j)) := by
     congr
     ext y
     rw[hf y]
   rw[hr]
-  simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc, ← hp]
+  simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc]
   rw[MeasureTheory.integral_finset_sum]
   · apply Finset.sum_congr
     · simp
-    · intro k hk
+    · intro j hj
       rw[MeasureTheory.integral_finset_sum]
-      · have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, f i * f k * Walsh.walsh k a * Walsh.walsh i a = f i * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh i a := by
-          rw[← MeasureTheory.integral_const_mul]
-          congr
-          ext a
-          rw[← mul_assoc]
-        simp_rw[this]
-        have : ∑ x ∈ Finset.range (2 ^ M), f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a =(f k * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh k a) +  ∑ x ∈ Finset.range (2 ^ M) \ {k}, f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a   := by
+      · have : ∫ (a : ℝ) in Ico 0 1, Walsh.walsh j a * Walsh.walsh j a = 1 := by
+          exact Walsh.walsh_norm' j
+        conv_lhs => rw[← mul_one (a:= coef M k' j * coef M k' j), ← this, ← h0, ← MeasureTheory.integral_const_mul, ← zero_add (a:= ∫ (a : ℝ) in Ico 0 1, coef M k j * coef M k j * (Walsh.walsh j a * Walsh.walsh j a))]
+        have : ∑ i ∈ Finset.range (2 ^ M), ∫ (a : ℝ) in Ico 0 1, coef M k i * coef M k j * Walsh.walsh j a * Walsh.walsh i a = (∑ i ∈ Finset.range (2 ^ M) \ {j}, ∫ (a : ℝ) in Ico 0 1, coef M k i * coef M k j * Walsh.walsh j a * Walsh.walsh i a ) + ∫ (a : ℝ) in Ico 0 1, coef M k j * coef M k j * Walsh.walsh j a * Walsh.walsh j a:= by
           exact
-            Finset.sum_eq_add_sum_diff_singleton hk fun x ↦
-              f x * f k * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh k a * Walsh.walsh x a
+            Finset.sum_eq_sum_diff_singleton_add hj fun x ↦
+              ∫ (a : ℝ) in Ico 0 1, coef M k x * coef M k j * Walsh.walsh j a * Walsh.walsh x a
         rw[this]
-        rw[Walsh.walsh_norm' k, mul_comm]
-        simp only [mul_one, left_eq_add]
-        apply Finset.sum_eq_zero
-        intro p hp
-        rw [@mul_eq_zero]
-        right
-        rw[walsh_ort]
-        simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
-        push_neg at hp
-        exact hp.2
+        congr
+        · rw[eq_comm ]
+          apply Finset.sum_eq_zero
+          intro m hm
+          simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hm
+          have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, coef M k i * coef M k j * Walsh.walsh j a * Walsh.walsh i a = coef M k i * coef M k j * ∫ (a : ℝ) in Ico 0 1, Walsh.walsh j a * Walsh.walsh i a := by
+            rw[← MeasureTheory.integral_const_mul]
+            congr
+            ext a
+            rw[← mul_assoc]
+          rw[this]
+          rw[walsh_ort]
+          · simp
+          · simp only [ne_eq]
+            exact hm.2
+        · ext y
+          rw[← mul_assoc]
       · intro i hi
         simp at hi
         simp_rw[mul_assoc]
