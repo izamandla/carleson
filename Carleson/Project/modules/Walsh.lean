@@ -1241,31 +1241,27 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), (fun
     have hp : Finset.range (2^(M+1)) = s ∪ t := by
       rw[hs, ht]
       ext k
-      simp only [Finset.mem_range, Finset.mem_union, Finset.mem_filter]
-      rw[← and_or_left]
-      simp only [iff_self_and]
+      simp only [Finset.mem_range, Finset.mem_union, Finset.mem_filter, ← and_or_left, iff_self_and]
       exact fun a ↦ Or.symm (Nat.even_or_odd k)
     have hw (f:ℕ  → ℝ) (x :ℝ) : ∑ x_1 ∈ Finset.range (2 ^ (M + 1)), f x_1 * walsh x_1 x = ∑ x_1 ∈ s, f x_1 * walsh x_1 x + ∑ x_1 ∈ t, f x_1 * walsh x_1 x := by
-      rw[← Finset.sum_union]
+      rw[← Finset.sum_union ]
       · congr
       · rw[hs, ht]
         refine Finset.disjoint_filter.mpr ?_
-        intro k hk
-        intro h1
+        intro k hk h1
         simp only [Nat.not_even_iff_odd]
         exact h1
-    sorry
-    /-by_cases h : k < 2^M
-    ·
-      specialize ih (k:=k) (x:=2*x) h
-      simp_rw[← mul_assoc, ← pow_succ] at ih
-      simp_rw[walshsizing_firsthalf'] at ih
+    by_cases h : k < 2^M
+    · specialize ih (k:=k) h
       obtain ⟨g, hg⟩ := ih
-      rw[← hg]
-      simp_rw[mul_comm, ← mul_assoc, mul_add, Finset.sum_add_distrib]
-      simp_rw[hw]
       set f: ℕ → ℝ := (fun x ↦ g (x/2)*(1 / 2)) with hf
       use f
+      ext x
+      have h_p := congrFun hg (2*x)
+      simp_rw[← mul_assoc, ← pow_succ, walshsizing_firsthalf'] at h_p
+      rw[← h_p]
+      simp_rw[mul_comm, ← mul_assoc, mul_add, Finset.sum_add_distrib]
+      simp_rw[hw, hf]
       rw[add_comm]
       refine Eq.symm (Mathlib.Tactic.LinearCombination.add_eq_eq ?_ ?_)
       · rw[ht, eq_comm ]
@@ -1306,7 +1302,6 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), (fun
           exfalso
           exact this hl1
         · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i]
-          rw[hf]
           intro i hi hii
           simp only [one_div, mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero,
             or_false, *]
@@ -1355,7 +1350,6 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), (fun
           exfalso
           exact this hl1
         · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i]
-          rw[hf]
           intro i hi hii
           simp only [one_div, mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero,
             or_false, *]
@@ -1365,18 +1359,18 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), (fun
     · push_neg at h
       rw[pow_succ,mul_two] at hk
       apply Nat.sub_lt_left_of_lt_add h  at hk
-      specialize ih (k:=k-2^M) (x:=2*x-1) hk
-      rw[mul_sub, ← mul_assoc, ← pow_succ   ] at ih
-      simp only [mul_one] at ih
-      rw[Nat.cast_sub h, sub_sub_eq_add_sub] at ih
-      simp_rw[walshsizing_secondhalf'] at ih
-      simp only [Nat.cast_pow, Nat.cast_ofNat, sub_add_cancel] at ih
+      specialize ih (k:=k-2^M) hk
       obtain ⟨g, hg⟩ := ih
-      rw[← hg]
-      simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib]
-      simp_rw[hw]
       set f: ℕ → ℝ := (fun x ↦ g (x/2)*(1 / 2)*((-1)^x)) with hf
       use f
+      ext x
+      have h_p := congrFun hg (2*x-1)
+      rw[mul_sub, ← mul_assoc, ← pow_succ, mul_one, Nat.cast_sub h, sub_sub_eq_add_sub] at h_p
+      simp_rw[walshsizing_secondhalf'] at h_p
+      simp only [Nat.cast_pow, Nat.cast_ofNat, sub_add_cancel] at h_p
+      rw[← h_p]
+      simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib]
+      simp_rw[hw]
       conv_rhs => rw[sub_eq_add_neg,← mul_neg_one, Finset.sum_mul]
       rw[← mul_neg_one,add_comm]
       refine Eq.symm (Mathlib.Tactic.LinearCombination.add_eq_eq ?_ ?_)
@@ -1474,7 +1468,7 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), (fun
             inv_eq_zero, OfNat.ofNat_ne_zero, or_false, *]
           left
           congr
-          exact Eq.symm (Nat.div_two_mul_two_add_one_of_odd hii)-/
+          exact Eq.symm (Nat.div_two_mul_two_add_one_of_odd hii)
 
 
 
