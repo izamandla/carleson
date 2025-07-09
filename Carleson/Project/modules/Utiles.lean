@@ -592,6 +592,7 @@ theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k'):  walshhaar M
     exact h
 
 
+
 theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k'):  ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
   have h1 : EqOn (walshhaar M k * walshhaar M k') 0 (Set.Ico 0 1) := by
     unfold EqOn
@@ -855,9 +856,14 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
 
 -- ajaj potrzeba nowego twierdzenia!!
 
-theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k' = 0 := by
+theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
+  have h (x : ℝ ) : (∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k j)*(∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k' j) = 0 := by
+    rw[← walshHaar_ort_help h0 (M := M) (x:= x)]
+    simp_rw[basiccoef]
+  simp_rw[@Finset.sum_mul_sum] at h
 
   sorry
+
 
 
 
