@@ -865,7 +865,7 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range
   sorry
 
 
-
+theorem bighelpextra1wrr {M k k' : ℕ} : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by sorry
 
 
 theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
@@ -969,6 +969,7 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
         f a * Walsh.walsh i a * Walsh.walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i =
       ∑ i ∈ Finset.range (2 ^ M),
         f a * Walsh.walsh i a * Walsh.walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 i := by
+
       sorry
 
 
