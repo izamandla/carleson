@@ -852,6 +852,9 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
     · exact Walsh.bcs_walsh
     · exact Walsh.bcs_walsh
 
+
+-- ajaj potrzeba nowego twierdzenia!!
+
 theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k' = 0 := by
 
   sorry
