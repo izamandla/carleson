@@ -782,6 +782,10 @@ def coef (M k : ℕ) : ℕ → ℝ :=
   (walshindicatorrightform1 (M := M) (k := k)).choose
 
 
+theorem basiccoef (M k : ℕ) {x : ℝ} : ∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k j = walshhaar M k x := by
+  apply congrFun ((walshindicatorrightform1 (M := M) (k := k)).choose_spec) x
+
+
 
 
 
@@ -848,7 +852,9 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
     · exact Walsh.bcs_walsh
     · exact Walsh.bcs_walsh
 
+theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k' = 0 := by
 
+  sorry
 
 
 
@@ -918,6 +924,8 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
     · exact Walsh.bcs_walsh
     · exact Walsh.bcs_walsh
 
+theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k j = 1 := by
+  exact bighelpextra1 hk rfl
 
 
 --jak dostac 2^m-1 funkcji z walshindicatorrightform
@@ -927,13 +935,42 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
     (∫ y in Set.Ico 0 1,
       f y * walshhaar M k y) * walshhaar M k x:= by
   simp only [Walsh.walshInnerProduct, ← MeasureTheory.integral_mul_const]
+  rw[eq_comm]
+  rw[ ← MeasureTheory.integral_finset_sum]
+  · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
+    have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
+      ∑ x_2 ∈ Finset.range (2 ^ M),
+        ∑ i ∈ Finset.range (2 ^ M), f a * Walsh.walsh i a * coef M x_1 i * Walsh.walsh x_2 x * coef M x_1 x_2  =
+      ∑ x_2 ∈ Finset.range (2 ^ M),
+        ∑ i ∈ Finset.range (2 ^ M), f a * Walsh.walsh i a  * Walsh.walsh x_2 x *(∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i) := by
+          simp_rw[Finset.mul_sum]
+          rw[Finset.sum_comm]
+          congr
+          ext y
+          rw[Finset.sum_comm]
+          congr
+          ext k
+          congr
+          ext i
+          rw[← mul_assoc]
+          linarith
+    simp_rw[this]
+    have (a :ℝ ): ∑ x_2 ∈ Finset.range (2 ^ M),
+      ∑ i ∈ Finset.range (2 ^ M),
+        f a * Walsh.walsh i a * Walsh.walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i =
+      ∑ i ∈ Finset.range (2 ^ M),
+        f a * Walsh.walsh i a * Walsh.walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 i := by
+      sorry
+
+
+    simp_rw[this]
+    sorry
+
+
+  · sorry
+
   --rw [← sub_eq_zero, ← Finset.sum_sub_distrib]
 
-
-
-
-
-  sorry
 
 
 theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
