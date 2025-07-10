@@ -576,6 +576,9 @@ theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M))
     simp
   · simp[h]
 
+theorem walshhaarsqr' {M k : ℕ}(hk : k ∈ Finset.range (2 ^ M)) :  (walshhaar M k)*(walshhaar M k ) = (2 ^ (M / 2 : ℝ))* walshhaar M k := by
+
+  sorry
 
 
 
@@ -856,16 +859,59 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
 
 -- ajaj potrzeba nowego twierdzenia!!
 
-theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
-  have h (x : ℝ ) : (∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k j)*(∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k' j) = 0 := by
-    rw[← walshHaar_ort_help h0 (M := M) (x:= x)]
+/-  have h (x :ℝ ): (∑ j ∈ Finset.range (2^M), walshhaar M j x)*  (∑ j ∈ Finset.range (2^M), walshhaar M j x) = 2 ^ ((M :ℝ) / 2) * (∑ j ∈ Finset.range (2^M), walshhaar M j x) := by
+    rw[Finset.sum_mul_sum ]
+    conv_rhs => rw[mul_comm, Finset.sum_mul]
+    apply Finset.sum_congr
+    · simp
+    · intro i hi
+      have : ∑ x_1 ∈ Finset.range (2 ^ M), walshhaar M i x * walshhaar M x_1 x = (∑ x_1 ∈ Finset.range (2 ^ M) \{i}, walshhaar M i x * walshhaar M x_1 x) +  (walshhaar M i  * walshhaar M i) x:= by
+        exact Finset.sum_eq_sum_diff_singleton_add hi fun x_1 ↦ walshhaar M i x * walshhaar M x_1 x
+      rw[this, walshhaarsqr' hi, mul_comm]
+      simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, add_eq_right]
+      apply Finset.sum_eq_zero
+      intro j hj
+      apply walshHaar_ort_help (M:= M)
+      simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
+      rw[ne_eq, eq_comm]
+      exact hj.2-/
+
+
+
+
+
+
+ /-have h : ∫ (x : ℝ) in Ico 0 1, (∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k j)*(∑ j ∈ Finset.range (2 ^ M),  Walsh.walsh j x * coef M k' j) = 0 := by
+    conv_rhs => rw[← walshHaar_ort h0 (M := M)]
     simp_rw[basiccoef]
   simp_rw[@Finset.sum_mul_sum] at h
+  have h1 : ∫ (x : ℝ) in Ico 0 1,
+    ∑ i ∈ Finset.range (2 ^ M),
+      ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh i x * coef M k i * (Walsh.walsh j x * coef M k' j) =
+    ∑ i ∈ Finset.range (2 ^ M),
+      ∑ j ∈ Finset.range (2 ^ M),( ∫ (x : ℝ) in Ico 0 1, Walsh.walsh i x * Walsh.walsh j x) * coef M k i * coef M k' j:= by
+      rw[MeasureTheory.integral_finset_sum]
+      · apply Finset.sum_congr
+        · simp
+        · intro i hi
+          rw[MeasureTheory.integral_finset_sum]
+          · simp_rw[← MeasureTheory.integral_mul_const, ← mul_assoc]
+            congr
+            ext x
+            congr
+            ext a
+            linarith
+          · sorry
+      · sorry
+  rw[h1] at h
+  rw[← h]
+  rw[Finset.sum_congr]
+  · simp
+  · intro i hi
 
-  sorry
+--kurdebele-/
 
 
-theorem bighelpextra1wrr {M k k' : ℕ} : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by sorry
 
 
 theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
@@ -937,8 +983,25 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
   exact bighelpextra1 hk rfl
 
 
---jak dostac 2^m-1 funkcji z walshindicatorrightform
-theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
+--to podobno powinno działać
+theorem ayayay {M j : ℕ} (hj : j < 2 ^ M) : (fun x ↦ Walsh.walsh j x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M j k  * walshhaar M k x) := by
+  ext x
+  simp_rw[← basiccoef]
+
+
+
+  sorry
+
+theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
+  rw[← walshHaar_ort (M:= M) (k:= k) (k':= k') h0]
+
+  sorry
+
+
+theorem bighelpextra1wrr {M k : ℕ} : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by sorry
+
+
+theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
@@ -964,32 +1027,53 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
           rw[← mul_assoc]
           linarith
     simp_rw[this]
-    have (a :ℝ ): ∑ x_2 ∈ Finset.range (2 ^ M),
+    have :
+    ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),
-        f a * Walsh.walsh i a * Walsh.walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i =
+        (∫ (a : ℝ) in Ico 0 1,f a * Walsh.walsh i a * Walsh.walsh x_2 x )* ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i = ∫ (a : ℝ) in Ico 0 1,
+    ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),
-        f a * Walsh.walsh i a * Walsh.walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 i := by
+        f a * Walsh.walsh i a * Walsh.walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i := by sorry
+    simp_rw[← this]
+    apply Finset.sum_congr
+    · simp
+    · intro n hn
+      have : ∑ i ∈ Finset.range (2 ^ M),
+    (∫ (a : ℝ) in Ico 0 1, f a * Walsh.walsh i a * Walsh.walsh n x) *
+      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 i = (∑ i ∈ Finset.range (2 ^ M) \ {n},
+    (∫ (a : ℝ) in Ico 0 1, f a * Walsh.walsh i a * Walsh.walsh n x) *
+      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 i) + (∫ (a : ℝ) in Ico 0 1, f a * Walsh.walsh n a * Walsh.walsh n x) *
+      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 n := by
+        exact
+          Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
+            (∫ (a : ℝ) in Ico 0 1, f a * Walsh.walsh x_1 a * Walsh.walsh n x) *
+              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1
+      rw[this, bighelpextra1wrr (M:= M) ]
+      simp only [mul_one, add_eq_right]
+      apply Finset.sum_eq_zero
+      intro h hj
+      simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
+      rw[bighelpextra0wrr]
+      · rw[mul_zero]
+      · simp only [ne_eq]
+        rw[eq_comm]
+        exact hj.2
+  · intro i hi
 
-      sorry
 
-
-    simp_rw[this]
     sorry
 
 
-  · sorry
-
-  --rw [← sub_eq_zero, ← Finset.sum_sub_distrib]
 
 
 
-theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x : ℝ) :
+theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)))(x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled (-M) k y) * Walsh.walsh (2 ^ M) x *
         (Haar.haarFunctionScaled (-M) k x)):= by
-  rw[lemma1_1' h1 h2]
+  rw[lemma1_1' h1 h2 f hf']
   congr
   ext k
   rw[← MeasureTheory.integral_mul_const]
@@ -1112,8 +1196,7 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                     rw[← Int.ofNat_le ]
                     rw[← neg_le_neg_iff]
                     rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
-                    ·
-                      sorry
+                    · sorry
                     · exact one_lt_two
                   linarith
                 rcases hh1 with hh1|hh1|hh1
@@ -1227,7 +1310,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled (-M) k y)) *
         Walsh.walsh N x *
       (Haar.haarFunctionScaled (-M) k x) := by
-  rw [lemma1_1 h1 h2 ]
+  rw [lemma1_1 h1 h2 f hf']
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · apply MeasureTheory.setIntegral_congr_fun
