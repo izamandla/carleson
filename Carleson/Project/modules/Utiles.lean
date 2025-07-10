@@ -984,9 +984,17 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
 
 
 --to podobno powinno działać
-theorem ayayay {M j : ℕ} (hj : j < 2 ^ M) : (fun x ↦ Walsh.walsh j x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M j k  * walshhaar M k x) := by
+theorem ayayay {M n : ℕ} (hj : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
   ext x
   simp_rw[← basiccoef]
+  have : ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x * coef M x_1 j =  ∑ j ∈ Finset.range (2 ^ M), Walsh.walsh j x * (∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 j ):= by
+    have (j :ℕ ) : Walsh.walsh j x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 j =  ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 j * Walsh.walsh j x := by
+      rw[mul_comm, ← Finset.sum_mul]
+    simp_rw[this]
+
+    sorry
+  rw[this]
+  --tak z tego wgl powinno wyjść ze ta suma coef wyjdzie 1 bo te walshe sa ortonormalne wiec no
 
 
 
