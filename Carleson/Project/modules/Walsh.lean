@@ -535,6 +535,8 @@ theorem walsh_ort_same {n m : ℕ} (h : m = n) : walshInnerProduct (walsh n) m  
 
 
 
+
+
 theorem walsh_leq_one {n : ℕ} {x : ℝ} : |walsh n x| ≤ 1 := by
   by_cases h : 0 ≤ x ∧ x < 1
   · rw [@abs_le_one_iff_mul_self_le_one, walsh_sqr1]
