@@ -577,9 +577,26 @@ theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M))
   · simp[h]
 
 theorem walshhaarsqr' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) :  (walshhaar M k)*(walshhaar M k ) = (2 ^ (M / 2 : ℝ))* walshhaar M k := by
-
-
-  sorry
+  ext x
+  by_cases h : 0 ≤ x ∧ x<1
+  · simp only [Pi.mul_apply]
+    rw[walshhaarpropsqr hk h.1 h.2]
+    rw[walshhaarprop hk h.1 h.2]
+    simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply,
+      Real.rpow_natCast, mul_ite, mul_zero]
+    split_ifs with h1
+    ·
+      sorry
+    · simp
+  · unfold walshhaar
+    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, mul_eq_mul_right_iff, mul_eq_zero]
+    rw[Walsh.walsh_zero_outside_domain, or_comm]
+    · left
+      left
+      simp only
+    · rw[Decidable.not_and_iff_or_not] at h
+      simp only [not_le, not_lt] at h
+      exact h
 
 
 
@@ -1000,12 +1017,25 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun
 
 
 theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range (2 ^ M)) (hk' : k' ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
-
-
+  have :  ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k' =  ∑ j ∈ Finset.range (2^M),  ∫ y in Set.Ico 0 1, walshhaar M j y * Walsh.walsh k y  * coef M j k' := by
+    apply Finset.sum_congr
+    · simp
+    · intro i hi
+      rw[notsobasiccoef M i k hk]
+      rw[MeasureTheory.integral_mul_const]
+  rw[this]
   sorry
 
 
-theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)): ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by sorry
+theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)): ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by
+  have :  ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k =  ∑ j ∈ Finset.range (2^M),  ∫ y in Set.Ico 0 1, walshhaar M j y * Walsh.walsh k y  * coef M j k := by
+    apply Finset.sum_congr
+    · simp
+    · intro i hi
+      rw[notsobasiccoef M i k hk]
+      rw[MeasureTheory.integral_mul_const]
+
+  sorry
 
 
 theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
@@ -1070,15 +1100,23 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
       · simp only [Finset.mem_range]
         exact hj.1
   · intro i hi
+    simp_rw[ mul_comm,  ← mul_assoc, mul_comm  ]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · apply MeasureTheory.BoundedCompactSupport.restrict
+      unfold walshhaar
+      simp only
+      apply MeasureTheory.BoundedCompactSupport.mul
+      · exact Walsh.bcs_walsh
+      · exact Haar.bcs_haarscaled
+    · apply MeasureTheory.Integrable.mul_const
+      exact hf'
 
 
-    sorry
 
 
 
 
-
-theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)))(x : ℝ) :
+theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
@@ -1207,7 +1245,8 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                     rw[← Int.ofNat_le ]
                     rw[← neg_le_neg_iff]
                     rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
-                    · sorry
+                    ·
+                      sorry
                     · exact one_lt_two
                   linarith
                 rcases hh1 with hh1|hh1|hh1
