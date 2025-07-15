@@ -1485,6 +1485,41 @@ theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
   exact h this
 
 
+theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
+
+theorem ago2 {M k : ℕ} {x : ℝ} (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by sorry
+
+--tu powinno być chyba jakieś wykorzystanie dyadic intervals
+
+theorem aboutwalshhelp {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)) (hy1 : 2 ^ (-M : ℤ) * k ≤ y) (hy2 : y < 2 ^ (-M : ℤ) * (k + 1)):  walsh n x =  walsh n y := by
+  induction' n using Nat.evenOddRec with n ih n ih generalizing x y k
+  · rw[walsh_zero (ago1 hx1) (ago2 hx2), walsh_zero (ago1 hy1) (ago2 hy2)]
+  · rw [@walshevenasfun]
+    simp only [Pi.add_apply,indicator, mem_Ico]
+    apply Mathlib.Tactic.LinearCombination.add_eq_eq
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+  · rw [@walshoddasfun]
+    simp only [Pi.add_apply,indicator, mem_Ico]
+    apply Mathlib.Tactic.LinearCombination.add_eq_eq
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
 
 end Walsh
 
