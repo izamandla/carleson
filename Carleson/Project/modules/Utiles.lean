@@ -979,20 +979,9 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
 
 
 theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
-  have hx11: 0≤ x := by sorry
-  have hx21 : x <1 := by sorry
-  induction' n using Nat.evenOddRec with n ih n ih
-  · rw[Walsh.walsh_zero hx11 hx21, mul_one]
-    have : ∫ (y : ℝ) in Ico (2 ^ (-M : ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), Walsh.walsh 0 y = ∫ (y : ℝ) in Ico (2 ^ (-M : ℤ ) * ↑k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), 1 := by
-      sorry
-    rw[this]
-    simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-    rw[← intervalIntegral.integral_of_le]
-    · simp
-      ring
-    · simp
-  · sorry
-  · sorry
+
+  sorry
+
 
 
 theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): Walsh.walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by

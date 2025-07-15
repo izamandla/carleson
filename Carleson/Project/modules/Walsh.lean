@@ -1,5 +1,6 @@
 
 import Carleson.ToMathlib.BoundedCompactSupport
+import Carleson.Project.modules.DyadicStructures
 import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.Normed.Field.Instances
 import Mathlib.Data.Int.Star
@@ -8,7 +9,7 @@ import Mathlib.MeasureTheory.Constructions.Polish.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 
-open Function Set MeasureTheory BoundedCompactSupport --Classical
+open Function Set MeasureTheory BoundedCompactSupport DyadicStructures--Classical
 noncomputable section
 
 /- ## Walsh Functions and Walsh-Fourier Series -/
@@ -1520,6 +1521,50 @@ theorem aboutwalshhelp {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ 
       · sorry
       · sorry
       · simp
+
+
+theorem aboutwalshhelp' {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) (hy : y ∈ dyadicInterval (-M : ℤ) k):  walsh n x =  walsh n y := by
+  induction' n using Nat.evenOddRec with n ih n ih generalizing x y k
+  · sorry
+  · rw [@walshevenasfun]
+    simp only [Pi.add_apply,indicator, mem_Ico]
+    apply Mathlib.Tactic.LinearCombination.add_eq_eq
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+  · rw [@walshoddasfun]
+    simp only [Pi.add_apply,indicator, mem_Ico]
+    apply Mathlib.Tactic.LinearCombination.add_eq_eq
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+    · split_ifs with h1 h2
+      · sorry
+      · sorry
+      · sorry
+      · simp
+
+theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) : ∀ x ∈  dyadicInterval (-M : ℤ) k, ∃ c :ℝ , walsh n x = c := by
+  intro x hx
+  induction' n using Nat.evenOddRec with n ih n ih generalizing k
+  · rw[walsh_zero]
+    · use 1
+    · sorry
+    · sorry
+  · rw [@walshevenasfun]
+    sorry
+  · rw [@walshoddasfun]
+    sorry
+
 
 end Walsh
 
