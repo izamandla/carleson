@@ -978,17 +978,31 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
 
 
 
-theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): (2^M) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
-
-
-  sorry
-
-theorem aboutwalsh0 {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): Walsh.walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by
-  --rw[aboutwalshhelp hn hk hx1 hx2]
-  rw[notsobasiccoef]
+theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
+  have hx11: 0≤ x := by sorry
+  have hx21 : x <1 := by sorry
+  induction' n using Nat.evenOddRec with n ih n ih
+  · rw[Walsh.walsh_zero hx11 hx21, mul_one]
+    have : ∫ (y : ℝ) in Ico (2 ^ (-M : ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), Walsh.walsh 0 y = ∫ (y : ℝ) in Ico (2 ^ (-M : ℤ ) * ↑k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), 1 := by
+      sorry
+    rw[this]
+    simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+    rw[← intervalIntegral.integral_of_le]
+    · simp
+      ring
+    · simp
   · sorry
-  · simp only [Finset.mem_range]
-    exact hn
+  · sorry
+
+
+theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): Walsh.walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by
+  rw[← mul_right_inj' (a := (2^(-M :ℤ )) ) ]
+  · rw[aboutwalshhelp hn hk hx1 hx2]
+    rw[notsobasiccoef]
+    · sorry
+    · simp only [Finset.mem_range]
+      exact hn
+  · simp
 
 
 
@@ -1005,9 +1019,13 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range
     exact walsh_ort (id (Ne.symm h0))
   rw[← h]
   have hf (x : ℝ ) :  Walsh.walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
-    sorry
+    simp only [Finset.mem_range] at hk
+    apply congrFun (ayayay hk)
   have hg (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M),walshhaar M j x * coef M j k' =  Walsh.walsh k' x:= by
-    sorry
+    simp only [Finset.mem_range] at hk'
+    rw[eq_comm]
+    simp_rw[mul_comm]
+    apply congrFun (ayayay hk')
   have hr : ∫ (y : ℝ) in Ico 0 1, Walsh.walsh k y * Walsh.walsh k' y= ∫ (y : ℝ) in Ico 0 1,  ( ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j y) * (∑ j ∈ Finset.range (2 ^ M),walshhaar M j y * coef M j k') := by
     congr
     ext y
@@ -1092,7 +1110,8 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)): ∑ j �
     exact Walsh.walsh_norm' k
   rw[← h]
   have hf (x : ℝ ) :  Walsh.walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
-    sorry
+    simp only [Finset.mem_range] at hk
+    apply congrFun (ayayay hk)
   have hr : ∫ (y : ℝ) in Ico 0 1, Walsh.walsh k y * Walsh.walsh k y= ∫ (y : ℝ) in Ico 0 1,  ( ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j y) * (∑ j ∈ Finset.range (2 ^ M),walshhaar M j y * coef M j k) := by
     congr
     ext y
@@ -1211,8 +1230,17 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
     ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),
         f a * Walsh.walsh i a * Walsh.walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i := by
-
-          sorry
+          rw[MeasureTheory.integral_finset_sum]
+          · congr
+            ext i
+            rw[MeasureTheory.integral_finset_sum]
+            · congr
+              ext m
+              rw[← MeasureTheory.integral_mul_const]
+            · intro m hm --here just integrability
+              sorry
+          · intro i hi --here just integrability
+            sorry
     simp_rw[← this]
     apply Finset.sum_congr
     · simp
