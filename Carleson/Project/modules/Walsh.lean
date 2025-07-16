@@ -1553,14 +1553,16 @@ theorem aboutwalshhelp' {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^
       · sorry
       · simp
 
-theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) : ∀ x ∈  dyadicInterval (-M : ℤ) k, ∃ c :ℝ , walsh n x = c := by
-  intro x hx
+theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' n using Nat.evenOddRec with n ih n ih generalizing k
-  · rw[walsh_zero]
-    · use 1
-    · sorry
-    · sorry
+  · use 1
+    intro x hx
+    apply Set.mem_of_subset_of_mem (natdyadicin0' hk) at hx
+    simp only [mem_Ico] at hx
+    rw[walsh_zero hx.1 hx.2]
   · rw [@walshevenasfun]
+    simp only [Pi.add_apply]
+
     sorry
   · rw [@walshoddasfun]
     sorry

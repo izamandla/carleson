@@ -142,6 +142,45 @@ theorem dyadicInterval_split (k n : ℤ) :
     apply zpow_pos
     simp
 
+theorem dyadicin (k n : ℤ) : dyadicInterval k n ⊆ dyadicInterval (k+1) (n/2) := by
+  rw[ dyadicInterval_split (k+1)]
+  simp only [add_sub_cancel_right]
+  by_cases h : Odd n
+  · rw [Int.two_mul_ediv_two_add_one_of_odd h]
+    exact subset_union_right
+  · simp only [Int.not_odd_iff_even] at h
+    rw [Int.two_mul_ediv_two_of_even h]
+    simp
+
+theorem natdyadicin0 {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k ⊆ dyadicInterval 0 0 := by
+  rw[zero_dyadicInterval]
+  simp only [dyadicInterval, zpow_neg]
+  rw [@Ico_def]
+  refine Ico_subset_Ico ?_ ?_
+  · simp
+  · refine inv_mul_le_one_of_le₀ ?_ ?_
+    · simp
+      rw[Nat.lt_iff_add_one_le] at h
+      norm_cast
+    · simp
+
+theorem natdyadicin0' {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k ⊆ Set.Ico 0 1 := by
+  simp only [dyadicInterval, zpow_neg]
+  rw [@Ico_def]
+  refine Ico_subset_Ico ?_ ?_
+  · simp
+  · refine inv_mul_le_one_of_le₀ ?_ ?_
+    · simp
+      rw[Nat.lt_iff_add_one_le] at h
+      norm_cast
+    · simp
+
+
+theorem doublein {x : ℝ} {M k : ℤ} : x ∈ dyadicInterval M k ↔ 2*x ∈ dyadicInterval (M+1) k := by
+
+  sorry
+
+
 
 
 
