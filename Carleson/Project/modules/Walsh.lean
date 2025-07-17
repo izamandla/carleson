@@ -1562,10 +1562,20 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
     rw[walsh_zero hx.1 hx.2]
   · rw [@walshevenasfun]
     simp only [Pi.add_apply]
-
-    sorry
+    have hn': n< 2^M := by sorry
+    have hk': k/2 < 2^M := by sorry
+    obtain ⟨ p, hp⟩ := ih hn' hk' --tu powinno być inne k chyba k/2 ale nwm
+    use p
+    intro x hx
+    by_cases h : x ∈ Ico 0 0.5
+    · --rw [← hp x hx]
+      sorry
+    · sorry
   · rw [@walshoddasfun]
     sorry
+
+
+
 
 
 end Walsh
