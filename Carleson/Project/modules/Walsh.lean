@@ -1564,6 +1564,7 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
     simp only [Pi.add_apply]
     have hn': n< 2^M := by sorry
     have hk': k/2 < 2^M := by sorry
+    have hk'' : k/2 +1 < 2^M := by sorry
     obtain ⟨ p, hp⟩ := ih hn' hk' --tu powinno być inne k chyba k/2 ale nwm
     use p
     intro x hx

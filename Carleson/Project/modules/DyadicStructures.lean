@@ -142,6 +142,13 @@ theorem dyadicInterval_split (k n : ℤ) :
     apply zpow_pos
     simp
 
+theorem dyadicInterval_split' (k n : ℤ) :
+  dyadicInterval (k+1) n = dyadicInterval k (2 * n) ∪ dyadicInterval k (2 * n + 1) := by
+  rw[dyadicInterval_split (k+1) n]
+  simp
+
+
+
 theorem dyadicin (k n : ℤ) : dyadicInterval k n ⊆ dyadicInterval (k+1) (n/2) := by
   rw[ dyadicInterval_split (k+1)]
   simp only [add_sub_cancel_right]
@@ -176,12 +183,65 @@ theorem natdyadicin0' {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k �
     · simp
 
 
-theorem doublein {x : ℝ} {M k : ℤ} : x ∈ dyadicInterval M k ↔ 2*x ∈ dyadicInterval (M+1) k := by
+theorem infirsthalf {M k : ℕ} (hM : M ≠ 0): dyadicInterval (-M :ℤ) k ⊆ Ico 0 0.5 ↔ k < 2 ^ (M - 1 ) := by
+  simp at hM
+  rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
+  · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
+    rw[inv_mul_le_iff₀]
+    · ring_nf
+      simp only [one_div]
+      rw[ ← Nat.add_one_le_iff ]
+      have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
+        refine (mul_inv_eq_iff_eq_mul₀ ?_).mpr ?_
+        · simp
+        · rw [pow_sub_one_mul hM 2]
+      rw[this]
+      norm_cast
+      rw[add_comm]
+    · simp
+  · simp
+
+
+
+theorem insecondhalf {M k : ℕ} (hk : k < 2 ^ M) (hM : M ≠ 0): dyadicInterval (-M :ℤ) k ⊆ Ico 0.5 1 ↔ 2 ^ (M - 1) ≤ k:= by
+  simp at hM
+  rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
+  · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
+    rw[inv_mul_le_iff₀]
+    · simp only [mul_one]
+      rw[mul_comm, le_mul_inv_iff₀]
+      · ring_nf
+        simp only [one_div]
+        have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
+          refine (mul_inv_eq_iff_eq_mul₀ ?_).mpr ?_
+          · simp
+          · rw [pow_sub_one_mul hM 2]
+        rw[this]
+        norm_cast
+        simp only [and_iff_left_iff_imp]
+        intro h
+        rw[add_comm, Nat.add_one_le_iff ]
+        exact hk
+      · simp
+    · simp
+  · simp
+
+
+
+theorem xinfirsthalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hk : k < 2 ^ (M - 1)) (hM : M ≠ 0) : 2*x ∈ dyadicInterval (-M :ℤ) (2*k) ∨ 2*x ∈ dyadicInterval (-M :ℤ) (2*k + 1) := by
+  rw [← @mem_union, ← dyadicInterval_split']
+
 
   sorry
 
+theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hk0 : k < 2 ^ M) (hk : 2 ^ (M - 1) ≤ k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k - 2^M) ∨ (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k -2 ^M + 1) := by
+  have : 2*k - 2^M = 2*(k - 2^(M-1)) := by
+    rw [Nat.mul_sub]
+    rw [mul_pow_sub_one hM 2]
 
+  --rw [← @mem_union, ← dyadicInterval_split']
 
+  sorry
 
 
 /--
