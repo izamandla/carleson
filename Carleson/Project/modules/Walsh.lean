@@ -1490,181 +1490,6 @@ theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x :=
 
 theorem ago2 {M k : ℕ} {x : ℝ} (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by sorry
 
---tu powinno być chyba jakieś wykorzystanie dyadic intervals
-
-theorem aboutwalshhelp {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)) (hy1 : 2 ^ (-M : ℤ) * k ≤ y) (hy2 : y < 2 ^ (-M : ℤ) * (k + 1)):  walsh n x =  walsh n y := by
-  induction' n using Nat.evenOddRec with n ih n ih generalizing x y k
-  · rw[walsh_zero (ago1 hx1) (ago2 hx2), walsh_zero (ago1 hy1) (ago2 hy2)]
-  · rw [@walshevenasfun]
-    simp only [Pi.add_apply,indicator, mem_Ico]
-    apply Mathlib.Tactic.LinearCombination.add_eq_eq
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-  · rw [@walshoddasfun]
-    simp only [Pi.add_apply,indicator, mem_Ico]
-    apply Mathlib.Tactic.LinearCombination.add_eq_eq
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-
-
-theorem aboutwalshhelp' {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) (hy : y ∈ dyadicInterval (-M : ℤ) k):  walsh n x =  walsh n y := by
-  induction' n using Nat.evenOddRec with n ih n ih generalizing x y k
-  · sorry
-  · rw [@walshevenasfun]
-    simp only [Pi.add_apply,indicator, mem_Ico]
-    apply Mathlib.Tactic.LinearCombination.add_eq_eq
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-  · rw [@walshoddasfun]
-    simp only [Pi.add_apply,indicator, mem_Ico]
-    apply Mathlib.Tactic.LinearCombination.add_eq_eq
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-    · split_ifs with h1 h2
-      · sorry
-      · sorry
-      · sorry
-      · simp
-
-theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
-  by_cases hM : M = 0
-  · simp only [hM, pow_zero, Nat.lt_one_iff] at hk
-    simp only [hM, pow_zero, Nat.lt_one_iff] at hn
-    rw[hM, hk, hn]
-    simp only [CharP.cast_eq_zero, neg_zero, dyadicInterval_of_n_zero, zpow_zero, mem_Ico, and_imp]
-    use 1
-    intro x
-    apply walsh_zero
-  induction' n using Nat.evenOddRec with n ih n ih generalizing k
-  · use 1
-    intro x hx
-    apply Set.mem_of_subset_of_mem (natdyadicin0' hk) at hx
-    simp only [mem_Ico] at hx
-    rw[walsh_zero hx.1 hx.2]
-  · rw [@walshevenasfun]
-    simp only [Pi.add_apply]
-    have hn': n< 2^M := by
-      rw[←  mul_lt_mul_iff_of_pos_left  (a := 2) (two_pos)]
-      apply lt_trans hn
-      simp
-    have H1: ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,
-    (Ico 0 0.5).indicator (fun x ↦ walsh n (2 * x)) x = c := by
-      by_cases hk': k < 2 ^ (M-1)
-      · rw[← infirsthalf hM] at hk'
-        have hk1 : 2* k < 2 ^ M := by sorry
-        have hk2 : 2*k +1 < 2^M := by sorry
-        obtain ⟨ p, hp⟩ := ih hn' hk1
-        obtain ⟨ q , hq⟩ := ih hn' hk2
-        use p
-        intro x hx
-        have h2x :  x ∈ Ico 0 0.5 := by
-          have : k < 2^ (M-1) := by sorry
-          rw[← infirsthalf hM] at this
-          exact hk' hx
-        apply xinfirsthalf at hx
-        simp only [h2x, indicator_of_mem]
-        rcases hx with  hx1 | hx2
-        · rw[hp]
-          push_cast
-          exact hx1
-        · rw[hq]
-          ·
-
-            sorry --trzeba pokazać ze q=p i tyle
-          · push_cast
-            exact hx2
-      · rw[← infirsthalf hM] at hk'
-        use 0
-        intro x hx
-        have : x ∉ Ico 0 0.5 := by
-          have hrr : ¬  k < 2^ (M-1) := by sorry
-          rw[← infirsthalf hM] at hrr
-          have : Disjoint (dyadicInterval (-M :ℤ ) k)  (Ico 0 0.5) := by sorry
-          exact Disjoint.notMem_of_mem_left this hx
-        simp[this]
-    have H2 : ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,  (Ico 0.5 1).indicator (fun x ↦ walsh n (2 * x - 1)) x = c := by sorry
-    obtain ⟨ c1, hc1⟩ := H1
-    obtain ⟨ c2, hc2⟩ := H2
-    use c1 + c2
-    intro x hx
-    exact Mathlib.Tactic.LinearCombination.add_eq_eq (hc1 x hx) (hc2 x hx)
-    /-obtain ⟨ p, hp⟩ := ih hn' hk' --tu powinno być inne k chyba k/2 ale nwm
-    use p
-    intro x hx
-    by_cases h : x ∈ Ico 0 0.5
-    · apply xinfirsthalf at hx
-      simp only [h, indicator_of_mem]
-      rcases hx with  hx1 | hx2
-      · sorry
-      · sorry
-    · apply xinsecondhalf at hx
-      by_cases h1 : x ∈ Ico 0.5 1
-      · simp only [h, not_false_eq_true, indicator_of_notMem, h1, indicator_of_mem, zero_add]
-        rcases hx hM with  hx1 | hx2
-        · sorry
-        · sorry
-      · simp[h, h1]
-        sorry -/
-
-  · rw [@walshoddasfun]
-    simp only [Pi.add_apply]
-    have hn': n< 2^M := by
-      rw[←  mul_lt_mul_iff_of_pos_left  (a := 2) (two_pos)]
-      --apply lt_trans hn
-      simp
-      sorry
-    have H1: ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,
-    (Ico 0 0.5).indicator (fun x ↦ walsh n (2 * x)) x = c := by
-      by_cases hk': k < 2 ^ (M-1)
-      · rw[← infirsthalf hM] at hk'
-        have hk1 : 2* k < 2 ^ M := by sorry
-        have hk2 : 2*k +1 < 2^M := by sorry
-        obtain ⟨ p, hp⟩ := ih hn' hk1
-        obtain ⟨ q , hq⟩ := ih hn' hk2
-        use p
-        intro x hx
-        apply xinfirsthalf at hx
-        rcases hx with  hx1 | hx2
-        · sorry
-        · sorry
-        --trzeba pokazać ze q=p i tyle
-
-      · sorry
-    have H2 : ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,  (Ico 0.5 1).indicator (fun x ↦ -walsh n (2 * x - 1)) x = c := by sorry
-    obtain ⟨ c1, hc1⟩ := H1
-    obtain ⟨ c2, hc2⟩ := H2
-    use c1 + c2
-    intro x hx
-    exact Mathlib.Tactic.LinearCombination.add_eq_eq (hc1 x hx) (hc2 x hx)
-
-
 
 theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' M with M ih generalizing k n
@@ -1674,12 +1499,35 @@ theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ
     use 1
     intro x hx
     rw[walsh_zero hx.1 hx.2]
-  · by_cases h : Odd k
-    · sorry
-    · simp only [Nat.not_odd_iff_even] at h
-      set l := 2*k with hl
-      have hl' : l/2 = k := Eq.symm (Nat.eq_div_of_mul_eq_right (two_ne_zero) hl)
-      rw[← hl']
+  · have hM : dyadicInterval (-(M + 1)) (k :ℤ)  ⊆ dyadicInterval (-(↑M + 1) + 1)  (k/2) := by
+      apply dyadicin (k := -(M + 1)) (n := k)
+    simp only [neg_add_rev, Int.reduceNeg, neg_add_cancel_comm] at hM
+    have hk' : k/2 < 2 ^ M := Nat.nat_repr_len_aux k 2 M (two_pos) hk
+    set l := n/2 with hl
+    by_cases hn' : Odd n
+    · have hl' : n = 2*l + 1 := Eq.symm (Nat.two_mul_div_two_add_one_of_odd hn')
+      rw[hl', @walshoddasfun]
+      simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg, Pi.add_apply]
+      have hl0 : l < 2^M := by
+        rw[hl', pow_add] at hn
+        simp at hn
+
+        sorry
+      obtain ⟨ p, hp⟩ := ih hl0 hk'
+      use p
+      intro x hx
+      sorry
+    · simp only [Nat.not_odd_iff_even] at hn'
+      have hl' : n = 2*l  := Eq.symm (Nat.two_mul_div_two_of_even hn')
+      rw[hl', @walshevenasfun]
+      have hl0 : l < 2^M := by
+        rw[hl', pow_add, mul_comm, pow_one, mul_lt_mul_iff_of_pos_right (two_pos)] at hn
+        exact hn
+      obtain ⟨ p, hp⟩ := ih hl0 hk'
+      use p
+      intro x hx
+
+
       sorry
 
 

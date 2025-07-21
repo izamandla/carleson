@@ -243,6 +243,22 @@ theorem xinfirsthalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ)
   · rw[mul_assoc, mul_lt_mul_left (two_pos), @zpow_neg]
     exact hx2
 
+
+theorem xinfirsthalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) : 2*x ∈ dyadicInterval (-M + 1 :ℤ) k := by
+  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
+  simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
+  have : (2 : ℝ ) ^ ((-M:ℤ) +1 ) = 2 * 2 ^ (-M : ℤ  ) := by
+    rw [zpow_add₀, zpow_one, mul_comm]
+    exact Ne.symm (NeZero.ne' 2)
+  rw[this]
+  obtain ⟨ hx1, hx2 ⟩ := hx
+  constructor
+  · rw[mul_assoc, mul_le_mul_left (two_pos), @zpow_neg]
+    exact hx1
+  · rw[mul_assoc, mul_lt_mul_left (two_pos), @zpow_neg]
+    exact hx2
+
+
 theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k - 2^M) ∨ (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k -2 ^M + 1) := by
   have : 2*(k:ℤ) - 2^M = 2*(k - 2^(M-1)) := by
     rw [Int.mul_sub]
@@ -286,6 +302,43 @@ theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ
     simp only [zpow_neg, zpow_natCast]
     exact hx2
 
+theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M + 1 :ℤ) (k - 2^(M-1)) := by
+  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
+  simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
+  obtain ⟨ hx1, hx2 ⟩ := hx
+  have : (2 ^ ((-M :ℤ) + 1) :ℝ ) * 2 ^ (M  - 1) = 1 := by
+    have : (-M :ℤ) + 1 = - (M -1) := by
+      simp only [neg_sub]
+      rw [@neg_add_eq_sub]
+    rw[this]
+    rw [@zpow_neg]
+    refine (inv_mul_eq_one₀ ?_).mpr ?_
+    · apply zpow_ne_zero
+      simp
+    · rw[← zpow_natCast ]
+      refine (zpow_right_inj₀ ?_ ?_).mpr ?_
+      · simp
+      · simp
+      · have : M ≥ 1 := by
+          exact Nat.one_le_iff_ne_zero.mpr hM
+        exact Eq.symm (Int.natCast_pred_of_pos this)
+  constructor
+  · push_cast
+    rw[mul_sub, tsub_le_iff_right]
+    rw[this]
+    simp only [sub_add_cancel, ge_iff_le]
+    rw [zpow_add₀ (two_ne_zero) , zpow_one, mul_assoc, mul_comm, mul_assoc,  mul_le_mul_left (two_pos), mul_comm ]
+    simp only [zpow_neg, zpow_natCast]
+    exact hx1
+  · simp only [Int.cast_sub, Int.cast_natCast, Int.cast_pow, Int.cast_ofNat]
+    rw[mul_add, mul_sub, this]
+    simp only [mul_one]
+    rw [@sub_lt_iff_lt_add]
+    rw[zpow_add₀ (two_ne_zero) , zpow_one]
+    ring_nf
+    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-M :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm ]
+    simp only [zpow_neg, zpow_natCast]
+    exact hx2
 
 
 /--
