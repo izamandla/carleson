@@ -243,7 +243,7 @@ theorem xinfirsthalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ)
   · rw[mul_assoc, mul_lt_mul_left (two_pos), @zpow_neg]
     exact hx2
 
-theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hk0 : k < 2 ^ M) (hk : 2 ^ (M - 1) ≤ k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k - 2^M) ∨ (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k -2 ^M + 1) := by
+theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k - 2^M) ∨ (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k -2 ^M + 1) := by
   have : 2*(k:ℤ) - 2^M = 2*(k - 2^(M-1)) := by
     rw [Int.mul_sub]
     rw [mul_pow_sub_one hM 2]
@@ -259,13 +259,15 @@ theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ
     rw[this]
     rw [@zpow_neg]
     refine (inv_mul_eq_one₀ ?_).mpr ?_
-    · sorry
-    · norm_cast
-      simp only [Nat.cast_pow, Nat.cast_ofNat]
-      sorry
-      --rw[← zpow_add₀ (two_ne_zero)]
-      --simp
-    --rw[← zpow_add₀ (two_ne_zero)]
+    · apply zpow_ne_zero
+      simp
+    · rw[← zpow_natCast ]
+      refine (zpow_right_inj₀ ?_ ?_).mpr ?_
+      · simp
+      · simp
+      · have : M ≥ 1 := by
+          exact Nat.one_le_iff_ne_zero.mpr hM
+        exact Eq.symm (Int.natCast_pred_of_pos this)
   constructor
   · push_cast
     rw[mul_sub, tsub_le_iff_right]
