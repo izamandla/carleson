@@ -1554,6 +1554,14 @@ theorem aboutwalshhelp' {M n k : ℕ} {x y : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^
       · simp
 
 theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
+  by_cases hM : M = 0
+  · simp only [hM, pow_zero, Nat.lt_one_iff] at hk
+    simp only [hM, pow_zero, Nat.lt_one_iff] at hn
+    rw[hM, hk, hn]
+    simp only [CharP.cast_eq_zero, neg_zero, dyadicInterval_of_n_zero, zpow_zero, mem_Ico, and_imp]
+    use 1
+    intro x
+    apply walsh_zero
   induction' n using Nat.evenOddRec with n ih n ih generalizing k
   · use 1
     intro x hx
@@ -1562,18 +1570,85 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
     rw[walsh_zero hx.1 hx.2]
   · rw [@walshevenasfun]
     simp only [Pi.add_apply]
-    have hn': n< 2^M := by sorry
-    have hk': k/2 < 2^M := by sorry
-    have hk'' : k/2 +1 < 2^M := by sorry
-    obtain ⟨ p, hp⟩ := ih hn' hk' --tu powinno być inne k chyba k/2 ale nwm
+    have hn': n< 2^M := by
+      rw[←  mul_lt_mul_iff_of_pos_left  (a := 2) (two_pos)]
+      apply lt_trans hn
+      simp
+    have H1: ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,
+    (Ico 0 0.5).indicator (fun x ↦ walsh n (2 * x)) x = c := by
+      by_cases hk': k < 2 ^ (M-1)
+      · rw[← infirsthalf hM] at hk'
+        have hk1 : 2* k < 2 ^ M := by sorry
+        have hk2 : 2*k +1 < 2^M := by sorry
+        obtain ⟨ p, hp⟩ := ih hn' hk1
+        obtain ⟨ q , hq⟩ := ih hn' hk2
+        use p
+        intro x hx
+        apply xinfirsthalf at hx
+        rcases hx with  hx1 | hx2
+        ·
+          sorry
+        · sorry
+
+
+        --trzeba pokazać ze q=p i tyle
+
+      · sorry
+    have H2 : ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,  (Ico 0.5 1).indicator (fun x ↦ walsh n (2 * x - 1)) x = c := by sorry
+    obtain ⟨ c1, hc1⟩ := H1
+    obtain ⟨ c2, hc2⟩ := H2
+    use c1 + c2
+    intro x hx
+    exact Mathlib.Tactic.LinearCombination.add_eq_eq (hc1 x hx) (hc2 x hx)
+    /-obtain ⟨ p, hp⟩ := ih hn' hk' --tu powinno być inne k chyba k/2 ale nwm
     use p
     intro x hx
     by_cases h : x ∈ Ico 0 0.5
-    · --rw [← hp x hx]
-      sorry
-    · sorry
+    · apply xinfirsthalf at hx
+      simp only [h, indicator_of_mem]
+      rcases hx with  hx1 | hx2
+      · sorry
+      · sorry
+    · apply xinsecondhalf at hx
+      by_cases h1 : x ∈ Ico 0.5 1
+      · simp only [h, not_false_eq_true, indicator_of_notMem, h1, indicator_of_mem, zero_add]
+        rcases hx hM with  hx1 | hx2
+        · sorry
+        · sorry
+      · simp[h, h1]
+        sorry -/
+
   · rw [@walshoddasfun]
-    sorry
+    simp only [Pi.add_apply]
+    have hn': n< 2^M := by
+      rw[←  mul_lt_mul_iff_of_pos_left  (a := 2) (two_pos)]
+      --apply lt_trans hn
+      simp
+      sorry
+    have H1: ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,
+    (Ico 0 0.5).indicator (fun x ↦ walsh n (2 * x)) x = c := by
+      by_cases hk': k < 2 ^ (M-1)
+      · rw[← infirsthalf hM] at hk'
+        have hk1 : 2* k < 2 ^ M := by sorry
+        have hk2 : 2*k +1 < 2^M := by sorry
+        obtain ⟨ p, hp⟩ := ih hn' hk1
+        obtain ⟨ q , hq⟩ := ih hn' hk2
+        use p
+        intro x hx
+        apply xinfirsthalf at hx
+        rcases hx with  hx1 | hx2
+        · sorry
+        · sorry
+        --trzeba pokazać ze q=p i tyle
+
+      · sorry
+    have H2 : ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,  (Ico 0.5 1).indicator (fun x ↦ -walsh n (2 * x - 1)) x = c := by sorry
+    obtain ⟨ c1, hc1⟩ := H1
+    obtain ⟨ c2, hc2⟩ := H2
+    use c1 + c2
+    intro x hx
+    exact Mathlib.Tactic.LinearCombination.add_eq_eq (hc1 x hx) (hc2 x hx)
+
 
 
 
