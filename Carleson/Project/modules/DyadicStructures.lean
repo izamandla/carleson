@@ -287,6 +287,7 @@ theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ
     exact hx2
 
 
+
 /--
 The dyadic intervals at scale `k` cover the entire real line.
 -/

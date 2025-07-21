@@ -1584,16 +1584,31 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
         obtain ⟨ q , hq⟩ := ih hn' hk2
         use p
         intro x hx
+        have h2x :  x ∈ Ico 0 0.5 := by
+          have : k < 2^ (M-1) := by sorry
+          rw[← infirsthalf hM] at this
+          exact hk' hx
         apply xinfirsthalf at hx
+        simp only [h2x, indicator_of_mem]
         rcases hx with  hx1 | hx2
-        ·
-          sorry
-        · sorry
+        · rw[hp]
+          push_cast
+          exact hx1
+        · rw[hq]
+          ·
 
-
-        --trzeba pokazać ze q=p i tyle
-
-      · sorry
+            sorry --trzeba pokazać ze q=p i tyle
+          · push_cast
+            exact hx2
+      · rw[← infirsthalf hM] at hk'
+        use 0
+        intro x hx
+        have : x ∉ Ico 0 0.5 := by
+          have hrr : ¬  k < 2^ (M-1) := by sorry
+          rw[← infirsthalf hM] at hrr
+          have : Disjoint (dyadicInterval (-M :ℤ ) k)  (Ico 0 0.5) := by sorry
+          exact Disjoint.notMem_of_mem_left this hx
+        simp[this]
     have H2 : ∃ c, ∀ x ∈ dyadicInterval (-↑M) ↑k,  (Ico 0.5 1).indicator (fun x ↦ walsh n (2 * x - 1)) x = c := by sorry
     obtain ⟨ c1, hc1⟩ := H1
     obtain ⟨ c2, hc2⟩ := H2
@@ -1651,7 +1666,21 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
 
 
 
-
+theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
+  induction' M with M ih generalizing k n
+  · simp only [pow_zero, Nat.lt_one_iff] at hn
+    simp only [pow_zero, Nat.lt_one_iff] at hk
+    simp only [CharP.cast_eq_zero, neg_zero, hk, dyadicInterval_of_n_zero, zpow_zero, mem_Ico, hn]
+    use 1
+    intro x hx
+    rw[walsh_zero hx.1 hx.2]
+  · by_cases h : Odd k
+    · sorry
+    · simp only [Nat.not_odd_iff_even] at h
+      set l := 2*k with hl
+      have hl' : l/2 = k := Eq.symm (Nat.eq_div_of_mul_eq_right (two_ne_zero) hl)
+      rw[← hl']
+      sorry
 
 
 end Walsh
