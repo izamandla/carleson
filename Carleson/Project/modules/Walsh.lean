@@ -1516,7 +1516,18 @@ theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ
       obtain ⟨ p, hp⟩ := ih hl0 hk'
       use p
       intro x hx
-      sorry
+      by_cases h0 : x ∈ Ico 0 0.5
+      · have h01 : x ∉ Ico 0.5 1 := by sorry
+        simp only [h0, indicator_of_mem, h01, not_false_eq_true, indicator_of_notMem, add_zero]
+        simp_rw[← neg_add] at hx
+        norm_cast at hx
+        apply xinfirsthalf' at hx
+        simp at hx
+
+        sorry
+      · have h01 : x ∈ Ico 0.5 1 := by sorry
+
+        sorry
     · simp only [Nat.not_odd_iff_even] at hn'
       have hl' : n = 2*l  := Eq.symm (Nat.two_mul_div_two_of_even hn')
       rw[hl', @walshevenasfun]
@@ -1530,6 +1541,28 @@ theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ
 
       sorry
 
+
+theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
+  induction' M with M ih generalizing k n
+  · simp only [pow_zero, Nat.lt_one_iff] at hn
+    simp only [pow_zero, Nat.lt_one_iff] at hk
+    simp only [CharP.cast_eq_zero, neg_zero, hk, dyadicInterval_of_n_zero, zpow_zero, mem_Ico, hn]
+    use 1
+    intro x hx
+    rw[walsh_zero hx.1 hx.2]
+  · by_cases hk0 : k < 2^M
+    · have hkx :  dyadicInterval (-↑(M + 1)) ↑k ⊆ Ico 0 0.5 := by sorry
+      set l := n/2 with hl
+      by_cases h : Odd n
+      · have hl' : n = 2*l + 1 := Eq.symm (Nat.two_mul_div_two_add_one_of_odd h)
+        simp_rw[hl', walshoddasfun]
+
+
+        sorry
+      · sorry
+    · simp at hk0
+      have hk1 : k - 2^M < 2^ M := by sorry
+      sorry
 
 end Walsh
 
