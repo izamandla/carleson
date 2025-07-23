@@ -302,7 +302,7 @@ theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ
     simp only [zpow_neg, zpow_natCast]
     exact hx2
 
-theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M + 1 :ℤ) (k - 2^(M-1)) := by
+theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M + 1 :ℤ) ((k - 2^(M-1)):ℤ) := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
   obtain ⟨ hx1, hx2 ⟩ := hx

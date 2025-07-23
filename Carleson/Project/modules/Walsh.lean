@@ -1486,10 +1486,10 @@ theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
   exact h this
 
 
-theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
+/--theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
 
 theorem ago2 {M k : ℕ} {x : ℝ} (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by sorry
-
+--/
 
 theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' M with M ih generalizing k n
@@ -1511,58 +1511,121 @@ theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ
       have hl0 : l < 2^M := by
         rw[hl', pow_add] at hn
         simp at hn
-
-        sorry
-      obtain ⟨ p, hp⟩ := ih hl0 hk'
-      use p
-      intro x hx
-      by_cases h0 : x ∈ Ico 0 0.5
-      · have h01 : x ∉ Ico 0.5 1 := by sorry
+        linarith
+      by_cases hk' :  k < 2^ M
+      · obtain ⟨ p, hp⟩ := ih hl0 hk'
+        use p
+        intro x hx
+        have h0 : x ∈ Ico 0 0.5 := by
+          set N := M + 1 with hN
+          have hN' : N - 1 = M := rfl
+          rw[← hN'] at hk'
+          rw[← infirsthalf (Ne.symm (Nat.zero_ne_add_one M))] at hk'
+          simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hk'
+          exact hk' hx
+        have h01 : x ∉ Ico 0.5 1 := by
+          simp only [mem_Ico] at h0
+          refine notMem_Ico_of_lt h0.2
         simp only [h0, indicator_of_mem, h01, not_false_eq_true, indicator_of_notMem, add_zero]
         simp_rw[← neg_add] at hx
         norm_cast at hx
         apply xinfirsthalf' at hx
-        simp at hx
-
-        sorry
-      · have h01 : x ∈ Ico 0.5 1 := by sorry
-
-        sorry
+        simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg,
+          neg_add_cancel_right] at hx
+        exact hp (2 * x) hx
+      · have hk1 : (k - 2^M) < 2^M := by
+          apply Nat.sub_lt_left_of_lt_add
+          · simp only [not_lt] at hk'
+            exact hk'
+          · rw [← Nat.two_pow_succ]
+            exact hk
+        obtain ⟨ p, hp⟩ := ih hl0 hk1
+        use -p
+        intro x hx
+        have h01 : x ∈ Ico 0.5 1 := by
+          set N := M + 1 with hN
+          have hN' : N - 1 = M := rfl
+          rw[← hN'] at hk'
+          simp only [not_lt] at hk'
+          rw[← insecondhalf hk (Ne.symm (Nat.zero_ne_add_one M)) ] at hk'
+          simp only [hN, Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hk'
+          exact hk' hx
+        have h0 : x ∉ Ico 0 0.5 := by
+          simp only [mem_Ico] at h01
+          refine notMem_Ico_of_ge h01.1
+        simp only [h0, not_false_eq_true, indicator_of_notMem, h01, indicator_of_mem, zero_add, neg_inj]
+        simp_rw[← neg_add] at hx
+        norm_cast at hx
+        have : 1 + M ≠ 0 := Ne.symm (NeZero.ne' (1 + M))
+        apply xinsecondhalf' at hx
+        simp only [ne_eq, Nat.add_eq_zero, one_ne_zero, false_and, not_false_eq_true, Nat.cast_add,
+          Nat.cast_one, neg_add_rev, Int.reduceNeg, neg_add_cancel_right, add_tsub_cancel_left,
+          forall_const] at hx
+        rw[hp (2 * x - 1) ]
+        have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by
+          sorry
+        rw[this]
+        exact hx
     · simp only [Nat.not_odd_iff_even] at hn'
       have hl' : n = 2*l  := Eq.symm (Nat.two_mul_div_two_of_even hn')
       rw[hl', @walshevenasfun]
       have hl0 : l < 2^M := by
         rw[hl', pow_add, mul_comm, pow_one, mul_lt_mul_iff_of_pos_right (two_pos)] at hn
         exact hn
-      obtain ⟨ p, hp⟩ := ih hl0 hk'
-      use p
-      intro x hx
+      by_cases hk' :  k < 2^ M
+      · obtain ⟨ p, hp⟩ := ih hl0 hk'
+        use p
+        intro x hx
+        have h0 : x ∈ Ico 0 0.5 := by
+          set N := M + 1 with hN
+          have hN' : N - 1 = M := rfl
+          rw[← hN'] at hk'
+          rw[← infirsthalf (Ne.symm (Nat.zero_ne_add_one M))] at hk'
+          simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hk'
+          simp only [hN, Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hx
+          exact hk' hx
+        have h01 : x ∉ Ico 0.5 1 := by
+          simp only [mem_Ico] at h0
+          refine notMem_Ico_of_lt h0.2
+        simp only [Pi.add_apply, h0, indicator_of_mem, h01, not_false_eq_true, indicator_of_notMem,
+          add_zero]
+        apply xinfirsthalf' at hx
+        simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg,
+          neg_add_cancel_comm] at hx
+        exact hp (2 * x) hx
+      · have hk1 : (k - 2^M) < 2^M := by
+          apply Nat.sub_lt_left_of_lt_add
+          · simp only [not_lt] at hk'
+            exact hk'
+          · rw [← Nat.two_pow_succ]
+            exact hk
+        obtain ⟨ p, hp⟩ := ih hl0 hk1
+        use p
+        intro x hx
+        have h01 : x ∈ Ico 0.5 1 := by
+          set N := M + 1 with hN
+          have hN' : N - 1 = M := rfl
+          rw[← hN'] at hk'
+          simp only [not_lt] at hk'
+          rw[← insecondhalf hk (Ne.symm (Nat.zero_ne_add_one M)) ] at hk'
+          simp only [hN, Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hk'
+          simp only [hN, Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg] at hx
+          exact hk' hx
+        have h0 : x ∉ Ico 0 0.5 := by
+          simp only [mem_Ico] at h01
+          refine notMem_Ico_of_ge h01.1
+        simp only [Pi.add_apply, h0, not_false_eq_true, indicator_of_notMem, h01, indicator_of_mem,
+          zero_add]
+        have : 1 + M ≠ 0 := Ne.symm (NeZero.ne' (1 + M))
+        apply xinsecondhalf' at hx
+        simp only [ne_eq, Nat.add_eq_zero, one_ne_zero, and_false, not_false_eq_true, Nat.cast_add,
+          Nat.cast_one, neg_add_rev, Int.reduceNeg, neg_add_cancel_comm, add_tsub_cancel_right,
+          forall_const] at hx
+        rw[hp (2 * x - 1) ]
+        have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by sorry
+        rw[this]
+        exact hx
 
-
-      sorry
-
-
-theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
-  induction' M with M ih generalizing k n
-  · simp only [pow_zero, Nat.lt_one_iff] at hn
-    simp only [pow_zero, Nat.lt_one_iff] at hk
-    simp only [CharP.cast_eq_zero, neg_zero, hk, dyadicInterval_of_n_zero, zpow_zero, mem_Ico, hn]
-    use 1
-    intro x hx
-    rw[walsh_zero hx.1 hx.2]
-  · by_cases hk0 : k < 2^M
-    · have hkx :  dyadicInterval (-↑(M + 1)) ↑k ⊆ Ico 0 0.5 := by sorry
-      set l := n/2 with hl
-      by_cases h : Odd n
-      · have hl' : n = 2*l + 1 := Eq.symm (Nat.two_mul_div_two_add_one_of_odd h)
-        simp_rw[hl', walshoddasfun]
-
-
-        sorry
-      · sorry
-    · simp at hk0
-      have hk1 : k - 2^M < 2^ M := by sorry
-      sorry
 
 end Walsh
 
