@@ -1486,12 +1486,13 @@ theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
   exact h this
 
 
-/--theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
+/--
+theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
 
 theorem ago2 {M k : ℕ} {x : ℝ} (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by sorry
---/
+-/
 
-theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
+theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' M with M ih generalizing k n
   · simp only [pow_zero, Nat.lt_one_iff] at hn
     simp only [pow_zero, Nat.lt_one_iff] at hk
@@ -1627,8 +1628,32 @@ theorem walshonint' {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ
         exact hx
 
 
+theorem walshonintnext {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∀ x ∈  dyadicInterval (-M : ℤ) k, ∀ y ∈  dyadicInterval (-M : ℤ) k , walsh n x = walsh n y := by
+  intro x hx y hy
+  obtain ⟨c, hc⟩ := walshonint hn hk
+  apply hc at hy
+  apply hc at hx
+  rw[hx, hy]
+
+theorem walshonintval {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M): (dyadicInterval (-M : ℤ) k).indicator (1) = (dyadicInterval (-M : ℤ) k).indicator (walsh n)  ∨ (dyadicInterval (-M : ℤ) k).indicator (- 1 ) = (dyadicInterval (-M : ℤ) k).indicator (walsh n) := by
+
+
+  sorry
+
+
+def val (M n k : ℕ) (hn : n < 2 ^ M) (hk : k < 2 ^ M): ℝ  :=
+  (walshonint (M := M) (n := n ) (k := k) hn hk ).choose
+
+
+
 end Walsh
 
+/-
+theorem valexplicit (M n k : ℕ) (hn : n < 2 ^ M) (hk : k < 2 ^ M): val M n k hn hk = 1 ∨ val M n k hn hk = -1 := by
+  obtain hp  := (walshonint (M := M) (n := n ) (k := k) hn hk ).choose_spec
+
+
+  sorry  --/
 
 
 ---measurability

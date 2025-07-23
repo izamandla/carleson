@@ -979,8 +979,18 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
 
 
 theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
+  --rw[MeasureTheory.integral_eq_const]
+
 
   sorry
+theorem aboutwalshhelp' {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
+
+  by_cases h : Walsh.walsh n x  = 1
+  ·
+    sorry
+  · sorry
+
+
 
 
 
