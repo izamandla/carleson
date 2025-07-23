@@ -978,36 +978,81 @@ theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.ran
 
 
 
-theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
-  --rw[MeasureTheory.integral_eq_const]
-
-
-  sorry
-theorem aboutwalshhelp' {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
-
-  by_cases h : Walsh.walsh n x  = 1
-  ·
-    sorry
-  · sorry
 
 
 
+theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k): (2^(-M :ℤ )) * Walsh.walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , Walsh.walsh n y := by
+  obtain  hp :=  (Walsh.walshonint ( M := M ) ( n := n ) ( k := k) hn hk).choose_spec
+  set p := (Walsh.walshonint ( M := M ) ( n := n ) ( k := k) hn hk).choose with hp1
+  apply hp at hx
+  rw[hx]
+  have h : ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), Walsh.walsh n y = ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (k + 1)), p := by
+    refine setIntegral_congr_fun ?_ hp
+    simp
+  rw[h]
+  simp only [zpow_natCast, integral_const, MeasurableSet.univ, measureReal_restrict_apply,
+    univ_inter, Real.volume_real_Ico, smul_eq_mul, mul_eq_mul_right_iff]
+  left
+  have : (2 ^ (-M :ℤ ) :ℝ ) * (k + 1) - 2 ^ (-M :ℤ ) * ↑k=  2^ (-M :ℤ ) := by
+    linarith
+  rw[this]
+  simp
 
 
-theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx1 : 2 ^ (-M : ℤ) * k ≤ x) (hx2 : x < 2 ^ (-M : ℤ) * (k + 1)): Walsh.walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by
+
+
+
+
+theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k): Walsh.walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by
   rw[← mul_right_inj' (a := (2^(-M :ℤ )) ) ]
-  · rw[aboutwalshhelp hn hk hx1 hx2]
+  · rw[aboutwalshhelp hn hk hx]
     rw[notsobasiccoef]
-    · sorry
+    · rw[← MeasureTheory.integral_mul_const, ← MeasureTheory.integral_const_mul]
+      simp_rw[mul_comm, ← mul_assoc]
+      rw[← MeasureTheory.integral_indicator (measurableSet_Ico), ← MeasureTheory.integral_indicator (measurableSet_Ico)]
+      congr
+      ext x
+      simp only [indicator, zpow_neg, zpow_natCast, mem_Ico]
+      split_ifs with h1 h2 h3
+      · rw[walshhaarprop ?_ h2.1 h2.2]
+        · simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply,
+          mul_ite, mul_zero, ite_mul, zero_mul]
+          split_ifs with h4
+          · rw[← mul_comm]
+            conv_lhs => rw[← mul_one (a:= Walsh.walsh n x)]
+            rw [@mul_eq_mul_left_iff]
+            left
+            rw[mul_assoc,←  Real.rpow_add (zero_lt_two)]
+            simp
+          · simp_rw[mul_comm] at h4
+            exact False.elim (h4 h1)
+        · simp only [Finset.mem_range]
+          exact hk
+      · rw[Decidable.not_and_iff_or_not] at h2
+        simp only [not_le, not_lt, ← ge_iff_le] at h2
+        rw[Walsh.walsh_zero_outside_domain n x h2]
+      · exfalso
+        --rw[Decidable.not_and_iff_or_not] at h1
+        have : ↑k * (2 ^ M)⁻¹ =  (2 ^ (-M : ℤ) :ℝ ) * k := by sorry
+
+        sorry
+      · simp
     · simp only [Finset.mem_range]
       exact hn
   · simp
 
 
 
+theorem ayayayhelp  {M n k: ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hn : n < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
+  rw[walshhaarprop hk (Walsh.ago)]
+  sorry
+
+
 
 --to podobno powinno działać
 theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
+  ext x
+
   sorry
 
 

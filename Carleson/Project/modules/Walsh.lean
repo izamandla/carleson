@@ -1486,11 +1486,35 @@ theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
   exact h this
 
 
-/--
-theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by sorry
 
-theorem ago2 {M k : ℕ} {x : ℝ} (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by sorry
--/
+theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by
+  apply le_trans ?_ hx1
+  simp
+
+
+theorem ago2 {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by
+  apply lt_of_lt_of_le hx1
+  rw[Nat.lt_iff_add_one_le] at hk
+  simp only [zpow_neg, zpow_natCast]
+  rw[inv_mul_le_one₀]
+  · norm_cast
+  · simp
+
+theorem ago {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx : x ∈  dyadicInterval (-M : ℤ) k) : 0 ≤ x ∧ x<1 := by
+  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
+  obtain ⟨ hx1 , hx2 ⟩ := hx
+  constructor
+  · apply ago1 (M := M) (k := k)
+    simp only [zpow_neg, zpow_natCast]
+    exact hx1
+  · apply ago2 (M := M) (k := k) hk
+    simp only [zpow_neg, zpow_natCast]
+    exact hx2
+
+
+
+
+
 
 theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' M with M ih generalizing k n
