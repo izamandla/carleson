@@ -1093,10 +1093,24 @@ theorem ayayayhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx
 --to podobno powinno działać
 theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
   ext x
-  by_cases hx : x<0 ∨ 1 ≤ x
-  · sorry
+  by_cases hx : x<0 ∨  x ≥ 1
+  · rw[Walsh.walsh_zero_outside_domain n x hx]
+    rw[Finset.sum_eq_zero]
+    intro k hk
+    rw[notsobasiccoef]
+    · simp only [mul_eq_zero]
+      right
+      unfold walshhaar
+      simp only [mul_eq_zero]
+      left
+      rw[Walsh.walsh_zero_outside_domain (2 ^ M) x hx]
+    · simp only [Finset.mem_range]
+      exact hn
+  simp at hx
   set p := (extdi (M := M ) (x := x)).choose with hp
-  --rw[ayayayhelp ?_ ]
+
+  --rw[ayayayhelp (k:= p) ?_ ]
+
 
 
 
