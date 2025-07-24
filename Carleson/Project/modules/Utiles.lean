@@ -1032,9 +1032,9 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
         simp only [not_le, not_lt, ← ge_iff_le] at h2
         rw[Walsh.walsh_zero_outside_domain n x h2]
       · exfalso
-        --rw[Decidable.not_and_iff_or_not] at h1
-        have : ↑k * (2 ^ M)⁻¹ =  (2 ^ (-M : ℤ) :ℝ ) * k := by sorry
-
+        rw[Decidable.not_and_iff_or_not] at h1
+        simp only [not_le, not_lt] at h1
+        rcases h1 with h
         sorry
       · simp
     · simp only [Finset.mem_range]
@@ -1043,9 +1043,27 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
 
 
 
-theorem ayayayhelp  {M n k: ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hn : n < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
-  rw[walshhaarprop hk (Walsh.ago)]
-  sorry
+theorem ayayayhelp  {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hn : n < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
+  have : ∑ l ∈ Finset.range (2 ^ M), coef M l n * walshhaar M l x  = (∑ l ∈ Finset.range (2 ^ M) \ {k}, coef M l n * walshhaar M l x)  + coef M k n * walshhaar M k x := by
+      exact Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦ coef M x_1 n * walshhaar M x_1 x
+  rw[this]
+  simp only [add_eq_right]
+  apply Finset.sum_eq_zero
+  intro l hl
+  rw[walshhaarprop ]
+  · have h : ¬ (x ∈  Ico ((2 ^ (-M :ℤ ) * l) :ℝ ) (2 ^ (-M :ℤ ) * (↑l + 1)) ):= by
+
+      sorry
+
+    sorry
+  · have : Finset.range (2 ^ M) \ {k} ⊆ Finset.range (2 ^ M) := by
+      simp
+    exact this hl
+  · simp only [Finset.mem_range] at hk
+    apply (Walsh.ago hk hx).1
+  · simp only [Finset.mem_range] at hk
+    apply (Walsh.ago hk hx).2
+
 
 
 

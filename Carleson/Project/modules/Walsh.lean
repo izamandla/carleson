@@ -1500,7 +1500,7 @@ theorem ago2 {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx1 : x < 2 ^ (-M : ℤ) * 
   · norm_cast
   · simp
 
-theorem ago {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx : x ∈  dyadicInterval (-M : ℤ) k) : 0 ≤ x ∧ x<1 := by
+theorem ago {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) : 0 ≤ x ∧ x<1 := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   obtain ⟨ hx1 , hx2 ⟩ := hx
   constructor
