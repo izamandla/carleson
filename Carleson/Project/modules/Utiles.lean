@@ -1031,11 +1031,21 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
       · rw[Decidable.not_and_iff_or_not] at h2
         simp only [not_le, not_lt, ← ge_iff_le] at h2
         rw[Walsh.walsh_zero_outside_domain n x h2]
-      · exfalso
-        rw[Decidable.not_and_iff_or_not] at h1
-        simp only [not_le, not_lt] at h1
-        rcases h1 with h
-        sorry
+      · --rw[← mem_Ico] at h1
+        rw[walshhaarprop ?_ h3.1 h3.2]
+        · simp only [indicator]
+          rw[mul_assoc]
+          simp only [zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, ite_mul,
+            zero_mul, mul_ite, mul_zero, right_eq_ite_iff, zero_eq_mul, mul_eq_zero, inv_eq_zero,
+            pow_eq_zero_iff', OfNat.ofNat_ne_zero, ne_eq, false_and, Nat.ofNat_nonneg, false_or,
+            or_self_left, and_imp]
+          intro hh1 hh2
+          rw[mul_comm] at hh1
+          rw[mul_comm] at hh2
+          exfalso
+          exact  h1 ⟨hh1, hh2⟩
+        · simp only [Finset.mem_range]
+          exact hk
       · simp
     · simp only [Finset.mem_range]
       exact hn
@@ -1043,7 +1053,7 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
 
 
 
-theorem ayayayhelp  {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hn : n < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
+theorem ayayayhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
   have : ∑ l ∈ Finset.range (2 ^ M), coef M l n * walshhaar M l x  = (∑ l ∈ Finset.range (2 ^ M) \ {k}, coef M l n * walshhaar M l x)  + coef M k n * walshhaar M k x := by
       exact Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦ coef M x_1 n * walshhaar M x_1 x
   rw[this]
@@ -1051,11 +1061,24 @@ theorem ayayayhelp  {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
   apply Finset.sum_eq_zero
   intro l hl
   rw[walshhaarprop ]
-  · have h : ¬ (x ∈  Ico ((2 ^ (-M :ℤ ) * l) :ℝ ) (2 ^ (-M :ℤ ) * (↑l + 1)) ):= by
-
-      sorry
-
-    sorry
+  · simp only [zpow_neg, zpow_natCast, mul_eq_zero, indicator_apply_eq_zero, mem_Ico, Pi.pow_apply,
+      Pi.ofNat_apply, Nat.ofNat_nonneg]
+    right
+    intro h
+    have h1 : x ∈ dyadicInterval (-↑M) l := by
+      simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq]
+      exact h
+    have h2 : dyadicInterval  (-↑M) ↑l ∩ dyadicInterval  (-↑M) k = ∅ := by
+      apply dyadicInterval_disjoint
+      simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hl
+      rw [@Ne.eq_def]
+      norm_cast
+      exact hl.2
+    exfalso
+    have : x ∉ dyadicInterval (-↑M) ↑k := by
+      rw[← Set.disjoint_iff_inter_eq_empty ] at h2
+      exact Disjoint.notMem_of_mem_left h2 h1
+    exact this hx
   · have : Finset.range (2 ^ M) \ {k} ⊆ Finset.range (2 ^ M) := by
       simp
     exact this hl
@@ -1070,6 +1093,12 @@ theorem ayayayhelp  {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
 --to podobno powinno działać
 theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
   ext x
+  by_cases hx : x<0 ∨ 1 ≤ x
+  · sorry
+  set p := (extdi (M := M ) (x := x)).choose with hp
+  --rw[ayayayhelp ?_ ]
+
+
 
   sorry
 

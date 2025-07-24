@@ -366,6 +366,13 @@ theorem dyadicInterval_cover (k : ℤ) :
     apply zpow_pos ?ha k
   exact Filter.frequently_principal.mp fun a ↦ a h1 h2
 
+
+theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
+  refine mem_iUnion.mp ?_
+  rw[dyadicInterval_cover]
+  simp
+
+
 /--
 If `n < n'`, then the dyadic intervals at scale `k` indexed by `n` and `n'` are disjoint.
 -/
