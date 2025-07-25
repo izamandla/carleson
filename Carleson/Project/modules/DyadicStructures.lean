@@ -382,7 +382,9 @@ theorem dyadicInterval_cover01 (k : ℕ) :
         sorry
       apply lt_of_lt_of_le this
       simp
-    · sorry
+    · constructor
+      · sorry
+      · sorry
   · intro h
     obtain ⟨ i, hi1, hi2⟩ := h
     simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hi2
@@ -404,10 +406,17 @@ theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
   rw[dyadicInterval_cover]
   simp
 
-theorem extdiin01 {M : ℤ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1): ∃ k : ℕ , x ∈ dyadicInterval M k := by
+theorem extdiin01 {M : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1): ∃  k ∈  Finset.range (2^M)  , x ∈ dyadicInterval (-M :ℤ ) k := by
+  have hx : x ∈ Ico 0 1 := by
+    simp only [mem_Ico]
+    constructor
+    · exact hx1
+    · exact hx2
+  rw[dyadicInterval_cover01 M ] at hx
+  simp only [Finset.mem_range, mem_iUnion, exists_prop] at hx
+  simp only [Finset.mem_range]
+  exact hx
 
-  have hx : x ∈ Ico 0 1 := by sorry
-  sorry
 
 /--
 If `n < n'`, then the dyadic intervals at scale `k` indexed by `n` and `n'` are disjoint.

@@ -1588,7 +1588,8 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
           forall_const] at hx
         rw[hp (2 * x - 1) ]
         have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by
-          sorry
+          push_neg at hk'
+          norm_cast
         rw[this]
         exact hx
     · simp only [Nat.not_odd_iff_even] at hn'
@@ -1647,7 +1648,9 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
           Nat.cast_one, neg_add_rev, Int.reduceNeg, neg_add_cancel_comm, add_tsub_cancel_right,
           forall_const] at hx
         rw[hp (2 * x - 1) ]
-        have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by sorry
+        have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by
+          push_neg at hk'
+          norm_cast
         rw[this]
         exact hx
 
@@ -1659,7 +1662,7 @@ theorem walshonintnext {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∀ x �
   apply hc at hx
   rw[hx, hy]
 
-theorem walshonintval {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M): (dyadicInterval (-M : ℤ) k).indicator (1) = (dyadicInterval (-M : ℤ) k).indicator (walsh n)  ∨ (dyadicInterval (-M : ℤ) k).indicator (- 1 ) = (dyadicInterval (-M : ℤ) k).indicator (walsh n) := by
+/-theorem walshonintval {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M): (dyadicInterval (-M : ℤ) k).indicator (1) = (dyadicInterval (-M : ℤ) k).indicator (walsh n)  ∨ (dyadicInterval (-M : ℤ) k).indicator (- 1 ) = (dyadicInterval (-M : ℤ) k).indicator (walsh n) := by
 
 
   sorry
@@ -1669,7 +1672,7 @@ def val (M n k : ℕ) (hn : n < 2 ^ M) (hk : k < 2 ^ M): ℝ  :=
   (walshonint (M := M) (n := n ) (k := k) hn hk ).choose
 
 
-
+-/
 end Walsh
 
 /-

@@ -1106,15 +1106,22 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ Walsh.walsh n x) = (fun
       rw[Walsh.walsh_zero_outside_domain (2 ^ M) x hx]
     · simp only [Finset.mem_range]
       exact hn
-  simp at hx
-  set p := (extdi (M := M ) (x := x)).choose with hp
-
-  --rw[ayayayhelp (k:= p) ?_ ]
-
-
-
-
-  sorry
+  simp only [ge_iff_le, not_or, not_lt, not_le] at hx
+  obtain ⟨  p, hp1, hp2 ⟩  := (extdiin01 hx.1 hx.2  (M := M ) (x := x))
+  rw[ayayayhelp (k:= p) hp1 hp2 ]
+  simp only [Finset.mem_range] at hp1
+  rw[aboutwalsh hn hp1 hp2]
+  simp only [mul_eq_mul_left_iff]
+  left
+  rw[← Finset.mem_range] at hp1
+  rw[walshhaarprop hp1 hx.1 hx.2 ]
+  rw[indicator]
+  rw[intervalform_dyadicInterval ] at hp2
+  split_ifs with h1
+  · simp
+  · exfalso
+    simp only [zpow_natCast, Int.cast_natCast] at hp2
+    exact h1 hp2
 
 
 
