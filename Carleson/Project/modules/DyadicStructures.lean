@@ -367,9 +367,36 @@ theorem dyadicInterval_cover (k : ℤ) :
   exact Filter.frequently_principal.mp fun a ↦ a h1 h2
 
 
-theorem dyadicInterval_cover01 (k : ℤ) :
-  Ico 0 1 ⊆ ⋃ n : ℕ , dyadicInterval k n := by
-  sorry
+theorem dyadicInterval_cover01 (k : ℕ) :
+  Ico 0 1 = ⋃ ( n ∈ Finset.range (2^k) ) , dyadicInterval (-k :ℤ) n := by
+  ext x
+  simp only [mem_Ico, mem_iUnion, exists_prop]
+  constructor
+  · intro h
+    simp only [dyadicInterval, zpow_neg, zpow_natCast, mem_setOf_eq]
+    use Nat.floor (x / (2^(-k :ℤ ) : ℝ))
+    constructor
+    · simp only [zpow_neg, zpow_natCast, div_inv_eq_mul, Finset.mem_range]
+      have : ⌊x * 2 ^ k⌋₊ < ⌊1 * 2 ^ k⌋₊ := by
+        --Nat.floor_le_floor
+        sorry
+      apply lt_of_lt_of_le this
+      simp
+    · sorry
+  · intro h
+    obtain ⟨ i, hi1, hi2⟩ := h
+    simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hi2
+    obtain ⟨ hx1 , hx2 ⟩ := hi2
+    constructor
+    · apply le_trans ?_ hx1
+      simp
+    · apply lt_of_lt_of_le hx2
+      simp only [Finset.mem_range, Nat.lt_iff_add_one_le] at hi1
+      rw[inv_mul_le_one₀]
+      · norm_cast
+      · simp
+
+
 
 
 theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
