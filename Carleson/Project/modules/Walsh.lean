@@ -1662,26 +1662,5 @@ theorem walshonintnext {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∀ x �
   apply hc at hx
   rw[hx, hy]
 
-/-theorem walshonintval {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M): (dyadicInterval (-M : ℤ) k).indicator (1) = (dyadicInterval (-M : ℤ) k).indicator (walsh n)  ∨ (dyadicInterval (-M : ℤ) k).indicator (- 1 ) = (dyadicInterval (-M : ℤ) k).indicator (walsh n) := by
 
-
-  sorry
-
-
-def val (M n k : ℕ) (hn : n < 2 ^ M) (hk : k < 2 ^ M): ℝ  :=
-  (walshonint (M := M) (n := n ) (k := k) hn hk ).choose
-
-
--/
 end Walsh
-
-/-
-theorem valexplicit (M n k : ℕ) (hn : n < 2 ^ M) (hk : k < 2 ^ M): val M n k hn hk = 1 ∨ val M n k hn hk = -1 := by
-  obtain hp  := (walshonint (M := M) (n := n ) (k := k) hn hk ).choose_spec
-
-
-  sorry  --/
-
-
----measurability
---#min_imports

@@ -253,7 +253,7 @@ Relation between explicit forms of binary representation set of `n` and `2n+1`.
 -/
 
 theorem binaryRepresentationSet_equiv2plus1result (n : ℕ) : ∑ k ∈ binaryRepresentationSet n,
-  2 ^ (k + 1)  + 1=  ∑ k in binaryRepresentationSet (2*n +1), 2^k:= by
+  2 ^ (k + 1)  + 1=  ∑ k ∈ binaryRepresentationSet (2 * n + 1), 2 ^ k:= by
   rw[binaryRepresentationSet_equiv2plus1resulthelp2, add_left_inj]
   let i : ℕ → ℕ  := fun i ↦ i + 1
   apply Finset.sum_nbij i
