@@ -251,29 +251,68 @@ theorem haarFunctionScaled_outside (k n : ℤ) (x : ℝ)
 
 theorem haarscl_di (k n : ℤ) (x : ℝ) :
   haarFunctionScaled k n x = (dyadicInterval (k-1) (2*n) ).indicator (2 ^ ((-k / 2) : ℝ)) x + (dyadicInterval (k-1) (2*n + 1) ).indicator (-2 ^ ((-k / 2) : ℝ)) x := by
-    unfold dyadicInterval
-    simp only [indicator, mem_setOf_eq, Pi.pow_apply, Pi.ofNat_apply]
-    simp only [Int.cast_mul, Int.cast_ofNat]
-    /-split_ifs with h
-    · rw[haarFunctionScaled_left_half]
-      · obtain ⟨ h1, h2 ⟩ := h
-        rw[zpow_neg, sub_nonneg]
-        rw[le_inv_mul_iff₀ ]
-        · rw[← mul_assoc, ← zpow_add_one₀ (a:= 2) (n:= (k-1)) ] at h1
-          · simp only [sub_add_cancel] at h1
-            exact h1
-          · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true]
-        · refine zpow_pos ?_ k
-          exact zero_lt_two
-      · obtain ⟨ h1, h2 ⟩ := h
-        /-rw[mul_comm, ← mul_inv_lt_iff₀ (zpow_pos (zero_lt_two) k )] at h2
-        rw[zpow_neg, sub_lt_iff_lt_add', mul_comm]
-        apply lt_trans-/
+    have obv : (2 ^ (k - 1) :ℝ ) * 2 = 2^k := by
+          have : k = (k-1)+1 := by
+            simp only [sub_add_cancel]
+          conv_rhs => rw[this, zpow_add₀ (two_ne_zero)]
+          simp
+    by_cases h1 : x ∈ dyadicInterval (k-1) (2*n)
+    · have h2 : x ∉ dyadicInterval (k-1) (2*n + 1) := by
+        have : Disjoint (dyadicInterval (k - 1) (2 * n + 1)) (dyadicInterval (k - 1) (2 * n )) := by
+          refine disjoint_iff_inter_eq_empty.mpr ?_
+          refine dyadicInterval_disjoint ?_
+          simp
+        exact Disjoint.notMem_of_mem_left (id (Disjoint.symm this)) h1
+      simp only [h1, indicator_of_mem, Pi.pow_apply, Pi.ofNat_apply, h2, not_false_eq_true,
+        indicator_of_notMem, add_zero]
+      simp only [dyadicInterval, Int.cast_mul, Int.cast_ofNat, mem_setOf_eq] at h1
+      obtain ⟨ h11, h12 ⟩ := h1
+      apply haarFunctionScaled_left_half
+      · simp only [zpow_neg, sub_nonneg]
+        rw[ ← mul_assoc] at h11
+        rw[le_inv_mul_iff₀ (zpow_pos (two_pos) k)]
+        rw[obv] at h11
+        exact h11
+      · rw [@sub_lt_iff_lt_add']
+        simp only [zpow_neg, one_div]
+        refine (inv_mul_lt_iff₀' (zpow_pos (two_pos) k)).mpr ?_
+        rw[mul_add, ← mul_assoc, obv] at h12
+        linarith
+    · by_cases h2 : x ∈ dyadicInterval (k-1) (2*n + 1)
+      · simp only [h1, not_false_eq_true, indicator_of_notMem, h2, indicator_of_mem, Pi.neg_apply,
+        Pi.pow_apply, Pi.ofNat_apply, zero_add]
+        simp only [dyadicInterval, Int.cast_mul, Int.cast_ofNat, mem_setOf_eq] at h2
+        obtain ⟨ h21, h22 ⟩ := h2
+        apply haarFunctionScaled_right_half
+        · simp only [one_div, zpow_neg]
+          simp only [Int.cast_add, Int.cast_mul, Int.cast_ofNat, Int.cast_one, mul_add, ← mul_assoc, obv, mul_one] at h21
+          rw [@le_sub_iff_add_le, le_inv_mul_iff₀ (zpow_pos (two_pos) k), mul_add]
+          linarith
+        · simp only [Int.cast_add, Int.cast_mul, Int.cast_ofNat, Int.cast_one, add_assoc, one_add_one_eq_two, mul_add, ← mul_assoc, obv] at h22
+          rw [@sub_lt_iff_lt_add']
+          simp only [zpow_neg]
+          refine (inv_mul_lt_iff₀' (zpow_pos (two_pos) k)).mpr ?_
+          linarith
+      · simp only [h1, not_false_eq_true, indicator_of_notMem, h2, add_zero]
+        apply haarFunctionScaled_outside
+        have h3 : x ∉ dyadicInterval k n := by
+          rw[dyadicInterval_split]
+          simp only [mem_union, not_or]
+          exact Classical.not_imp.mp fun a ↦ h2 (a h1)
+        simp only [dyadicInterval, mem_setOf_eq, not_lt, Decidable.not_and_iff_or_not, not_le] at h3
+        rcases h3 with h|h
+        · left
+          rw [@sub_lt_zero]
+          simp only [zpow_neg]
+          refine (inv_mul_lt_iff₀' (zpow_pos (two_pos) k)).mpr ?_
+          linarith
+        · right
+          simp only [zpow_neg, ge_iff_le]
+          rw [@le_sub_iff_add_le]
+          refine (le_inv_mul_iff₀' (zpow_pos (two_pos) k)).mpr ?_
+          linarith
 
-        sorry
-    · rw[haarFunctionScaled_outside]
--/
-    sorry
+
 
 
 
