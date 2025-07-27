@@ -1309,7 +1309,7 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)): ∑ j �
 
 
 
-theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
+theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
@@ -1349,10 +1349,38 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
             · congr
               ext m
               rw[← MeasureTheory.integral_mul_const]
-            · intro m hm --here just integrability
-              sorry
-          · intro i hi --here just integrability
-            sorry
+            · intro m hm
+              have : (fun a ↦ f a * Walsh.walsh m a * Walsh.walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 m)= (fun a ↦  ∑ x_1 ∈ Finset.range (2 ^ M), ( Walsh.walsh m a  * f a ) *(Walsh.walsh i x* coef M x_1 i * coef M x_1 m) ):= by
+                ext a
+                rw[mul_comm, Finset.sum_mul]
+                congr
+                ext y
+                linarith
+              simp_rw[this]
+              apply MeasureTheory.integrable_finset_sum
+              intro j hj
+              apply MeasureTheory.Integrable.mul_const
+              apply MeasureTheory.BoundedCompactSupport.integrable_mul
+              · apply MeasureTheory.BoundedCompactSupport.restrict
+                exact Walsh.bcs_walsh
+              · exact hf'
+          · intro i hi
+            apply MeasureTheory.integrable_finset_sum
+            intro j hj
+            have : (fun a ↦ f a * Walsh.walsh j a * Walsh.walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 j) = (fun a ↦ ∑ x_1 ∈ Finset.range (2 ^ M),  ( Walsh.walsh j a * f a  )* (Walsh.walsh i x * coef M x_1 i * coef M x_1 j) ):= by
+              ext a
+              rw[mul_comm, Finset.sum_mul]
+              congr
+              ext y
+              linarith
+            simp_rw[this]
+            apply MeasureTheory.integrable_finset_sum
+            intro j hj
+            apply MeasureTheory.Integrable.mul_const
+            apply MeasureTheory.BoundedCompactSupport.integrable_mul
+            · apply MeasureTheory.BoundedCompactSupport.restrict
+              exact Walsh.bcs_walsh
+            · exact hf'
     simp_rw[← this]
     apply Finset.sum_congr
     · simp
@@ -1397,13 +1425,13 @@ theorem lemma1_1' {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ
 
 
 
-theorem lemma1_1 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
+theorem lemma1_1 {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), Walsh.walshInnerProduct f i * Walsh.walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
     (∫ y in Set.Ico 0 1,
       f y * Walsh.walsh (2 ^ M) y * (Haar.haarFunctionScaled (-M) k y) * Walsh.walsh (2 ^ M) x *
         (Haar.haarFunctionScaled (-M) k x)):= by
-  rw[lemma1_1' h1 h2 f hf']
+  rw[lemma1_1' f hf']
   congr
   ext k
   rw[← MeasureTheory.integral_mul_const]
@@ -1437,7 +1465,6 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
       ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
     (Haar.haarFunctionScaled (-↑M) (↑k) y * Haar.haarFunctionScaled (-↑M) (↑k) x ):= by
           linarith
-
         rw[this]
         conv_rhs => rw[← one_mul (a:= Haar.haarFunctionScaled (-↑M) (↑k) y), mul_assoc]
         simp only [mul_eq_mul_right_iff]
@@ -1641,7 +1668,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * (Haar.haarFunctionScaled (-M) k y)) *
         Walsh.walsh N x *
       (Haar.haarFunctionScaled (-M) k x) := by
-  rw [lemma1_1 h1 h2 f hf']
+  rw [lemma1_1 f hf']
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[← MeasureTheory.integral_finset_sum, ← MeasureTheory.integral_finset_sum]
   · apply MeasureTheory.setIntegral_congr_fun
