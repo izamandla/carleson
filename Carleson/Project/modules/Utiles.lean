@@ -1458,7 +1458,7 @@ theorem lemma1_helphelphelp {n m : ℤ} {x : ENNReal} (hx : 1 < x) (hx2 : x ≠ 
   · apply ENNReal.zpow_le_of_le hx.le
 
 
-theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1) : ∑ i ∈ Finset.range (2 ^ M),
+theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (x y : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) : ∑ i ∈ Finset.range (2 ^ M),
     (∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
       Haar.haarFunctionScaled (-↑M) (↑i) y *
            ( ∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m x) *
@@ -1664,7 +1664,7 @@ theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : 
           congr
           ext i
           linarith
-      rw[this,lemma1_2helphelp h1 h2 f x y hy1 hy2 hx1 hx2 ]
+      rw[this,lemma1_2helphelp h1 h2  x y  hx1 hx2 ]
       rw[Finset.sum_mul, Finset.sum_mul]
       congr
       ext i
