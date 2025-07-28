@@ -1448,6 +1448,15 @@ theorem lemma1_1 {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (
 Lemma 2
 -/
 
+theorem lemma1_helphelphelp {n m : ℤ} {x : ENNReal} (hx : 1 < x) (hx2 : x ≠ ⊤): x^n ≤ x^m ↔ n ≤ m := by
+  constructor
+  · rw[← ENNReal.rpow_intCast, ← ENNReal.rpow_intCast]
+    rw[le_imp_le_iff_lt_imp_lt]
+    intro h
+    apply ENNReal.rpow_lt_rpow_of_exponent_lt hx hx2
+    norm_cast
+  · apply ENNReal.zpow_le_of_le hx.le
+
 
 theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1) : ∑ i ∈ Finset.range (2 ^ M),
     (∏ m ∈ BinaryRepresentationSet.binaryRepresentationSet (N - 2 ^ M), Haar.rademacherFunction m y) *
@@ -1552,10 +1561,10 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
                   have hh222: M ≤ i := by
                     rw[← Int.ofNat_le ]
                     rw[← neg_le_neg_iff]
-                    rw[← zpow_le_zpow_iff_right₀ (a:= (2:ℝ )) ]
-                    ·
-                      sorry
-                    · exact one_lt_two
+                    rw[← lemma1_helphelphelp (x := 2)]
+                    · exact hh22
+                    · simp
+                    · simp
                   linarith
                 rcases hh1 with hh1|hh1|hh1
                 · right
