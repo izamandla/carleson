@@ -231,6 +231,7 @@ theorem xinfirsthalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ)
     rw [zpow_add₀, zpow_one, mul_comm]
     exact Ne.symm (NeZero.ne' 2)
   rw[this]
+
   obtain ⟨ hx1, hx2 ⟩ := hx
   constructor
   · rw[mul_assoc, mul_le_mul_left (two_pos), @zpow_neg]
