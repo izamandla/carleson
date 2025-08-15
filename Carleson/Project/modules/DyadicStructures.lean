@@ -23,6 +23,33 @@ theorem zero_dyadicInterval : dyadicInterval 0 0 = Set.Ico 0 1 := by
   ext x
   simp [dyadicInterval]
 
+/-- General case: writting dyadic as Ico. -/
+theorem intervalform_dyadicInterval {k n : ℤ}: dyadicInterval k n = Set.Ico ((2^k: ℝ) *n) ((2^k : ℝ )* (n + 1)) := by
+  ext x
+  simp [dyadicInterval]
+
+/-- Equivalent definition using interval -/
+@[simp]
+theorem eqdef1 (k n : ℤ) (x : ℝ): x ∈ dyadicInterval k n  ↔ x ∈ Set.Ico ((2^k: ℝ) *n) ((2^k : ℝ )* (n + 1))   := by
+  rw[intervalform_dyadicInterval]
+
+
+/-- Equivalent definition using inequalities -/
+@[simp]
+theorem eqdef2 (k n : ℤ) (x : ℝ): x ∈ dyadicInterval k n  ↔ ((2^k: ℝ) *n) ≤ x ∧ x< ((2^k : ℝ )* (n + 1))  := by
+  simp
+
+@[simp]
+theorem eqdef2' (k n : ℤ) (x : ℝ): x ∈ dyadicInterval k n  ↔ n≤ x*2^(-k) ∧ x *2^(-k)<  (n + 1)  := by
+  simp only [eqdef1, mem_Ico, zpow_neg]
+  refine and_congr (Iff.symm (le_mul_inv_iff₀' (zpow_pos (zero_lt_two) k))) (Iff.symm (mul_inv_lt_iff₀' (zpow_pos (zero_lt_two) k)))
+
+@[simp]
+theorem eqdef2'' (k n : ℤ) (x : ℝ): x ∈ dyadicInterval k n  ↔ 0≤ x*2^(-k)-n ∧ x *2^(-k) - n<  1  := by
+  simp only [eqdef2', mem_Ico, zpow_neg, sub_nonneg]
+  refine and_congr_right' (Iff.symm sub_lt_iff_lt_add')
+
+
 /-- Special case: the dyadic interval with `k = 0` is `[n, n+1)`. -/
 @[simp]
 theorem dyadicInterval_of_k_zero (n : ℤ) :
@@ -31,14 +58,15 @@ theorem dyadicInterval_of_k_zero (n : ℤ) :
   simp [Set.Ico, Set.mem_setOf_eq, dyadicInterval, zpow_zero]
 
 
-/-- Special case: the dyadic interval with `k = 1` is `[2n, 2n+2)`. -/
+/- Special case: the dyadic interval with `k = 1` is `[2n, 2n+2)`. -/
+/- to chyba jest niepotrzebne
 @[simp]
 theorem dyadicInterval_of_k_one (n : ℤ) :
     dyadicInterval 1 n = Set.Ico (2*n : ℝ) (2*n+2) := by
   ext x
   simp only [dyadicInterval, zpow_one, mem_setOf_eq, Ico, and_congr_right_iff]
   intro h
-  ring_nf
+  ring_nf -/
 
 /-- Special case: the dyadic interval with `k = -1` is `[n/2, (n+1)/2)`. -/
 @[simp]
@@ -60,31 +88,20 @@ theorem dyadicInterval_of_n_zero (k : ℤ) :
 theorem dyadicInterval_of_n_one (k : ℤ) :
     dyadicInterval k 1 = Set.Ico (2^k : ℝ) (2^(k+1) : ℝ) := by
   ext x
-  simp only [dyadicInterval, Int.cast_one, mul_one, mem_setOf_eq, mem_Ico, and_congr_right_iff]
-  intro h
-  have h1 : 2 ^ k * (1 + 1) = (2 ^ (k + 1) : ℝ) := by
-    have : 2 ≠ 0 := two_ne_zero
-    calc (2 : ℝ)^k*(1+1)
-        = (2 : ℝ  )^(k)*2 := by ring_nf
-      _ = (2 : ℝ)^(k + 1) := by rw [← zpow_add_one₀ two_ne_zero k]
-  rw [h1]
+  rw[eqdef1, Int.cast_one, mul_one, mem_Ico, one_add_one_eq_two, zpow_add_one₀ (two_ne_zero)]
+  exact Iff.symm mem_Ico
 
 
-/-- General case: writting dyadic as Ico. -/
-theorem intervalform_dyadicInterval {k n : ℤ}: dyadicInterval k n = Set.Ico ((2^k: ℝ) *n) ((2^k : ℝ )* (n + 1)) := by
-  ext x
-  simp [dyadicInterval]
-
-/--
+/-
 Points inside the same dyadic interval at scale `k` are within `(2^k : ℝ)` of each other.
 -/
 
-theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval k n ∧ y ∈ dyadicInterval k n) : |x - y| ≤ (2^k : ℝ) := by
+/-theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval k n ∧ y ∈ dyadicInterval k n) : |x - y| ≤ (2^k : ℝ) := by
   simp [dyadicInterval] at h
   rw[abs_sub_le_iff]
   constructor
   · linarith
-  · linarith
+  · linarith-/
 
 theorem ofReal_zpow {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≠ 0) (n : ℤ) :
     ENNReal.ofReal (p ^ n) = ENNReal.ofReal p ^ n := by
@@ -94,41 +111,26 @@ theorem ofReal_zpow {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≠ 0) (n : ℤ) :
 
 theorem dyadicInterval_measure (k n : ℤ): MeasureTheory.volume (dyadicInterval k n) = 2^k  := by
   rw[intervalform_dyadicInterval, Real.volume_Ico]
-  have : ((2 ^ k : ℝ ) * (↑n + 1) - 2 ^ k * ↑n) = (2^k :ℝ ) := by
-    linarith
-  rw[this, ofReal_zpow]
-  · simp
-  · simp
-  · simp
+  ring_nf
+  rw[ofReal_zpow (zero_le_two) (two_ne_zero)]
+  simp
 
+
+
+
+theorem scale_up {k n : ℤ} : dyadicInterval k n = { x | (2^(k-1) : ℝ)*(2*n) ≤ x ∧ x < (2^(k-1) : ℝ)*(2*n+2) } := by
+  have h : (2^(k-1) : ℝ)*2 = 2^k := by
+    rw[← zpow_add_one₀ two_ne_zero (k-1), sub_add_cancel]
+  simp_rw[mul_add, ← mul_assoc, h]
+  ext x
+  simp only [eqdef1, mem_Ico, mem_setOf_eq]
+  apply and_congr_right'
+  rw[mul_add, mul_one]
 
 /--
 A dyadic interval at scale `k` can be expressed as a union of two smaller intervals of the scale `k - 1`.
 -/
 
-theorem scale_up {k n : ℤ} : dyadicInterval k n = { x | (2^(k-1) : ℝ)*(2*n) ≤ x ∧ x < (2^(k-1) : ℝ)*(2*n+2) } := by
-  ext x
-  simp only [dyadicInterval, mem_setOf_eq]
-  rw[← mul_assoc,← zpow_add_one₀ two_ne_zero (k-1)]
-  simp only [sub_add_cancel, and_congr_right_iff]
-  intro h1
-  constructor
-  · intro h2
-    rw[mul_add, ← mul_assoc, ← zpow_add_one₀ two_ne_zero (k-1)]
-    simp only [sub_add_cancel]
-    rw [← mul_one (2^k), mul_assoc, one_mul, ← mul_add]
-    apply h2
-  · intro h2
-    rw[mul_add, ← mul_assoc, ← zpow_add_one₀ two_ne_zero (k-1)] at h2
-    simp only [sub_add_cancel] at h2
-    rw [← mul_one (2^k), mul_assoc, one_mul, ← mul_add] at h2
-    apply h2
-
-
-
-/--
-A dyadic interval can be split into two smaller dyadic intervals.
--/
 theorem dyadicInterval_split (k n : ℤ) :
   dyadicInterval k n = dyadicInterval (k - 1) (2 * n) ∪ dyadicInterval (k - 1) (2 * n + 1) := by
   rw[scale_up, intervalform_dyadicInterval, intervalform_dyadicInterval]
@@ -137,7 +139,7 @@ theorem dyadicInterval_split (k n : ℤ) :
   · unfold Set.Ico
     ring_nf
   · rw[mul_add]
-    simp only [mul_one, le_add_iff_nonneg_right]
+    rw[mul_one, le_add_iff_nonneg_right]
     apply le_of_lt
     apply zpow_pos
     simp
@@ -164,17 +166,7 @@ theorem dyadicin (k n : ℤ) : dyadicInterval k n ⊆ dyadicInterval (k+1) (n/2)
     rw [Int.two_mul_ediv_two_of_even h]
     simp
 
-theorem natdyadicin0 {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k ⊆ dyadicInterval 0 0 := by
-  rw[zero_dyadicInterval]
-  simp only [dyadicInterval, zpow_neg]
-  rw [@Ico_def]
-  refine Ico_subset_Ico ?_ ?_
-  · simp
-  · refine inv_mul_le_one_of_le₀ ?_ ?_
-    · simp
-      rw[Nat.lt_iff_add_one_le] at h
-      norm_cast
-    · simp
+
 
 theorem natdyadicin0' {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k ⊆ Set.Ico 0 1 := by
   simp only [dyadicInterval, zpow_neg]
@@ -188,47 +180,45 @@ theorem natdyadicin0' {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k �
     · simp
 
 
+theorem natdyadicin0 {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k ⊆ dyadicInterval 0 0 := by
+  rw[zero_dyadicInterval]
+  apply natdyadicin0' h
+
+
+
+
 theorem infirsthalf {M k : ℕ} (hM : M ≠ 0): dyadicInterval (-M :ℤ) k ⊆ Ico 0 0.5 ↔ k < 2 ^ (M - 1 ) := by
   simp at hM
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
-    rw[inv_mul_le_iff₀]
-    · ring_nf
-      simp only [one_div]
-      rw[ ← Nat.add_one_le_iff ]
-      have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
-        refine (mul_inv_eq_iff_eq_mul₀ ?_).mpr ?_
-        · simp
-        · rw [pow_sub_one_mul hM 2]
-      rw[this]
-      norm_cast
-      rw[add_comm]
-    · simp
+    rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
+    ring_nf
+    simp only [one_div]
+    rw[ ← Nat.add_one_le_iff , add_comm]
+    have : (2 ^ M :ℝ ) * 2⁻¹ = 2^(M-1) := by
+      refine (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr ?_
+      rw [pow_sub_one_mul hM 2]
+    rw[this]
+    norm_cast
   · simp
-
 
 
 theorem insecondhalf {M k : ℕ} (hk : k < 2 ^ M) (hM : M ≠ 0): dyadicInterval (-M :ℤ) k ⊆ Ico 0.5 1 ↔ 2 ^ (M - 1) ≤ k:= by
   simp at hM
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
-    rw[inv_mul_le_iff₀]
-    · simp only [mul_one]
-      rw[mul_comm, le_mul_inv_iff₀]
-      · ring_nf
-        simp only [one_div]
-        have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
-          refine (mul_inv_eq_iff_eq_mul₀ ?_).mpr ?_
-          · simp
-          · rw [pow_sub_one_mul hM 2]
-        rw[this]
-        norm_cast
-        simp only [and_iff_left_iff_imp]
-        intro h
-        rw[add_comm, Nat.add_one_le_iff ]
-        exact hk
-      · simp
-    · simp
+    rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
+    simp only [mul_one]
+    rw[mul_comm, le_mul_inv_iff₀ (pow_pos (two_pos) M)]
+    ring_nf
+    simp only [one_div]
+    have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
+      refine (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr ?_
+      rw [pow_sub_one_mul hM 2]
+    rw[this]
+    norm_cast
+    simp only [and_iff_left_iff_imp, add_comm, Nat.add_one_le_iff ]
+    exact fun a ↦ hk
   · simp
 
 
