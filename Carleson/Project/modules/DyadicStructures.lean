@@ -58,16 +58,6 @@ theorem dyadicInterval_of_k_zero (n : ℤ) :
   simp [Set.Ico, Set.mem_setOf_eq, dyadicInterval, zpow_zero]
 
 
-/- Special case: the dyadic interval with `k = 1` is `[2n, 2n+2)`. -/
-/- to chyba jest niepotrzebne
-@[simp]
-theorem dyadicInterval_of_k_one (n : ℤ) :
-    dyadicInterval 1 n = Set.Ico (2*n : ℝ) (2*n+2) := by
-  ext x
-  simp only [dyadicInterval, zpow_one, mem_setOf_eq, Ico, and_congr_right_iff]
-  intro h
-  ring_nf -/
-
 /-- Special case: the dyadic interval with `k = -1` is `[n/2, (n+1)/2)`. -/
 @[simp]
 theorem dyadicInterval_of_k_negone (n : ℤ) :
@@ -95,13 +85,6 @@ theorem dyadicInterval_of_n_one (k : ℤ) :
 /-
 Points inside the same dyadic interval at scale `k` are within `(2^k : ℝ)` of each other.
 -/
-
-/-theorem dyadicInterval_length (k n : ℤ) (x y : ℝ) (h : x ∈ dyadicInterval k n ∧ y ∈ dyadicInterval k n) : |x - y| ≤ (2^k : ℝ) := by
-  simp [dyadicInterval] at h
-  rw[abs_sub_le_iff]
-  constructor
-  · linarith
-  · linarith-/
 
 theorem ofReal_zpow {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≠ 0) (n : ℤ) :
     ENNReal.ofReal (p ^ n) = ENNReal.ofReal p ^ n := by
@@ -185,20 +168,13 @@ theorem natdyadicin0 {M k : ℕ} (h : k < 2 ^ M): dyadicInterval (-M : ℤ) k �
   apply natdyadicin0' h
 
 
-
-
 theorem infirsthalf {M k : ℕ} (hM : M ≠ 0): dyadicInterval (-M :ℤ) k ⊆ Ico 0 0.5 ↔ k < 2 ^ (M - 1 ) := by
   simp at hM
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
     rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
     ring_nf
-    simp only [one_div]
-    rw[ ← Nat.add_one_le_iff , add_comm]
-    have : (2 ^ M :ℝ ) * 2⁻¹ = 2^(M-1) := by
-      refine (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr ?_
-      rw [pow_sub_one_mul hM 2]
-    rw[this]
+    rw[one_div, ← Nat.add_one_le_iff , add_comm, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hM 2))]
     norm_cast
   · simp
 
@@ -208,14 +184,9 @@ theorem insecondhalf {M k : ℕ} (hk : k < 2 ^ M) (hM : M ≠ 0): dyadicInterval
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
     rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
-    simp only [mul_one]
-    rw[mul_comm, le_mul_inv_iff₀ (pow_pos (two_pos) M)]
+    rw[mul_one, mul_comm, le_mul_inv_iff₀ (pow_pos (two_pos) M)]
     ring_nf
-    simp only [one_div]
-    have : (2 ^ M :ℝ ) * 2⁻¹   = 2^(M-1) := by
-      refine (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr ?_
-      rw [pow_sub_one_mul hM 2]
-    rw[this]
+    rw[one_div, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hM 2))]
     norm_cast
     simp only [and_iff_left_iff_imp, add_comm, Nat.add_one_le_iff ]
     exact fun a ↦ hk
@@ -223,117 +194,46 @@ theorem insecondhalf {M k : ℕ} (hk : k < 2 ^ M) (hM : M ≠ 0): dyadicInterval
 
 
 
-theorem xinfirsthalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) : 2*x ∈ dyadicInterval (-M :ℤ) (2*k) ∨ 2*x ∈ dyadicInterval (-M :ℤ) (2*k + 1) := by
-  rw [← @mem_union, ← dyadicInterval_split']
-  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
-  simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
-  have : (2 : ℝ ) ^ ((-M:ℤ) +1 ) = 2 * 2 ^ (-M : ℤ  ) := by
-    rw [zpow_add₀, zpow_one, mul_comm]
-    exact Ne.symm (NeZero.ne' 2)
-  rw[this]
-
-  obtain ⟨ hx1, hx2 ⟩ := hx
-  constructor
-  · rw[mul_assoc, mul_le_mul_left (two_pos), @zpow_neg]
-    exact hx1
-  · rw[mul_assoc, mul_lt_mul_left (two_pos), @zpow_neg]
-    exact hx2
-
-
 theorem xinfirsthalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) : 2*x ∈ dyadicInterval (-M + 1 :ℤ) k := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
-  have : (2 : ℝ ) ^ ((-M:ℤ) +1 ) = 2 * 2 ^ (-M : ℤ  ) := by
-    rw [zpow_add₀, zpow_one, mul_comm]
-    exact Ne.symm (NeZero.ne' 2)
-  rw[this]
+  rw [zpow_add₀ (Ne.symm (NeZero.ne' 2)), zpow_one, mul_comm]
   obtain ⟨ hx1, hx2 ⟩ := hx
   constructor
-  · rw[mul_assoc, mul_le_mul_left (two_pos), @zpow_neg]
+  · rw[← mul_assoc, mul_comm, mul_le_mul_left (two_pos), @zpow_neg, mul_comm]
     exact hx1
-  · rw[mul_assoc, mul_lt_mul_left (two_pos), @zpow_neg]
+  · conv_rhs => rw[mul_comm, ← mul_assoc]
+    rw[mul_comm, mul_lt_mul_right (two_pos), @zpow_neg, mul_comm]
     exact hx2
 
-
-theorem xinsecondhalf {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k - 2^M) ∨ (2*x-1) ∈ dyadicInterval (-M :ℤ) (2*k -2 ^M + 1) := by
-  have : 2*(k:ℤ) - 2^M = 2*(k - 2^(M-1)) := by
-    rw [Int.mul_sub]
-    rw [mul_pow_sub_one hM 2]
-  simp_rw[this]
-  rw [← @mem_union, ← dyadicInterval_split']
-  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
-  simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
-  obtain ⟨ hx1, hx2 ⟩ := hx
-  have : (2 ^ ((-M :ℤ) + 1) :ℝ ) * 2 ^ (M  - 1) = 1 := by
-    have : (-M :ℤ) + 1 = - (M -1) := by
-      simp only [neg_sub]
-      rw [@neg_add_eq_sub]
-    rw[this]
-    rw [@zpow_neg]
-    refine (inv_mul_eq_one₀ ?_).mpr ?_
-    · apply zpow_ne_zero
-      simp
-    · rw[← zpow_natCast ]
-      refine (zpow_right_inj₀ ?_ ?_).mpr ?_
-      · simp
-      · simp
-      · have : M ≥ 1 := by
-          exact Nat.one_le_iff_ne_zero.mpr hM
-        exact Eq.symm (Int.natCast_pred_of_pos this)
-  constructor
-  · push_cast
-    rw[mul_sub, tsub_le_iff_right]
-    rw[this]
-    simp only [sub_add_cancel, ge_iff_le]
-    rw [zpow_add₀ (two_ne_zero) , zpow_one, mul_assoc, mul_comm, mul_assoc,  mul_le_mul_left (two_pos), mul_comm ]
-    simp only [zpow_neg, zpow_natCast]
-    exact hx1
-  · simp only [Int.cast_sub, Int.cast_natCast, Int.cast_pow, Int.cast_ofNat]
-    rw[mul_add, mul_sub, this]
-    simp only [mul_one]
-    rw [@sub_lt_iff_lt_add]
-    rw[zpow_add₀ (two_ne_zero) , zpow_one]
-    ring_nf
-    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-M :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm ]
-    simp only [zpow_neg, zpow_natCast]
-    exact hx2
 
 theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0): (2*x-1) ∈ dyadicInterval (-M + 1 :ℤ) ((k - 2^(M-1)):ℤ) := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
   obtain ⟨ hx1, hx2 ⟩ := hx
-  have : (2 ^ ((-M :ℤ) + 1) :ℝ ) * 2 ^ (M  - 1) = 1 := by
+  have h : (2 ^ ((-M :ℤ) + 1) :ℝ ) * 2 ^ (M  - 1) = 1 := by
+    --rw[← zpow_add₀ (two_ne_zero)]??
     have : (-M :ℤ) + 1 = - (M -1) := by
       simp only [neg_sub]
       rw [@neg_add_eq_sub]
     rw[this]
     rw [@zpow_neg]
-    refine (inv_mul_eq_one₀ ?_).mpr ?_
+    apply (inv_mul_eq_one₀ ?_).mpr ?_
     · apply zpow_ne_zero
       simp
     · rw[← zpow_natCast ]
-      refine (zpow_right_inj₀ ?_ ?_).mpr ?_
-      · simp
-      · simp
-      · have : M ≥ 1 := by
-          exact Nat.one_le_iff_ne_zero.mpr hM
-        exact Eq.symm (Int.natCast_pred_of_pos this)
+      apply (zpow_right_inj₀ (Nat.ofNat_pos) (Ne.symm (OfNat.one_ne_ofNat 2))).mpr
+      apply Eq.symm (Int.natCast_pred_of_pos (Nat.zero_lt_of_ne_zero hM))
   constructor
   · push_cast
-    rw[mul_sub, tsub_le_iff_right]
-    rw[this]
+    rw[mul_sub, tsub_le_iff_right, h]
     simp only [sub_add_cancel, ge_iff_le]
-    rw [zpow_add₀ (two_ne_zero) , zpow_one, mul_assoc, mul_comm, mul_assoc,  mul_le_mul_left (two_pos), mul_comm ]
-    simp only [zpow_neg, zpow_natCast]
+    rw [zpow_add₀ (two_ne_zero) , zpow_one, mul_assoc, mul_comm, mul_assoc,  mul_le_mul_left (two_pos), mul_comm , zpow_neg, zpow_natCast]
     exact hx1
-  · simp only [Int.cast_sub, Int.cast_natCast, Int.cast_pow, Int.cast_ofNat]
-    rw[mul_add, mul_sub, this]
-    simp only [mul_one]
-    rw [@sub_lt_iff_lt_add]
+  · simp only [Int.cast_sub, Int.cast_natCast, Int.cast_pow, Int.cast_ofNat, mul_add, mul_sub, h, mul_one, @sub_lt_iff_lt_add]
     rw[zpow_add₀ (two_ne_zero) , zpow_one]
     ring_nf
-    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-M :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm ]
-    simp only [zpow_neg, zpow_natCast]
+    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-M :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm, zpow_neg, zpow_natCast]
     exact hx2
 
 
@@ -349,21 +249,21 @@ theorem dyadicInterval_cover (k : ℤ) :
   have h1 :  2^k* n ≤ x := by
     simp[n]
     ring_nf
-    have : (⌊x / (2^k : ℝ)⌋ : ℝ) ≤ x / (2^k : ℝ) := Int.floor_le (x / (2^k : ℝ))
     rw[mul_comm,← le_div_iff₀]
-    exact this
+    exact Int.floor_le (x / (2^k : ℝ))
     apply zpow_pos ?ha k
     linarith
   have h2 : x < 2^k * (n+1) := by
     unfold n
-    have : x / (2^k : ℝ) < (⌊x / (2^k : ℝ)⌋ + 1 : ℝ) := Int.lt_floor_add_one (x / (2^k : ℝ))
     rw[mul_comm, ← div_lt_iff₀]
-    exact this
+    exact Int.lt_floor_add_one (x / (2^k : ℝ))
     apply zpow_pos ?ha k
   exact Filter.frequently_principal.mp fun a ↦ a h1 h2
 
 
-
+/--
+The dyadic intervals with natural `k` and `n<2^k` cover the entire real line.
+-/
 
 theorem dyadicInterval_cover01 (k : ℕ) :
   Ico 0 1 = ⋃ ( n ∈ Finset.range (2^k) ) , dyadicInterval (-k :ℤ) n := by
@@ -377,38 +277,32 @@ theorem dyadicInterval_cover01 (k : ℕ) :
     · simp only [zpow_neg, zpow_natCast, div_inv_eq_mul, Finset.mem_range]
       have : ⌊x * 2 ^ k⌋₊ < ⌊1 * 2 ^ k⌋₊ := by
         simp only [one_mul, Nat.floor_nat, id_eq]
-        refine (Nat.floor_lt' ?_).mpr ?_
-        · exact Ne.symm (NeZero.ne' (2 ^ k))
-        · simp only [Nat.cast_pow, Nat.cast_ofNat, Nat.ofNat_pos, pow_pos, mul_lt_iff_lt_one_left]
-          exact h.2
+        apply (Nat.floor_lt' (Ne.symm (NeZero.ne' (2 ^ k)))).mpr
+        simp only [Nat.cast_pow, Nat.cast_ofNat, Nat.ofNat_pos, pow_pos, mul_lt_iff_lt_one_left]
+        exact h.2
       apply lt_of_lt_of_le this
       simp
     · constructor
       · simp only [zpow_neg, zpow_natCast, div_inv_eq_mul, Int.cast_natCast]
-        refine (inv_mul_le_iff₀' ?_).mpr ?_
-        · simp
-        · apply Nat.floor_le (a:= x * 2 ^ k)
-          simp only [Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_right]
-          exact h.1
+        apply (inv_mul_le_iff₀' (pow_pos (two_pos) k)).mpr
+        apply Nat.floor_le (a:= x * 2 ^ k)
+        simp only [Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_right]
+        exact h.1
       · simp only [zpow_neg, zpow_natCast, div_inv_eq_mul, Int.cast_natCast]
-        refine (lt_inv_mul_iff₀ ?_).mpr ?_
-        · simp
-        · rw[mul_comm]
-          exact Nat.lt_floor_add_one (x * 2 ^ k)
+        apply (lt_inv_mul_iff₀ (pow_pos (two_pos) k)).mpr
+        rw[mul_comm]
+        exact Nat.lt_floor_add_one (x * 2 ^ k)
   · intro h
     obtain ⟨ i, hi1, hi2⟩ := h
     simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hi2
-    obtain ⟨ hx1 , hx2 ⟩ := hi2
     constructor
-    · apply le_trans ?_ hx1
+    · apply le_trans ?_ hi2.1
       simp
-    · apply lt_of_lt_of_le hx2
+    · apply lt_of_lt_of_le hi2.2
       simp only [Finset.mem_range, Nat.lt_iff_add_one_le] at hi1
       rw[inv_mul_le_one₀]
       · norm_cast
       · simp
-
-
 
 
 theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
@@ -417,20 +311,13 @@ theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
   simp
 
 theorem extdiin01 {M : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1): ∃  k ∈  Finset.range (2^M)  , x ∈ dyadicInterval (-M :ℤ ) k := by
-  have hx : x ∈ Ico 0 1 := by
-    simp only [mem_Ico]
-    constructor
-    · exact hx1
-    · exact hx2
-  rw[dyadicInterval_cover01 M ] at hx
-  simp only [Finset.mem_range, mem_iUnion, exists_prop] at hx
+  have hx : x ∈ Ico 0 1 := mem_Ico.mpr (And.symm ⟨hx2, hx1⟩)
+  simp only [dyadicInterval_cover01 M , Finset.mem_range, mem_iUnion, exists_prop] at hx
   simp only [Finset.mem_range]
   exact hx
 
 
-/--
-If `n < n'`, then the dyadic intervals at scale `k` indexed by `n` and `n'` are disjoint.
--/
+--jak podpisywac helpy?
 theorem dyadicInterval_disjoint_help {k n n' : ℤ} (h : n < n') :
   (dyadicInterval k n ∩ dyadicInterval k n') = ∅ := by
   ext x
@@ -463,10 +350,10 @@ theorem dyadicInterval_disjoint {k n n' : ℤ} (h : n ≠ n') : (dyadicInterval 
 Case when dyadic intervals with the scales `k<k'` - then they are disjoint or one is contained in the other.
 -/
 
+
 theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
   dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
-  dyadicInterval k n ⊆ dyadicInterval k' n' ∨
-  dyadicInterval k' n' ⊆ dyadicInterval k n := by
+  dyadicInterval k n ⊆ dyadicInterval k' n' := by
   apply Int.le.dest at h
   obtain ⟨p, h_p⟩ := h
   set p':= 1+p with h_p'
@@ -497,7 +384,6 @@ theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
   · push_neg at h_1
     by_cases h_2 : (2^k *(n+1) : ℝ ) ≤   (2^k' * (n'+1) : ℝ)
     · right
-      left
       simp only [dyadicInterval, setOf_subset_setOf]
       intro a ha
       obtain ⟨ ha1,ha2⟩  := ha
@@ -534,6 +420,9 @@ theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
 
 
 
+
+
+
 theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
   dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
   dyadicInterval k n ⊆ dyadicInterval k' n':= by
@@ -544,35 +433,21 @@ theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
     · left
       rw[hk]
       exact dyadicInterval_disjoint hn
-  have h11: k < k' := by
-    push_neg at hk
-    rw [@Int.lt_iff_le_and_ne]
-    constructor
-    · exact h1
-    · exact hk
-  have h : dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
-  dyadicInterval k n ⊆ dyadicInterval k' n' ∨
-  dyadicInterval k' n' ⊆ dyadicInterval k n := by
-    apply dyadic_intervals_relation h11
-  rw[← or_assoc] at h
-  rcases h with h|h
-  · exact h
-  · exfalso
-    apply MeasureTheory.measure_mono (μ := MeasureTheory.volume ) at h
-    simp_rw[dyadicInterval_measure] at h
-    rw[← ENNReal.rpow_intCast, ← ENNReal.rpow_intCast] at  h
-    have : (k :ℝ ) < (k' : ℝ ) := by
-      norm_cast
-    apply ENNReal.rpow_lt_rpow_of_exponent_lt  (x := 2) at this
-    · order
-    · norm_num
-    · simp
+  apply dyadic_intervals_relation
+  push_neg at hk
+  rw [@Int.lt_iff_le_and_ne]
+  constructor
+  · exact h1
+  · exact hk
 
 
 
 /--
 Theorem: Two dyadic intervals are either disjoint or one is contained in the other.
 -/
+
+
+
 theorem dyadic_intervals_disjoint_or_contained (k k' n n' : ℤ) :
   (dyadicInterval k n ∩ dyadicInterval k' n' = ∅) ∨
   (dyadicInterval k n ⊆ dyadicInterval k' n') ∨
@@ -587,30 +462,14 @@ theorem dyadic_intervals_disjoint_or_contained (k k' n n' : ℤ) :
       apply dyadicInterval_disjoint hn
   push_neg at h
   by_cases h1 : k<k'
-  · apply dyadic_intervals_relation
+  · rw[← or_assoc]
+    left
+    apply dyadic_intervals_relation
     apply h1
   push_neg at h1
   have h_lt : k' < k := lt_of_le_of_ne h1 h.symm
-  rw[Set.inter_comm,← or_assoc, or_right_comm, or_assoc]
+  rw[Set.inter_comm,← or_assoc, or_right_comm]
+  left
   apply dyadic_intervals_relation h_lt
-
-
-/--
-A dyadic rectangle is the Cartesian product of two dyadic intervals.
--/
-def dyadicRectangle (k n k' n' : ℤ) : Set (ℝ × ℝ)  :=
-  (dyadicInterval k n).prod (dyadicInterval k' n')
-
-/--
-Collection of dyadic intervals at a fixed scale.
--/
-def SetDyadicIntervals (m : ℕ) : Set (Set ℝ) :=
-  {dyadicInterval (-m) n | n ∈ Finset.range (2^m)}
-
-/--
-Tile.
--/
-def Tile (I : Set ℝ) (ω : Set ℝ) : Prop :=
-  ∃ k n : ℤ, I = dyadicInterval k n ∧ ω = {x | x = 2^(-k)}
 
 end DyadicStructures
