@@ -1,8 +1,6 @@
-import Carleson.ToMathlib.Analysis.Convex.SpecificFunctions.Basic
-import Carleson.ToMathlib.Annulus
-import Carleson.ToMathlib.HardyLittlewood
 import Carleson.ToMathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Carleson.ToMathlib.MeasureTheory.Integral.Lebesgue
+import Carleson.ToMathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Carleson.TwoSidedCarleson.WeakCalderonZygmund
 
 open MeasureTheory Set Bornology Function ENNReal Metric
@@ -14,7 +12,6 @@ variable {X : Type*} {a : ℕ} [MetricSpace X] [DoublingMeasure X (defaultA a : 
 variable {τ C r R : ℝ} {q q' : ℝ≥0}
 variable {F G : Set X}
 variable {K : X → X → ℂ} {x x' : X} [IsTwoSidedKernel a K]
-variable [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)]
 
 /-! ## Section 10.1 and Lemma 10.0.2 -/
 
@@ -23,112 +20,10 @@ variable (K) in
 def simpleNontangentialOperator (r : ℝ) (g : X → ℂ) (x : X) : ℝ≥0∞ :=
   ⨆ (R > r) (x' ∈ ball x R), ‖czOperator K R g x'‖ₑ
 
-theorem Real.two_mul_lt_two_pow (x : ℝ) (hx : 2 ≤ x) :
-    (2 : ℝ) * x ≤ 2 ^ x := by
-  calc
-    _ ≤ (1 + (x - 1) * 1) * 2 := by linarith
-    _ ≤ (1 + 1 : ℝ) ^ (x - 1) * 2 := by
-      gcongr
-      apply one_add_mul_self_le_rpow_one_add (by norm_num) (by linarith)
-    _ ≤ (2 : ℝ) ^ (x - 1) * (2 : ℝ) ^ (1 : ℝ) := by norm_num
-    _ ≤ _ := by
-      rw [← rpow_add (by positivity)]
-      norm_num
-
-lemma geom_estimate_constant_le_two :
-    (4 * (1 - 2 ^ (-1 / 4 : ℝ)))⁻¹ ≤ (2 : ℝ) := by
-  have : (2 : ℝ) ^ (-1 / 4 : ℝ) ≤ 7 / 8 := by
-    rw [neg_div, one_div, neg_eq_neg_one_mul, mul_comm, Real.rpow_mul (by norm_num),
-      Real.rpow_neg_one, inv_le_comm₀ (by positivity) (by norm_num)]
-    apply le_of_pow_le_pow_left₀ (n := 4) (by norm_num) (by positivity)
-    conv_rhs => rw [← Real.rpow_natCast (n := 4), ← Real.rpow_mul (by norm_num)]
-    norm_num
-  calc
-    _ ≤ ((4 : ℝ) * (1 - 7 / 8))⁻¹ := by gcongr
-    _ ≤ _ := by norm_num
-
-lemma hasSum_geometric_series {x : ℝ} (hx : 4 ≤ x) :
-    HasSum (fun (n : ℕ) ↦ (2 : ℝ≥0) ^ (-n / x)) (1 - 2 ^ (-x⁻¹))⁻¹ := by
-  have h2x : (2 : ℝ≥0) ^ (-x⁻¹) < 1 := by
-    apply Real.rpow_lt_one_of_one_lt_of_neg
-    · norm_num
-    · simp_rw [Left.neg_neg_iff]
-      positivity
-
-  -- Bring it to the form of hasSum_geometric_of_lt_one
-  simp_rw [← NNReal.hasSum_coe, NNReal.coe_rpow, NNReal.coe_ofNat, neg_div,
-    div_eq_inv_mul (b := x), ← neg_mul, Real.rpow_mul_natCast zero_le_two]
-  push_cast [h2x.le]
-  exact hasSum_geometric_of_lt_one (by positivity) h2x
-
-/-- Lemma 10.1.1 -/
-theorem geometric_series_estimate {x : ℝ} (hx : 4 ≤ x) :
-    tsum (fun (n : ℕ) ↦ (2 : ℝ≥0∞) ^ (-n / x)) ≤ 2 ^ x := by
-  simp_rw [← ENNReal.coe_ofNat, ← ENNReal.coe_rpow_of_ne_zero two_ne_zero,
-    ← ENNReal.coe_tsum (hasSum_geometric_series hx).summable, coe_le_coe,
-    (hasSum_geometric_series hx).tsum_eq]
-
-  -- TODO the rest of this proof can surely be optimized
-  -- Floris suggests using `trans 2`
-  suffices (1 - (2 : ℝ) ^ (-x⁻¹))⁻¹ ≤ 2 ^ x by
-    rw [← NNReal.coe_le_coe, NNReal.coe_inv, NNReal.coe_rpow, NNReal.coe_ofNat, NNReal.coe_sub]
-    swap
-    · apply NNReal.rpow_le_one_of_one_le_of_nonpos
-      · exact Nat.one_le_ofNat
-      · simp_rw [Left.neg_nonpos_iff]
-        positivity
-    apply this
-
-  have zero_le_one_sub_four_div_x : 0 ≤ 1 - 4 / x := by
-    simp only [sub_nonneg]
-    rw [div_le_iff₀]
-    · simp only [one_mul]
-      exact hx
-    · positivity
-
-  have one_sub_two_pow_neg_one_div_four_pos : 0 < 1 - (2 : ℝ) ^ (-1 / 4 : ℝ) := by
-    norm_num
-    apply Real.rpow_lt_one_of_one_lt_of_neg
-    · exact one_lt_two
-    · norm_num
-
-  -- By convexity, for all 0 ≤ λ ≤ 1, we have ...
-  have two_pow_convex := (ConvexOn_rpow_left (2 : ℝ) (by linarith only)).2
-  have two_pow_neg_one_div_bound := two_pow_convex
-               (x := (-1/4 : ℝ)) (by simp)
-               (y := 0) (by simp)
-               (a := 4/x)
-               (b := 1 - 4/x)
-               (by positivity)
-               (zero_le_one_sub_four_div_x)
-               (by ring)
-  simp only [smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_mul_div_cancel₀',
-    mul_zero, add_zero, Real.rpow_zero, mul_one] at two_pow_neg_one_div_bound
-
-  calc
-    _ ≤ (4 / x * (1 - 2 ^ (-1 / 4 : ℝ)))⁻¹ := by
-      rw [inv_le_inv₀]
-      · simp_rw [inv_eq_one_div, ← neg_div]
-        linarith only [two_pow_neg_one_div_bound]
-      · rw [sub_pos]
-        apply Real.rpow_lt_one_of_one_lt_of_neg
-        · simp only [NNReal.coe_ofNat, Nat.one_lt_ofNat]
-        · simp only [Left.neg_neg_iff, inv_pos]
-          positivity
-      · apply _root_.mul_pos
-        · positivity
-        · exact one_sub_two_pow_neg_one_div_four_pos
-    _ ≤ (4 * (1 - 2 ^ (-1 / 4 : ℝ)))⁻¹ * x := by field_simp
-    _ ≤ 2 * x := mul_le_mul_of_nonneg_right geom_estimate_constant_le_two (by linarith only [hx])
-    _ ≤ 2 ^ x := by
-      apply Real.two_mul_lt_two_pow
-      linarith only [hx]
-
 /-- The constant used in `estimate_x_shift`. -/
 irreducible_def C10_1_2 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 2 * a + 2)
 -- exact estimate from proof: C_K * (defaultA + 2 * defaultA²) ≤ C10_1_2
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 lemma _laverage_mul_measure_ball {g : X → ℂ} {x₀ : X} {n : ℝ} :
     ∫⁻ (a : X) in ball x₀ (n * r), ‖g a‖ₑ = (⨍⁻ (a : X) in ball x₀ (n * r), ‖g a‖ₑ ∂volume) * volume (ball x₀ (n * r)) := by
   have : IsFiniteMeasure (volume.restrict (ball x₀ (n * r))) :=
@@ -136,7 +31,6 @@ lemma _laverage_mul_measure_ball {g : X → ℂ} {x₀ : X} {n : ℝ} :
   rw [← measure_mul_laverage]
   simp only [MeasurableSet.univ, Measure.restrict_apply, univ_inter, mul_comm]
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 lemma estimate_10_1_2 {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r) :
     (∫⁻ (y : X) in (ball x r)ᶜ ∩ ball x (2*r), ‖K x y * g y‖ₑ) ≤
     2 ^ (a ^ 3 + a) * globalMaximalFunction volume 1 g x := by
@@ -177,7 +71,6 @@ lemma estimate_10_1_2 {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r)
   norm_cast
   ring
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 lemma estimate_10_1_3 (ha : 4 ≤ a) {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r) (hx : dist x x' ≤ r) :
     ‖∫ (y : X) in (ball x (2*r))ᶜ, K x y * g y - K x' y * g y‖ₑ ≤
     2 ^ (a ^ 3 + 2 * a) * globalMaximalFunction volume 1 g x := by
@@ -265,7 +158,7 @@ lemma estimate_10_1_3 (ha : 4 ≤ a) {g : X → ℂ} (hg : BoundedFiniteSupport 
 
     trans (1 / (2 : ℝ≥0)) ^ ((i + 1) * (a : ℝ)⁻¹) * (C_K ↑a / volume (ball x (2 ^ (i + 1) * r))) *
         ∫⁻ (y : X) in ball x (2 ^ (i + 2) * r), ‖g y‖ₑ
-    · gcongr
+    · gcongr _ * ?_
       apply lintegral_mono_set
       unfold dom_i
       rw [Annulus.co_eq]
@@ -314,12 +207,9 @@ lemma estimate_10_1_3 (ha : 4 ≤ a) {g : X → ℂ} (hg : BoundedFiniteSupport 
     apply rpow_le_rpow_of_exponent_le Nat.one_le_ofNat
     rw [neg_div, neg_le_neg_iff, div_le_div_iff_of_pos_right (by positivity)]
     simp only [le_add_iff_nonneg_right, zero_le_one]
-
   rw [← rpow_natCast]
-  apply geometric_series_estimate
-  · simp only [Nat.ofNat_le_cast, ha]
+  exact geometric_series_estimate (by norm_cast; omega)
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 lemma estimate_10_1_4 {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r) (hx : dist x x' ≤ r) :
     (∫⁻ (y : X) in (ball x' r)ᶜ ∩ ball x (2*r), ‖K x' y * g y‖ₑ) ≤
     2 ^ (a ^ 3 + 2 * a) * globalMaximalFunction volume 1 g x := by
@@ -350,7 +240,7 @@ lemma estimate_10_1_4 {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r)
 
   apply mul_le_mul' ?_ le_rfl
   trans C_K ↑a / volume (ball x' r) * ((defaultA a) ^ 2 * volume (ball x' r))
-  · exact mul_le_mul' le_rfl (measure_ball_four_le_same' _ _)
+  · exact mul_le_mul' le_rfl (measure_ball_four_le_same _ _)
 
   -- Somehow simp doesn't do it
   apply le_of_eq
@@ -361,7 +251,6 @@ lemma estimate_10_1_4 {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r)
   norm_cast
   ring
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Lemma 10.1.2 -/
 theorem estimate_x_shift (ha : 4 ≤ a)
     {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : 0 < r) (hx : dist x x' ≤ r) :
@@ -403,7 +292,7 @@ theorem estimate_x_shift (ha : 4 ≤ a)
       exact inter_subset_right
     · exact measurableSet_ball.compl
     · rw [← dom_x]
-      apply czoperator_welldefined hg hr
+      apply czOperator_welldefined hg hr
 
   -- Integral split x'
   have integral_x_prime : czOperator K r g x' = (∫ y in (bxprc ∩ bx2r), K x' y * g y) + (∫ y in bx2rᶜ, K x' y * g y) := by
@@ -415,7 +304,7 @@ theorem estimate_x_shift (ha : 4 ≤ a)
     · rw [disjoint_compl_right_iff_subset]
       exact inter_subset_right
     · rw [← dom_x_prime]
-      exact czoperator_welldefined hg hr ..
+      exact czOperator_welldefined hg hr ..
 
   rw [edist_eq_enorm_sub, integral_x, integral_x_prime]
 
@@ -430,9 +319,9 @@ theorem estimate_x_shift (ha : 4 ≤ a)
                 + (∫ (y : X) in bx2rᶜ, K x y * g y - K x' y * g y)
                 - (∫ (y : X) in bxprc ∩ bx2r, K x' y * g y) := by
           rw[← integral_sub]
-          · apply czoperator_welldefined hg (mul_pos zero_lt_two hr)
+          · apply czOperator_welldefined hg (mul_pos zero_lt_two hr)
           · apply IntegrableOn.mono_set (hst := ball2_sub_ballprime)
-            apply czoperator_welldefined hg hr
+            apply czOperator_welldefined hg hr
 
   apply enorm_sub_le.trans
   trans ‖∫ (y : X) in bxrc ∩ bx2r, K x y * g y‖ₑ + ‖∫ (y : X) in bx2rᶜ, K x y * g y - K x' y * g y‖ₑ +
@@ -463,9 +352,8 @@ theorem estimate_x_shift (ha : 4 ≤ a)
 /-- The constant used in `cotlar_control`. -/
 irreducible_def C10_1_3 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 4 * a + 1)
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
-lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
-  (hr : r ∈ Ioc 0 R) (hx : dist x x' ≤ R / 4) :
+lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume) (hr : r ∈ Ioc 0 R)
+    (hx : dist x x' ≤ R / 4) :
     ‖czOperator K r ((ball x (R / 2))ᶜ.indicator g) x' - czOperator K R ((ball x (R / 2))ᶜ.indicator g) x'‖ₑ ≤
       2 ^ (a ^ 3 + 4 * a) * globalMaximalFunction volume 1 g x := by
   have R_pos : 0 < R := by
@@ -475,11 +363,11 @@ lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
   rw [← integral_indicator (by measurability), ← integral_indicator (by measurability), ← integral_sub]
   rotate_left
   · rw [integrable_indicator_iff (by measurability)]
-    apply czoperator_welldefined
+    apply czOperator_welldefined
     · apply BoundedFiniteSupport.indicator hg (by measurability)
     · rw [mem_Ioc] at hr; exact hr.1
   · rw [integrable_indicator_iff (by measurability)]
-    apply czoperator_welldefined _ R_pos
+    apply czOperator_welldefined _ R_pos
     apply BoundedFiniteSupport.indicator hg (by measurability)
   calc _
     _ = ‖∫ (y : X), ((ball x' R) \ (ball x' r ∪ ball x (R / 2))).indicator (fun y ↦ K x' y * g y) y‖ₑ := by
@@ -551,7 +439,7 @@ lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
       apply AEMeasurable.enorm
       exact hg.aemeasurable.restrict
     _ ≤ (C_K a : ℝ≥0∞) / (volume (ball x' (R / 4))) * ∫⁻ (y : X) in (ball x (2 * R)), ‖g y‖ₑ := by
-      gcongr
+      gcongr _ * ?_
       apply lintegral_mono_set
       exact diff_subset
     _ ≤ (C_K a : ℝ≥0∞) / (volume (ball x' (R / 4))) * (volume (ball x (2 * R)) * globalMaximalFunction volume 1 g x) := by
@@ -568,7 +456,6 @@ lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
       rw [ENNReal.div_le_iff' (by simp) (by simp)]
       calc _
         _ = volume (ball x (2 ^ 3 * (R / 4))) := by
-          congr
           ring_nf
         _ ≤ (defaultA a) ^ 3 * volume (ball x (R / 4)) := by
           apply measure_ball_two_le_same_iterate
@@ -581,7 +468,6 @@ lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
           gcongr
           apply measure_ball_two_le_same
         _ = 2 ^ (4 * a) * volume (ball x' (R / 4)) := by
-          unfold defaultA
           push_cast
           ring_nf
     _= 2 ^ (a ^ 3 + 4 * a) := by
@@ -594,10 +480,8 @@ lemma radius_change {g : X → ℂ} (hg : BoundedFiniteSupport g volume)
       · simp
       · simp
 
-omit [IsTwoSidedKernel a K] [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
-
-lemma cut_out_ball {g : X → ℂ}
-  (hr : r ∈ Ioc 0 R) (hx : dist x x' ≤ R / 4) :
+omit [IsTwoSidedKernel a K] in
+lemma cut_out_ball {g : X → ℂ} (hr : r ∈ Ioc 0 R) (hx : dist x x' ≤ R / 4) :
     czOperator K R g x' = czOperator K R ((ball x (R / 2))ᶜ.indicator g) x' := by
   have R_pos : 0 < R := by
     rw [mem_Ioc] at hr
@@ -617,10 +501,9 @@ lemma cut_out_ball {g : X → ℂ}
   · measurability
   · measurability
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Lemma 10.1.3 -/
-theorem cotlar_control (ha : 4 ≤ a)
-    {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : r ∈ Ioc 0 R) (hx : dist x x' ≤ R / 4) :
+theorem cotlar_control (ha : 4 ≤ a) {g : X → ℂ} (hg : BoundedFiniteSupport g) (hr : r ∈ Ioc 0 R)
+    (hx : dist x x' ≤ R / 4) :
     ‖czOperator K R g x‖ₑ ≤ ‖czOperator K r ((ball x (R / 2))ᶜ.indicator g) x'‖ₑ +
     C10_1_3 a * globalMaximalFunction volume 1 g x := by
   have R_pos : 0 < R := by
@@ -665,11 +548,9 @@ theorem cotlar_control (ha : 4 ≤ a)
         _ = 2 * 2 ^ (a ^ 3 + 4 * a) := (two_mul (2 ^ (a ^ 3 + 4 * a))).symm
         _ = 2 ^ (a ^ 3 + 4 * a + 1) := (pow_succ' 2 (a ^ 3 + 4 * a)).symm
 
-
 /-- The constant used in `cotlar_set_F₂`. -/
-irreducible_def C10_1_4 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 20 * a + 2)
+irreducible_def C10_1_4 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 22 * a + 2)
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 lemma globalMaximalFunction_zero_enorm_ae_zero (hR : 0 < R) {f : X → ℂ} (hf : AEStronglyMeasurable f)
     (hMzero : globalMaximalFunction volume 1 f x = 0) :
     ∀ᵐ x' ∂(volume.restrict (ball x R)), ‖f x'‖ₑ = 0 := by
@@ -681,7 +562,6 @@ lemma globalMaximalFunction_zero_enorm_ae_zero (hR : 0 < R) {f : X → ℂ} (hf 
     simp
   · simp [hR]
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Part 1 of Lemma 10.1.4 about `F₁`. -/
 theorem cotlar_set_F₁ (hr : 0 < r) (hR : r ≤ R) {g : X → ℂ} (hg : BoundedFiniteSupport g) :
     volume.restrict (ball x (R / 4))
@@ -704,13 +584,13 @@ theorem cotlar_set_F₁ (hr : 0 < r) (hR : r ≤ R) {g : X → ℂ} (hg : Bounde
   simp_rw [← indicator_mul_const, Pi.one_apply, one_mul]
   trans ∫⁻ (y : X) in ball x (R / 4),
       {x' | 4 * MTrgx < ‖czOperator K r g x'‖ₑ}.indicator (fun x_1 ↦ ‖czOperator K r g y‖ₑ ) y
-  · apply lintegral_mono_fn
+  · apply lintegral_mono
     intro y
     apply indicator_le_indicator'
     rw [mem_setOf_eq]
     exact le_of_lt
   trans ∫⁻ (y : X) in ball x (R / 4), ‖czOperator K r g y‖ₑ
-  · apply lintegral_mono_fn
+  · apply lintegral_mono
     intro y
     apply indicator_le_self
   nth_rw 2 [div_eq_mul_inv]
@@ -727,7 +607,7 @@ theorem cotlar_set_F₂ (ha : 4 ≤ a) (hr : 0 < r) (hR : r ≤ R)
     {g : X → ℂ} (hg : BoundedFiniteSupport g) :
     volume.restrict (ball x (R / 4))
       {x' | C10_1_4 a * globalMaximalFunction volume 1 g x <
-      ‖czOperator K r ((ball x (R / 2)).indicator g) x'‖ₑ } ≤
+        ‖czOperator K r ((ball x (R / 2)).indicator g) x'‖ₑ } ≤
     volume (ball x (R / 4)) / 4 := by
   by_cases hMzero : globalMaximalFunction volume 1 g x = 0
   · apply le_of_eq_of_le _ (zero_le _)
@@ -758,7 +638,7 @@ theorem cotlar_set_F₂ (ha : 4 ≤ a) (hr : 0 < r) (hR : r ≤ R)
   apply (Measure.restrict_le_self _).trans
   let g1 := (ball x (R / 2)).indicator g
   have bfs_g1 : BoundedFiniteSupport g1 := hg.indicator measurableSet_ball
-  have czw11 := czoperator_weak_1_1 ha hr (hT r hr)
+  have czw11 := czOperator_weak_1_1 ha hr (hT r hr)
   unfold HasBoundedWeakType at czw11
   have := (czw11 (f := g1) bfs_g1).2
   unfold wnorm wnorm' distribution at this
@@ -796,7 +676,7 @@ theorem cotlar_set_F₂ (ha : 4 ≤ a) (hr : 0 < r) (hR : r ≤ R)
   rw [mul_comm, ← mul_assoc, ENNReal.mul_inv_cancel (by simp) (by simp), one_mul]
 
 /-- The constant used in `cotlar_estimate`. -/
-irreducible_def C10_1_5 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 20 * a + 3)
+irreducible_def C10_1_5 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 22 * a + 3)
 
 /-- Lemma 10.1.5 -/
 theorem cotlar_estimate (ha : 4 ≤ a)
@@ -833,7 +713,7 @@ theorem cotlar_estimate (ha : 4 ≤ a)
   have hxx' := mem_ball.mp hx'.2
   rw [dist_comm] at hxx'
   apply cotlar_control ha hg hr hxx'.le |> le_trans
-  rw [indicator_compl, czoperator_sub hg (hg.indicator measurableSet_ball) hr.1, Pi.sub_apply]
+  rw [indicator_compl, czOperator_sub hg (hg.indicator measurableSet_ball) hr.1, Pi.sub_apply]
   have h1x' : ‖czOperator K r g x'‖ₑ ≤ 4 * globalMaximalFunction volume 1 (czOperator K r g) x := by
     suffices x' ∉ F1 by
       rw [notMem_setOf_iff, not_lt] at this
@@ -848,10 +728,11 @@ theorem cotlar_estimate (ha : 4 ≤ a)
   rw [add_assoc, C10_1_3_def, C10_1_4_def, C10_1_5_def, ← add_mul]
   conv_rhs => rw [pow_succ, mul_two]
   push_cast
-  gcongr <;> simp
+  gcongr _ + (_ + 2 ^ ?_) * _
+  · exact one_le_two
+  · omega
 
-
-omit [IsTwoSidedKernel a K] [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
+omit [IsTwoSidedKernel a K] in
 /-- Part of Lemma 10.1.6. -/
 lemma lowerSemicontinuous_simpleNontangentialOperator {g : X → ℂ} :
     LowerSemicontinuous (simpleNontangentialOperator K r g) := by
@@ -866,21 +747,14 @@ lemma lowerSemicontinuous_simpleNontangentialOperator {g : X → ℂ} :
   · simp_rw [hx', and_true, setOf_mem_eq, isOpen_ball]
   · simp [hx']
 
-omit [IsTwoSidedKernel a K] [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
+omit [IsTwoSidedKernel a K] in
 lemma aestronglyMeasurable_simpleNontangentialOperator {g : X → ℂ} :
     AEStronglyMeasurable (simpleNontangentialOperator K r g) volume :=
   lowerSemicontinuous_simpleNontangentialOperator |>.measurable.aestronglyMeasurable
 
 /-- The constant used in `simple_nontangential_operator`.
 It is not tight and can be improved by some `a` + `constant`. -/
-irreducible_def C10_1_6 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 24 * a + 6)
-
---TODO move to ToMathlib / generalises eLpNorm_add_le to ENorm class
-theorem eLpNorm_add_le'' {α E : Type*} {f g : α → E} {m : MeasurableSpace α}
-    {μ : Measure α} [TopologicalSpace E] [ENormedAddMonoid E]
-    {p : ℝ≥0∞} (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ)
-    (hp1 : 1 ≤ p) : eLpNorm (f + g) p μ ≤ eLpNorm f p μ + eLpNorm g p μ := by
-  sorry
+irreducible_def C10_1_6 (a : ℕ) : ℝ≥0 := 2 ^ (a ^ 3 + 26 * a + 6)
 
 /-- Lemma 10.1.6. The formal statement includes the measurability of the operator.
 See also `simple_nontangential_operator_le` -/
@@ -917,8 +791,8 @@ theorem simple_nontangential_operator (ha : 4 ≤ a)
   have aesm_gmf_czg := hst_gmf_czg.1 -- for fun_prop
   rw [show 4 * globalMaximalFunction volume 1 (czOperator K r g) =
       (4 : ℝ≥0) • globalMaximalFunction volume 1 (czOperator K r g) by rfl]
-  apply le_trans <| eLpNorm_add_le'' (by fun_prop) (by fun_prop) one_le_two
-  apply le_trans <| add_le_add (eLpNorm_add_le'' (by fun_prop) (by fun_prop) one_le_two) (by rfl)
+  apply le_trans <| eLpNorm_add_le (by fun_prop) (by fun_prop) one_le_two
+  apply le_trans <| add_le_add (eLpNorm_add_le (by fun_prop) (by fun_prop) one_le_two) (by rfl)
   simp_rw [eLpNorm_const_smul' (f := globalMaximalFunction volume 1 g),
       eLpNorm_const_smul' (f := globalMaximalFunction volume 1 (czOperator K r g)),
       enorm_NNReal, add_assoc, ← add_mul]
@@ -940,21 +814,15 @@ theorem simple_nontangential_operator (ha : 4 ≤ a)
   apply le_trans <| mul_le_mul_left' this _
   rw [C10_1_6_def, C_Ts, C10_1_5, C10_1_2]
   norm_cast
-  rw [show a ^ 3 + 24 * a + 6 = (a ^ 3 + 20 * a + 5) + (4 * a + 1) by ring]; nth_rw 4 [pow_add]
+  rw [show a ^ 3 + 26 * a + 6 = (a ^ 3 + 22 * a + 5) + (4 * a + 1) by ring]; nth_rw 4 [pow_add]
   gcongr
   nth_rw 6 [pow_succ]; rw [mul_two]
   apply add_le_add
   · ring_nf; gcongr <;> simp [Nat.one_le_pow]
   nth_rw 5 [pow_succ]; rw [mul_two]
-  gcongr <;> simp
-
-/-- Monotone convergence applied to eLpNorms. AEMeasurable variant.
-  Possibly imperfect hypotheses, particularly on `p`. -/
-theorem eLpNorm_iSup' {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ≥0∞}
-    {f : ℕ → α → ℝ≥0∞} (hf : ∀ n, AEMeasurable (f n) μ) (h_mono : ∀ᵐ x ∂μ, Monotone fun n => f n x) :
-    ⨆ n, eLpNorm (f n) p μ = eLpNorm (⨆ n, f n) p μ := by
-  -- lintegral_iSup'
-  sorry
+  gcongr _ + 2 ^ ?_
+  · exact one_le_two
+  · omega
 
 /-- This is the first step of the proof of Lemma 10.0.2, and should follow from 10.1.6 +
 monotone convergence theorem. (measurability should be proven without any restriction on `r`.) -/
@@ -998,14 +866,13 @@ theorem simple_nontangential_operator_le (ha : 4 ≤ a)
   intro n; unfold f
   apply simple_nontangential_operator ha hT (by positivity) g hg |>.2
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Part of Lemma 10.1.7, reformulated. -/
 theorem small_annulus_right {g : X → ℂ} (hg : BoundedFiniteSupport g) {R₁ R₂ : ℝ} (hR₁ : 0 < R₁) :
     ContinuousWithinAt (fun R₂ ↦ ∫ y in Annulus.oo x R₁ R₂, K x y * g y) (Ioo R₁ R₂) R₁ := by
   by_cases hR1R2 : R₁ < R₂
   case neg => rw [Ioo_eq_empty hR1R2, ContinuousWithinAt, nhdsWithin_empty]; exact Filter.tendsto_bot
   conv => arg 1; intro R; rw [← integral_indicator (by measurability)]
-  obtain ⟨B, hB⟩ := czoperator_bound (K := K) (r := R₁) hg hR₁ x
+  obtain ⟨B, hB⟩ := czOperator_bound (K := K) (r := R₁) hg hR₁ x
   rw [ae_restrict_iff' (by measurability), ← Annulus.ci_eq] at hB
   let bound (y : X) : ℝ := (Annulus.oo x R₁ R₂).indicator (fun y ↦ B) y
   apply continuousWithinAt_of_dominated (bound := bound)
@@ -1056,14 +923,13 @@ theorem small_annulus_right {g : X → ℂ} (hg : BoundedFiniteSupport g) {R₁ 
     apply mem_of_mem_nhds
     simpa [indicator_of_notMem hr] using hs
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Part of Lemma 10.1.7, reformulated -/
-theorem small_annulus_left {g : X → ℂ} (hg : BoundedFiniteSupport g) {R₁ R₂ : ℝ} (hR₁ : 0 ≤ R₁):
+theorem small_annulus_left {g : X → ℂ} (hg : BoundedFiniteSupport g) {R₁ R₂ : ℝ} (hR₁ : 0 ≤ R₁) :
     ContinuousWithinAt (fun R ↦ ∫ y in Annulus.oo x R R₂, K x y * g y) (Ioo R₁ R₂) R₂ := by
   by_cases hR1R2 : R₁ < R₂
   case neg => rw [Ioo_eq_empty hR1R2, ContinuousWithinAt, nhdsWithin_empty]; exact Filter.tendsto_bot
   conv => arg 1; intro R; rw [← integral_indicator (by measurability)]
-  obtain ⟨B, hB⟩ := czoperator_bound (K := K) (r := R₂ / 2) hg (by linarith [hR₁.trans_lt hR1R2]) x
+  obtain ⟨B, hB⟩ := czOperator_bound (K := K) (r := R₂ / 2) hg (by linarith [hR₁.trans_lt hR1R2]) x
   rw [ae_restrict_iff' (by measurability), ← Annulus.ci_eq] at hB
   let bound (y : X) : ℝ := (Annulus.oo x (R₂ / 2) R₂).indicator (fun y ↦ B) y
   apply continuousWithinAt_of_dominated (bound := bound)
@@ -1114,23 +980,19 @@ theorem small_annulus_left {g : X → ℂ} (hg : BoundedFiniteSupport g) {R₁ R
     apply mem_of_mem_nhds
     simpa [indicator_of_notMem hr] using hs
 
-omit [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
 /-- Lemma 10.1.8. -/
 theorem nontangential_operator_boundary {f : X → ℂ} (hf : BoundedFiniteSupport f) :
     nontangentialOperator K f x =
-    ⨆ (R₁ : ℝ) (_: 0 < R₁) (R₂ : ℝ) (_ : R₁ < R₂) (x' : X) (_ : dist x x' < R₁),
-    ‖∫ y in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ := by
-  let sup : ℝ≥0∞ := ⨆ (R₁ : ℝ) (_: 0 < R₁) (R₂ : ℝ) (_ : R₁ < R₂) (x' : X) (_ : dist x x' < R₁),
+    ⨆ (R₂ : ℝ) (R₁ ∈ Ioo 0 R₂) (x' ∈ ball x R₁),
+      ‖∫ y in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ := by
+  let sup : ℝ≥0∞ := ⨆ (R₂ : ℝ) (R₁ ∈ Ioo 0 R₂) (x' ∈ ball x R₁),
     ‖∫ y in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ
   unfold nontangentialOperator
   apply le_antisymm
   all_goals (
-    rw [iSup_le_iff]; intro R₁
-    rw [iSup_le_iff]; intro hR₁
     rw [iSup_le_iff]; intro R₂
-    rw [iSup_le_iff]; intro hR₂
-    rw [iSup_le_iff]; intro x'
-    rw [iSup_le_iff]; intro hx'
+    rw [iSup₂_le_iff]; intro R₁ hR₁
+    rw [iSup₂_le_iff]; intro x' hx'
   )
   · have (R' : ℝ) (hR' : R' ∈ Ioo R₁ R₂) : ‖∫ (y : X) in Annulus.oo x' R₁ R₂, K x' y * f y‖ₑ ≤
         ‖∫ (y : X) in Annulus.oo x' R₁ R', K x' y * f y‖ₑ + sup := by
@@ -1139,62 +1001,57 @@ theorem nontangential_operator_boundary {f : X → ℂ} (hf : BoundedFiniteSuppo
       rw [this, setIntegral_union_2 (disjoint_left.mpr <| fun x hx hx2 ↦ not_lt.mpr hx2.1 hx.2)
         (by measurability)]; swap
       · simp_rw [← this]
-        apply IntegrableOn.mono_set <| czoperator_welldefined hf hR₁ x'
+        apply IntegrableOn.mono_set <| czOperator_welldefined hf hR₁.1 x'
         rw [← Annulus.ci_eq]
         exact Annulus.oo_subset_ci (by rfl)
       apply le_trans <| enorm_add_le _ _
       gcongr
       rw [Annulus.co_eq, inter_comm, ← diff_eq_compl_inter]
-      apply le_trans ?_ <| le_iSup _ (i := R')
-      apply le_trans ?_ <| le_iSup _ (i := hR₁.trans hR'.1)
-      apply le_trans ?_ <| le_iSup _ (i := R₂)
-      apply le_trans ?_ <| le_iSup _ (i := hR'.2)
-      apply le_trans ?_ <| le_iSup _ (i := x')
-      rw [iSup_pos <| hx'.trans hR'.1]
+      refine le_iSup_of_le ?_ (i := R₂)
+      refine le_iSup₂_of_le ?_ (i := R') (j := ⟨hR₁.1.trans hR'.1, hR'.2⟩)
+      refine le_iSup₂_of_le ?_  (i := x') (j := hx'.trans hR'.1)
+      rfl
     -- apply continuity
     have le_R1 : ‖∫ (y : X) in Annulus.oo x' R₁ R₂, K x' y * f y‖ₑ ≤
         ‖∫ (y : X) in Annulus.oo x' R₁ R₁, K x' y * f y‖ₑ + sup := by
       refine ContinuousWithinAt.closure_le ?_ ?_ ?_ this
-      · simp [closure_Ioo hR₂.ne, hR₂.le]
+      · simp [closure_Ioo hR₁.2.ne, hR₁.2.le]
       · apply continuousWithinAt_const
       · apply ContinuousWithinAt.add ?_ continuousWithinAt_const
-        exact small_annulus_right hf hR₁ |>.enorm
+        exact small_annulus_right hf hR₁.1 |>.enorm
     simpa using le_R1
-  · have (R' : ℝ) (hR' : R' ∈ Ioo (dist x x') R₁) : ‖∫ (y : X) in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ ≤
+  · have (R' : ℝ) (hR' : R' ∈ Ioo (dist x' x) R₁) : ‖∫ (y : X) in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ ≤
         ‖∫ (y : X) in Annulus.oo x' R' R₁, K x' y * f y‖ₑ + nontangentialOperator K f x := by
-      have hR'pos : 0 < R' := by linarith [dist_nonneg (x := x) (y := x'), hR'.1]
+      have hR'pos : 0 < R' := by linarith [dist_nonneg (x := x') (y := x), hR'.1]
       have : ∫ (y : X) in Annulus.co x' R₁ R₂, K x' y * f y = (∫ (y : X) in Annulus.oo x' R' R₁, K x' y * f y) +
           (∫ (y : X) in Annulus.co x' R₁ R₂, K x' y * f y) - ∫ (y : X) in Annulus.oo x' R' R₁, K x' y * f y := by
         simp
       rw [diff_eq_compl_inter, inter_comm, ← Annulus.co_eq, this]
       have : Annulus.oo x' R' R₂ = Annulus.oo x' R' R₁ ∪ Annulus.co x' R₁ R₂ :=
-        Annulus.oo_union_co hR'.2 hR₂.le |>.symm
+        Annulus.oo_union_co hR'.2 hR₁.2.le |>.symm
       rw [← setIntegral_union_2 (disjoint_left.mpr <| fun x hx hx2 ↦ not_lt.mpr hx2.1 hx.2) (by measurability), ← this]; swap
       · simp_rw [← this]
-        apply IntegrableOn.mono_set <| czoperator_welldefined hf hR'pos x'
+        apply IntegrableOn.mono_set <| czOperator_welldefined hf hR'pos x'
         rw [← Annulus.ci_eq]
         exact Annulus.oo_subset_ci (by rfl)
       apply le_trans enorm_sub_le
       rw [add_comm]
       gcongr
-      apply le_trans ?_ <| le_iSup _ (i := R')
-      apply le_trans ?_ <| le_iSup _ (i := hR'pos)
-      apply le_trans ?_ <| le_iSup _ (i := R₂)
-      apply le_trans ?_ <| le_iSup _ (i := hR'.2.trans hR₂)
-      apply le_trans ?_ <| le_iSup _ (i := x')
-      rw [iSup_pos hR'.1]
+      refine le_iSup₂_of_le ?_ (i := R₂) (j := R')
+      refine le_iSup₂_of_le ?_ (i := ⟨hR'pos, hR'.2.trans hR₁.2⟩) (j := x')
+      refine le_iSup_of_le ?_ (i := hR'.1)
+      rfl
     -- apply continuity
     have le_R1 : ‖∫ (y : X) in ball x' R₂ \ ball x' R₁, K x' y * f y‖ₑ ≤
         ‖∫ (y : X) in Annulus.oo x' R₁ R₁, K x' y * f y‖ₑ + nontangentialOperator K f x := by
       refine ContinuousWithinAt.closure_le ?_ ?_ ?_ this
-      · simp [closure_Ioo hx'.ne, hx'.le]
+      · simp [closure_Ioo (mem_ball.mp hx').ne, (mem_ball.mp hx').le]
       · apply continuousWithinAt_const
       · apply ContinuousWithinAt.add ?_ continuousWithinAt_const
         exact small_annulus_left hf (dist_nonneg) |>.enorm
     simpa using le_R1
 
-
-omit [IsTwoSidedKernel a K] [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
+omit [IsTwoSidedKernel a K] in
 /-- Part of Lemma 10.1.6. -/
 lemma lowerSemicontinuous_nontangentialOperator {g : X → ℂ} :
     LowerSemicontinuous (nontangentialOperator K g) := by
@@ -1202,22 +1059,20 @@ lemma lowerSemicontinuous_nontangentialOperator {g : X → ℂ} :
   simp_rw [lowerSemicontinuous_iff_isOpen_preimage, preimage, mem_Ioi, lt_iSup_iff, ← iUnion_setOf,
     exists_prop]
   intro M
-  apply isOpen_iUnion; intro R₁
-  apply isOpen_iUnion; intro hR₁
   apply isOpen_iUnion; intro R₂
-  apply isOpen_iUnion; intro hR₂
+  apply isOpen_biUnion; intro R₁ hR₁
   apply isOpen_iUnion; intro x'
   by_cases hx' : M < ‖∫ (y : X) in Annulus.oo x' R₁ R₂, K x' y * g y‖ₑ
-  · simp_rw [hx', and_true, ← mem_ball, setOf_mem_eq, isOpen_ball]
+  · simp_rw [hx', and_true, mem_ball_comm, setOf_mem_eq, isOpen_ball]
   · simp [hx']
 
-omit [IsTwoSidedKernel a K] [CompatibleFunctions ℝ X (defaultA a)] [IsCancellative X (defaultτ a)] in
+omit [IsTwoSidedKernel a K] in
 lemma aestronglyMeasurable_nontangentialOperator {g : X → ℂ} :
     AEStronglyMeasurable (nontangentialOperator K g) volume :=
   lowerSemicontinuous_nontangentialOperator |>.measurable.aestronglyMeasurable
 
 /-- The constant used in `nontangential_from_simple`. -/
-irreducible_def C10_0_2 (a : ℕ) : ℝ≥0 := 2 ^ (5 * a ^ 3)
+irreducible_def C10_0_2 (a : ℕ) : ℝ≥0 := 2 ^ (3 * a ^ 3)
 
 /-- Lemma 10.0.2. The formal statement includes the measurability of the operator. -/
 theorem nontangential_from_simple (ha : 4 ≤ a)
@@ -1244,39 +1099,26 @@ theorem nontangential_from_simple (ha : 4 ≤ a)
         rw [diff_eq_compl_inter, inter_eq_right, compl_subset_compl]
         exact ball_subset_ball hR1R2.le
       rw [this, setIntegral_union_2 (disjoint_compl_left_iff_subset.mpr diff_subset) (by measurability)
-        (by rw [← this]; exact czoperator_welldefined (K := K) hg hR1 x')]
+        (by rw [← this]; exact czOperator_welldefined (K := K) hg hR1 x')]
       simp
-    trans ⨆ R₁, ⨆ (_ : 0 < R₁), ⨆ R₂, ⨆ (_ : R₁ < R₂), ⨆ x', ⨆ (_ : dist x x' < R₁),
+    trans ⨆ (R₂ : ℝ) (R₁ ∈ Ioo 0 R₂) (x' ∈ ball x R₁),
         ‖∫ (y : X) in (ball x' R₁)ᶜ, K x' y * g y‖ₑ + ‖∫ (y : X) in (ball x' R₂)ᶜ, K x' y * g y‖ₑ
-    · gcongr with R1 hR1 R2 hR1R2
-      exact this hR1 hR1R2
-    have {R : ℝ} (hR : 0 < R) {x' : X} (hx' : dist x x' <  R) :
+    · gcongr with R₂ R₁ hR₁
+      exact this hR₁.1 hR₁.2
+    have {R : ℝ} (hR : 0 < R) {x' : X} (hx' : dist x' x <  R) :
         ‖∫ (y : X) in (ball x' R)ᶜ, K x' y * g y‖ₑ ≤ simpleNontangentialOperator K 0 g x := by
       unfold simpleNontangentialOperator czOperator
       apply le_trans _ <| le_iSup _ R; rw [iSup_pos hR]
-      apply le_trans _ <| le_iSup _ x'; rw [← mem_ball, mem_ball_comm] at hx'; rw [iSup_pos hx']
-    rw [iSup_le_iff]; intro R₁
-    rw [iSup_le_iff]; intro hR₁
+      apply le_trans _ <| le_iSup _ x'; rw [← mem_ball] at hx'; rw [iSup_pos hx']
     rw [iSup_le_iff]; intro R₂
-    rw [iSup_le_iff]; intro hR₂
-    rw [iSup_le_iff]; intro x'
-    rw [iSup_le_iff]; intro hx'
+    rw [iSup₂_le_iff]; intro R₁ hR₁
+    rw [iSup₂_le_iff]; intro x' hx'
     norm_cast; rw [two_mul]
-    exact add_le_add (this hR₁ hx') (this (hR₁.trans hR₂) (hx'.trans hR₂))
-  · gcongr; norm_cast
-    rw [C10_1_6_def, C10_0_2_def] --constant manipulation makes me cry
-    rw [mul_comm, ← pow_succ]
-    gcongr
-    · exact one_le_two
-    ring_nf
-    conv_rhs => rw [show 5 = 4 + 1 by simp, mul_add_one]
-    gcongr
-    trans a * 26
-    · linarith
-    · trans a * 4^2 * 4
-      · linarith
-      · conv_rhs => rw [show 3 = 1 + 2 by simp, Nat.pow_add, Nat.pow_one]
-        have := pow_le_pow_left' ha 2
-        gcongr
+    exact add_le_add (this hR₁.1 hx') (this (hR₁.1.trans hR₁.2) (hx'.trans hR₁.2))
+  · rw [C10_1_6, C10_0_2, ← pow_succ']; gcongr; · exact one_le_two
+    calc
+      _ ≤ a ^ 3 + 2 * 4 * 4 * a := by omega
+      _ ≤ a ^ 3 + 2 * a * a * a := by gcongr
+      _ = _ := by ring
 
 end

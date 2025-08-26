@@ -1,7 +1,4 @@
-import Mathlib.Analysis.Normed.Group.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
-import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
-import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
 
 noncomputable section
 
@@ -53,7 +50,7 @@ instance : ENormedSpace ℝ≥0∞ where
 instance : ENormedSpace ℝ≥0 where
   enorm := ofNNReal
   add_smul r s x := by
-    simp only [id_eq, smul_eq_mul]
+    simp only [smul_eq_mul]
     ring
   zero_smul := by simp
   enorm_eq_zero := by simp
@@ -98,22 +95,22 @@ instance : ContinuousConstSMul ℝ≥0 ℝ≥0∞ where
 open MeasureTheory
 
 -- TODO: put next to MeasureTheory.eLpNorm_const_smul_le (which perhaps can stay)
-theorem eLpNorm_const_smul_le' {α : Type*} {m0 : MeasurableSpace α} {p : ℝ≥0∞}
-  {μ : Measure α} {c : ℝ≥0} {f : α → ε}: eLpNorm (c • f) p μ ≤ ‖c‖ₑ * eLpNorm f p μ := by
+theorem eLpNorm_const_nnreal_smul_le {α : Type*} {m0 : MeasurableSpace α} {p : ℝ≥0∞}
+  {μ : Measure α} {c : ℝ≥0} {f : α → ε} : eLpNorm (c • f) p μ ≤ ‖c‖ₑ * eLpNorm f p μ := by
   apply eLpNorm_le_nnreal_smul_eLpNorm_of_ae_le_mul' (p := p) ?_
   filter_upwards with x using by simp [ENNReal.smul_def]
 
 -- TODO: put next to eLpNorm_const_smul
 theorem eLpNorm_const_smul' {α : Type*} {m0 : MeasurableSpace α} {p : ℝ≥0∞}
-  {μ : Measure α} {c : ℝ≥0} {f : α → ε}:
+  {μ : Measure α} {c : ℝ≥0} {f : α → ε} :
     eLpNorm (c • f) p μ = ‖c‖ₑ * eLpNorm f p μ := by
   obtain rfl | hc := eq_or_ne c 0
   · simp
-  refine le_antisymm eLpNorm_const_smul_le' <| ENNReal.mul_le_of_le_div' ?_
-  simpa [ENNReal.div_eq_inv_mul, hc] using eLpNorm_const_smul_le' (c := c⁻¹) (f := c • f)
+  refine le_antisymm eLpNorm_const_nnreal_smul_le <| ENNReal.mul_le_of_le_div' ?_
+  simpa [ENNReal.div_eq_inv_mul, hc] using eLpNorm_const_nnreal_smul_le (c := c⁻¹) (f := c • f)
 
 -- TODO: put next to the unprimed version; perhaps both should stay
-lemma eLpNormEssSup_const_smul_le' {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α}
+lemma eLpNormEssSup_const_nnreal_smul_le {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α}
     {c : ℝ≥0} {f : α → ε} : eLpNormEssSup (c • f) μ ≤ ‖c‖ₑ * eLpNormEssSup f μ := by
   have (x : α) : ‖(c • f) x‖ₑ ≤ ↑c * ‖f x‖ₑ := by simp [ENNReal.smul_def]
   apply eLpNormEssSup_le_nnreal_smul_eLpNormEssSup_of_ae_le_mul'

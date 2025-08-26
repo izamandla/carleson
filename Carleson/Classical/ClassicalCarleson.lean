@@ -1,9 +1,7 @@
-/- This file contains the proof of the classical Carleson theorem from Section 11.1. -/
-
 import Carleson.Classical.Approximation
 import Carleson.Classical.ControlApproximationEffect
 
-import Mathlib.Analysis.Fourier.AddCircle
+/- This file contains the proof of the classical Carleson theorem from Section 11.1. -/
 
 open MeasureTheory Real
 
@@ -156,7 +154,7 @@ theorem carleson_interval {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f 
   apply le_trans' Emeasure
   apply measure_mono
   intro x hx
-  simp only [and_imp, Set.mem_compl_iff, Set.mem_setOf_eq, Classical.not_imp] at hx
+  simp only [Set.mem_compl_iff, Set.mem_setOf_eq, Classical.not_imp] at hx
   by_contra h
   exact hx.2 (hE x ⟨hx.1, h⟩)
 
@@ -178,14 +176,14 @@ lemma Function.Periodic.ae_of_ae_restrict {T : ℝ} (hT : 0 < T) {a : ℝ} {P : 
     · intro h
       rcases h with ⟨k, hk⟩
       rw [Set.mem_vadd_set_iff_neg_vadd_mem, vadd_eq_add, ← sub_eq_neg_add, E_interval_def] at hk
-      simp only [and_imp, Classical.not_imp, Set.mem_setOf_eq, hP.sub_zsmul_eq k] at hk
+      simp only [Classical.not_imp, Set.mem_setOf_eq, hP.sub_zsmul_eq k] at hk
       exact hk.2
     · dsimp
       rcases (hP.exists_mem_Ico' hT x a) with ⟨n, hn, hxn⟩
       rw [hxn]
       refine fun h ↦ ⟨n, ?_⟩
       rw [Set.mem_vadd_set_iff_neg_vadd_mem, vadd_eq_add, ← sub_eq_neg_add, E_interval_def]
-      simp only [and_imp, Classical.not_imp, Set.mem_setOf_eq]
+      simp only [Classical.not_imp, Set.mem_setOf_eq]
       exact ⟨hn, h⟩
   -- The union still has measure zero
   have Emeasure : volume E = 0 := by
@@ -196,7 +194,8 @@ lemma Function.Periodic.ae_of_ae_restrict {T : ℝ} (hT : 0 < T) {a : ℝ} {P : 
 
 end
 
-/- Carleson's theorem asserting a.e. convergence of the partial Fourier sums for continous functions. -/
+/- **Carleson's theorem** asserting a.e. point-wise convergence of the partial Fourier sums for
+periodic continuous functions. -/
 theorem classical_carleson {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f : f.Periodic (2 * π)) :
     ∀ᵐ x, Filter.Tendsto (S_ · f x) Filter.atTop (nhds (f x)) := by
   -- Reduce to a.e. convergence on [0,2π]
@@ -207,12 +206,9 @@ theorem classical_carleson {f : ℝ → ℂ} (cont_f : Continuous f) (periodic_f
     conv => pattern f _; rw [periodic_f]
   apply ae_restrict_of_ae_eq_of_ae_restrict Ico_ae_eq_Icc.symm
   rw [zero_add]
-
   -- Show a.e. convergence on [0,2π]
   exact carleson_interval cont_f periodic_f
 
-/- Classical theorem of Carleson and Hunt asserting a.e. convergence of the partial Fourier sums for L^p functions for p>1. -/
-theorem carleson_hunt {T : ℝ} [hT : Fact (0 < T)] {f : AddCircle T → ℂ} {p : ENNReal} (hp : 1 < p) (hf : MemLp f p AddCircle.haarAddCircle) :
-    ∀ᵐ x, Filter.Tendsto (partialFourierSum' · f x) Filter.atTop (nhds (f x)) := sorry
+theorem classical_carleson_check : ClassicalCarleson := @classical_carleson
 
 end

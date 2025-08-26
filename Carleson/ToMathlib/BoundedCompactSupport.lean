@@ -3,8 +3,8 @@ Copyright (c) 2024 Joris Roos. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joris Roos, Sébastien Gouëzel
 -/
-
 import Carleson.ToMathlib.BoundedFiniteSupport
+import Carleson.ToMathlib.Misc
 
 /-!
 
@@ -75,6 +75,10 @@ structure BoundedCompactSupport (f : X → E) (μ : Measure X := by volume_tac) 
 namespace BoundedCompactSupport
 
 section General
+
+open Bornology in
+lemma _root_.isBounded_range_iff_forall_norm_le {α β} [SeminormedAddCommGroup α] {f : β → α} :
+    IsBounded (range f) ↔ ∃ C, ∀ x, ‖f x‖ ≤ C := by convert isBounded_iff_forall_norm_le; simp
 
 variable [TopologicalSpace E] [ENorm E] [Zero E]
 
@@ -153,7 +157,7 @@ theorem comp_left_norm {F} [NormedAddCommGroup F] {g : E → F} (hf : BoundedCom
 
 protected theorem neg (hf : BoundedCompactSupport f μ) : BoundedCompactSupport (- f) μ where
   memLp_top := hf.memLp_top.neg
-  hasCompactSupport := hf.hasCompactSupport.neg'
+  hasCompactSupport := hf.hasCompactSupport.neg
 
 variable {𝕜 : Type*} [RCLike 𝕜] {g : X → E}
 
@@ -219,8 +223,7 @@ theorem mono {g : X → ℝ≥0∞} (hg : BoundedCompactSupport g μ) (hf : AESt
   hasCompactSupport := by
     refine hg.hasCompactSupport.mono ?_
     by_contra h
-    simp only [support_subset_iff, ne_eq, mem_support, not_forall, Classical.not_imp,
-      Decidable.not_not] at h
+    simp only [support_subset_iff, ne_eq, mem_support, not_forall, Decidable.not_not] at h
     obtain ⟨x, hfx, hgx⟩ := h
     specialize hfg x
     simp_rw [hgx, nonpos_iff_eq_zero, enorm_eq_zero, hfx] at hfg
@@ -232,8 +235,7 @@ theorem mono_norm {g : X → ℝ} (hg : BoundedCompactSupport g μ) (hf : AEStro
   hasCompactSupport := by
     refine hg.hasCompactSupport.mono ?_
     by_contra h
-    simp only [support_subset_iff, ne_eq, mem_support, not_forall, Classical.not_imp,
-      Decidable.not_not] at h
+    simp only [support_subset_iff, ne_eq, mem_support, not_forall, Decidable.not_not] at h
     obtain ⟨x, hfx, hgx⟩ := h
     specialize hfg x
     simp_rw [hgx, norm_le_zero_iff, hfx] at hfg
@@ -343,10 +345,7 @@ protected theorem indicator {f : X → E} (hf : BoundedCompactSupport f μ) {s :
 variable {F : X × Y → E}
 
 -- -- prove when needed
--- theorem swap (hF : BoundedCompactSupport f μ) : BoundedCompactSupport (F ∘ Prod.swap) where
---   memLp_top := sorry
---   stronglyMeasurable := sorry
---   hasCompactSupport := sorry
+-- theorem swap (hF : BoundedCompactSupport f μ) : BoundedCompactSupport (F ∘ Prod.swap)
 
 variable {F : X × Y → E}
 
@@ -358,10 +357,9 @@ variable {F : X × Y → E}
 --     apply isBounded_range_iff_forall_norm_le.2 ⟨C, fun x ↦ ?_⟩
 --     exact hC (x, y)
 --   stronglyMeasurable := hF.stronglyMeasurable.comp_measurable measurable_prodMk_right
---   hasCompactSupport := sorry
+--   hasCompactSupport :=
 --   -- by
 --   --   apply HasCompactSupport.intro
---   --   sorry
 -- }
 
 
@@ -369,7 +367,7 @@ variable {F : X × Y → E}
 --     ∀ᵐ x, BoundedCompactSupport (fun y ↦ F (x, y)) := hF.swap.prod_left_ae
 
 -- theorem integral_prod_left (hF : BoundedCompactSupport f μ) :
---     BoundedCompactSupport (fun x ↦ ∫ y, F (x, y)) := sorry
+--     BoundedCompactSupport (fun x ↦ ∫ y, F (x, y)) :=
 -- --   have := hF.integrable.integrable_prod_left
 
 -- theorem integral_prod_right (hF : BoundedCompactSupport f μ) :

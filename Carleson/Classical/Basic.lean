@@ -1,21 +1,15 @@
-/- This file contains basic definitions and lemmas. -/
-
-import Carleson.MetricCarleson.Main
-import Mathlib.Analysis.Fourier.AddCircle
-import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
-import Mathlib.Analysis.Convolution
-
 import Carleson.Classical.Helper
-import Carleson.ToMathlib.Misc
-import Carleson.ToMathlib.Topology.Instances.AddCircle.Defs
+import Carleson.Defs
 import Carleson.ToMathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Carleson.ToMathlib.MeasureTheory.Function.LpSpace.ContinuousFunctions
+import Carleson.ToMathlib.Topology.Instances.AddCircle.Defs
+import Mathlib.Analysis.Fourier.AddCircle
 
+/- This file contains basic definitions and lemmas. -/
 
 open Finset Real MeasureTheory AddCircle
 
 noncomputable section
-
 
 --TODO: I think the measurability assumptions might be unnecessary
 theorem fourierCoeff_eq_fourierCoeff_of_aeeq {T : ℝ} [hT : Fact (0 < T)] {n : ℤ} {f g : AddCircle T → ℂ}
@@ -31,16 +25,11 @@ theorem fourierCoeff_eq_fourierCoeff_of_aeeq {T : ℝ} [hT : Fact (0 < T)] {n : 
   congr 1
   rwa [AEEqFun.mk_eq_mk]
 
-
-def partialFourierSum (N : ℕ) (f : ℝ → ℂ) (x : ℝ) : ℂ := ∑ n ∈ Icc (-(N : ℤ)) N,
-    fourierCoeffOn Real.two_pi_pos f n * fourier n (x : AddCircle (2 * π))
-
 def partialFourierSum' {T : ℝ} [hT : Fact (0 < T)] (N : ℕ) (f : AddCircle T → ℂ) : C(AddCircle T, ℂ) :=
     ∑ n ∈ Finset.Icc (-Int.ofNat N) N, fourierCoeff f n • fourier n
 
 def partialFourierSumLp {T : ℝ} [hT : Fact (0 < T)] (p : ENNReal) [Fact (1 ≤ p)] (N : ℕ) (f : AddCircle T → ℂ) : Lp ℂ p (@haarAddCircle T hT) :=
     ∑ n ∈ Finset.Icc (-Int.ofNat N) N, fourierCoeff f n • fourierLp p n
-
 
 lemma partialFourierSum_eq_partialFourierSum' [hT : Fact (0 < 2 * Real.pi)] (N : ℕ) (f : ℝ → ℂ) :
     liftIoc (2 * Real.pi) 0 (partialFourierSum N f) = partialFourierSum' N (liftIoc (2 * Real.pi) 0 f) := by
@@ -83,7 +72,7 @@ lemma partialFourierSum'_eq_partialFourierSumLp {T : ℝ} [hT : Fact (0 < T)] (p
   rfl
 
 
-lemma partialFourierSum_aeeq_partialFourierSumLp [hT : Fact (0 < 2 * Real.pi)] (p : ENNReal) [Fact (1 ≤ p)] (N : ℕ) (f : ℝ → ℂ) (h_mem_Lp :  MemLp (liftIoc (2 * Real.pi) 0 f) 2 haarAddCircle):
+lemma partialFourierSum_aeeq_partialFourierSumLp [hT : Fact (0 < 2 * Real.pi)] (p : ENNReal) [Fact (1 ≤ p)] (N : ℕ) (f : ℝ → ℂ) (h_mem_Lp : MemLp (liftIoc (2 * Real.pi) 0 f) 2 haarAddCircle) :
     liftIoc (2 * Real.pi) 0 (partialFourierSum N f) =ᶠ[ae haarAddCircle] ↑↑(partialFourierSumLp p N (MemLp.toLp (liftIoc (2 * Real.pi) 0 f) h_mem_Lp)) := by
   rw [partialFourierSupLp_eq_partialFourierSupLp_of_aeeq (Lp.aestronglyMeasurable _) h_mem_Lp.aestronglyMeasurable (MemLp.coeFn_toLp h_mem_Lp)]
   rw [partialFourierSum'_eq_partialFourierSumLp, partialFourierSum_eq_partialFourierSum']
@@ -95,7 +84,7 @@ lemma partialFourierSum_aeeq_partialFourierSumLp [hT : Fact (0 < 2 * Real.pi)] (
 local notation "S_" => partialFourierSum
 
 @[simp]
-lemma fourierCoeffOn_mul {a b : ℝ} {hab : a < b} {f: ℝ → ℂ} {c : ℂ} {n : ℤ} :
+lemma fourierCoeffOn_mul {a b : ℝ} {hab : a < b} {f : ℝ → ℂ} {c : ℂ} {n : ℤ} :
   fourierCoeffOn hab (fun x ↦ c * f x) n = c * (fourierCoeffOn hab f n):= by
   simp only [fourierCoeffOn_eq_integral, one_div, fourier_apply, neg_smul, fourier_neg',
     fourier_coe_apply', mul_comm, Complex.ofReal_sub, smul_eq_mul, mul_assoc,
@@ -103,7 +92,7 @@ lemma fourierCoeffOn_mul {a b : ℝ} {hab : a < b} {f: ℝ → ℂ} {c : ℂ} {n
   ring
 
 @[simp]
-lemma fourierCoeffOn_neg {a b : ℝ} {hab : a < b} {f: ℝ → ℂ} {n : ℤ} :
+lemma fourierCoeffOn_neg {a b : ℝ} {hab : a < b} {f : ℝ → ℂ} {n : ℤ} :
   fourierCoeffOn hab (-f) n = - (fourierCoeffOn hab f n):= by
   simp only [fourierCoeffOn_eq_integral, one_div, fourier_apply, neg_smul, fourier_neg',
     fourier_coe_apply', Complex.ofReal_sub, Pi.neg_apply, smul_eq_mul, mul_neg,
@@ -150,7 +139,7 @@ lemma partialFourierSum_sub {f g : ℝ → ℂ} {N : ℕ}
     Complex.ofReal_mul, Complex.ofReal_ofNat, sub_mul, sum_sub_distrib, Pi.sub_apply]
 
 @[simp]
-lemma partialFourierSum_mul {f: ℝ → ℂ} {a : ℂ} {N : ℕ}:
+lemma partialFourierSum_mul {f : ℝ → ℂ} {a : ℂ} {N : ℕ} :
   S_ N (fun x ↦ a * f x) = fun x ↦ a * S_ N f x := by
   ext x
   simp only [partialFourierSum, fourierCoeffOn_mul, fourier_apply, fourier_coe_apply', mul_assoc,
@@ -232,7 +221,7 @@ lemma lower_secant_bound_aux {η : ℝ} (ηpos : 0 < η) {x : ℝ} (le_abs_x : �
           Even.neg_pow, le_add_iff_nonneg_right, pow_two_nonneg]
         · linarith [pow_two_nonneg (1 - Real.cos x), pow_two_nonneg (Real.sin x)]
 
-lemma lower_secant_bound' {η : ℝ}  {x : ℝ} (le_abs_x : η ≤ |x|) (abs_x_le : |x| ≤ 2 * π - η) :
+lemma lower_secant_bound' {η : ℝ} {x : ℝ} (le_abs_x : η ≤ |x|) (abs_x_le : |x| ≤ 2 * π - η) :
     (2 / π) * η ≤ ‖1 - Complex.exp (Complex.I * x)‖ := by
   by_cases ηpos : η ≤ 0
   · calc (2 / π) * η

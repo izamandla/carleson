@@ -1,5 +1,6 @@
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+
 /- This file formalizes section 11.4 (The proof of the van der Corput Lemma) from the paper. -/
-import Carleson.Classical.Basic
 
 noncomputable section
 
@@ -12,7 +13,7 @@ lemma ContinuousOn.intervalIntegrable_Ioo_of_bound
     IntervalIntegrable f volume a b := by
   rw [intervalIntegrable_iff_integrableOn_Ioo_of_le hab]
   refine ⟨hf.aestronglyMeasurable measurableSet_Ioo, ?_⟩
-  apply hasFiniteIntegral_restrict_of_bounded (by simp) (C := C)
+  apply HasFiniteIntegral.restrict_of_bounded (by simp) (C := C)
   filter_upwards [ae_restrict_mem measurableSet_Ioo] using h'f
 
 lemma intervalIntegrable_continuous_mul_lipschitzOnWith

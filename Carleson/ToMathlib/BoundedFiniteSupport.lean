@@ -1,14 +1,4 @@
-import Mathlib.Analysis.Convex.PartitionOfUnity
-import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.MeasureTheory.Integral.Average
-import Mathlib.MeasureTheory.Integral.Bochner.Basic
-import Mathlib.MeasureTheory.Integral.Prod
-import Mathlib.MeasureTheory.Measure.Haar.OfBasis
-import Mathlib.Topology.MetricSpace.Holder
-import Mathlib.Data.Set.Card
-import Mathlib.Data.Real.ENatENNReal
-import Carleson.ToMathlib.Misc
-import Carleson.ToMathlib.ENorm
+import Mathlib.MeasureTheory.Function.L1Space.Integrable
 
 /-
 This file defines BoundedFiniteSupport.
@@ -89,7 +79,7 @@ theorem indicator (bfs : BoundedFiniteSupport f μ) {s : Set X} (hs : Measurable
     exact bfs.measure_support_lt
 
 protected theorem neg (hf : BoundedFiniteSupport f μ) : BoundedFiniteSupport (-f) μ :=
-  ⟨memLp_neg_iff.mpr hf.memLp_top, support_neg' f ▸ hf.measure_support_lt⟩
+  ⟨memLp_neg_iff.mpr hf.memLp_top, support_neg f ▸ hf.measure_support_lt⟩
 
 protected theorem add (hf : BoundedFiniteSupport f μ) (hg : BoundedFiniteSupport g μ) :
     BoundedFiniteSupport (f + g) μ :=
