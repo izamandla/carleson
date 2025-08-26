@@ -834,6 +834,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
     simp
   · set s:= {l ∈ Finset.range (2^(M+1)) | Odd l} with hs
     set t := { l ∈ Finset.range (2^(M+1)) |  Even l}  with ht
+    --osobny lemat ze to zawsze jest prawda
     have hp : Finset.range (2^(M+1)) = s ∪ t := by
       rw[hs, ht]
       ext k
@@ -900,7 +901,8 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
       · rw[hs, eq_comm ]
         let i : ℕ → ℕ  := fun i ↦ i/2
         apply Finset.sum_of_injOn i
-        · unfold InjOn
+        · -- dla tego i dla parzysych osobny tw ze inj
+          unfold InjOn
           simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, and_imp]
           intro n hn hn2 m hm hm2 himp
           simp only [i] at himp
@@ -909,14 +911,16 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           rw[himp] at hk'
           rw[← hk']
           exact Nat.two_mul_div_two_add_one_of_odd hm2
-        · unfold MapsTo
+        · --to samo co powyzej
+          unfold MapsTo
           intro k hk
           simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, i] at hk
           simp only [Finset.coe_range, mem_Iio, i]
           refine Nat.div_lt_of_lt_mul ?_
           rw [← @Nat.pow_add_one']
           exact hk.1
-        · simp only [Finset.mem_range]
+        · --obraz przez podzielenie to cos tam - lemat
+          simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
