@@ -65,7 +65,7 @@ theorem haarFunction_outside (x : ℝ) (h : x < 0 ∨ x ≥ 1) : haarFunction x 
 Square of the Haar function is equal to one.
 -/
 @[simp]
-theorem haar_sqr (x : ℝ): (haarFunction x)^2 = if 0 ≤ x ∧ x < 1 then 1 else 0 := by
+theorem haar_sqr (x : ℝ) : (haarFunction x)^2 = if 0 ≤ x ∧ x < 1 then 1 else 0 := by
   split_ifs with h
   · let ⟨hP, hQ⟩ := h
     by_cases h1 : x< 1/2
@@ -170,7 +170,7 @@ theorem measurability_of_haar : Measurable haarFunction := by
   measurability
 
 
-theorem bcs_haar: BoundedCompactSupport (haarFunction) MeasureTheory.volume := by
+theorem bcs_haar : BoundedCompactSupport (haarFunction) MeasureTheory.volume := by
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
     · apply Measurable.aestronglyMeasurable (measurability_of_haar)
@@ -278,7 +278,7 @@ theorem haarscl_di (k n : ℤ) (x : ℝ) :
     · by_cases h2 : x ∈ dyadicInterval (k-1) (2*n + 1)
       · simp only [h1, not_false_eq_true, indicator_of_notMem, h2, indicator_of_mem, Pi.neg_apply,
         Pi.pow_apply, Pi.ofNat_apply, zero_add]
-        simp only [dyadicInterval, Int.cast_mul, Int.cast_ofNat, mem_setOf_eq] at h2
+        simp only [dyadicInterval, mem_setOf_eq] at h2
         obtain ⟨ h21, h22 ⟩ := h2
         apply haarFunctionScaled_right_half
         · simp only [Int.cast_add, Int.cast_mul, Int.cast_ofNat, Int.cast_one, mul_add, ← mul_assoc, obv, mul_one] at h21
@@ -407,7 +407,7 @@ theorem haarFunctionScaled_sqr (k n : ℤ) (x : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x - 
   have h : (2 ^ (-k / 2:ℝ) : ℝ ) ^ 2 = 2^(-k) := by
     rw [← Real.rpow_mul_natCast]
     · simp only [Nat.cast_ofNat, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-      IsUnit.div_mul_cancel, zpow_neg, ← zpow_neg]
+      IsUnit.div_mul_cancel]
       norm_cast
     · linarith
   split_ifs with h_1
@@ -428,12 +428,12 @@ theorem haarFunctionScaled_sqr (k n : ℤ) (x : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x - 
 Product of scaled Haar functions is 0 outside `[2^k n, 2^k (n+1))`.
 -/
 
-theorem haarFunction_product0 (k n : ℤ) (x y : ℝ) (h : 2 ^ (-k) * x - ↑n < 0 ∨ 1 ≤ 2 ^ (-k) * x - ↑n): haarFunctionScaled k n x  * haarFunctionScaled k n y  = 0 := by
+theorem haarFunction_product0 (k n : ℤ) (x y : ℝ) (h : 2 ^ (-k) * x - ↑n < 0 ∨ 1 ≤ 2 ^ (-k) * x - ↑n) : haarFunctionScaled k n x  * haarFunctionScaled k n y  = 0 := by
   rw[haarFunctionScaled_outside]
   · simp
   · exact h
 
-theorem haarFunction_product0' (k n : ℤ) (x y : ℝ) (h : 2 ^ (-k) * y - ↑n < 0 ∨ 1 ≤ 2 ^ (-k) * y - ↑n): haarFunctionScaled k n x  * haarFunctionScaled k n y  = 0 := by
+theorem haarFunction_product0' (k n : ℤ) (x y : ℝ) (h : 2 ^ (-k) * y - ↑n < 0 ∨ 1 ≤ 2 ^ (-k) * y - ↑n) : haarFunctionScaled k n x  * haarFunctionScaled k n y  = 0 := by
   rw[mul_comm]
   apply haarFunction_product0
   exact h
@@ -442,12 +442,12 @@ theorem haarFunction_product0' (k n : ℤ) (x y : ℝ) (h : 2 ^ (-k) * y - ↑n 
 Product of scaled Haar functions is `2^(-k)` on left half of `[2^k n, 2^k (n+1))`.
 -/
 
-theorem haarFunction_product1 (k n : ℤ) (x y : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x - ↑n) (h2 : 2 ^ (-k) * x - n < 1 / 2) (h3 : 0 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1 / 2): haarFunctionScaled k n x  * haarFunctionScaled k n y  = 2^(-k) := by
+theorem haarFunction_product1 (k n : ℤ) (x y : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x - ↑n) (h2 : 2 ^ (-k) * x - n < 1 / 2) (h3 : 0 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1 / 2) : haarFunctionScaled k n x  * haarFunctionScaled k n y  = 2^(-k) := by
   rw[haarFunctionScaled_left_half ,haarFunctionScaled_left_half]
   · rw[← pow_two]
     rw [← Real.rpow_mul_natCast]
     · simp only [Nat.cast_ofNat, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-      IsUnit.div_mul_cancel, zpow_neg, ← zpow_neg]
+      IsUnit.div_mul_cancel]
       norm_cast
     · linarith
   · exact h3
@@ -459,7 +459,7 @@ theorem haarFunction_product1 (k n : ℤ) (x y : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x -
 Product of scaled Haar functions is `2^(-k)` on right half of `[2^k n, 2^k (n+1))`.
 -/
 
-theorem haarFunction_product2 (k n : ℤ) (x y : ℝ) (h1 : 1 / 2 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) (h3 : 1 / 2 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1): haarFunctionScaled k n x  * haarFunctionScaled k n y  = 2^(-k) := by
+theorem haarFunction_product2 (k n : ℤ) (x y : ℝ) (h1 : 1 / 2 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) (h3 : 1 / 2 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1) : haarFunctionScaled k n x  * haarFunctionScaled k n y  = 2^(-k) := by
   rw[haarFunctionScaled_right_half ,haarFunctionScaled_right_half]
   · simp only [mul_neg, neg_mul, neg_neg, zpow_neg]
     · rw[← pow_two, ←Real.rpow_mul_natCast]
@@ -476,7 +476,7 @@ theorem haarFunction_product2 (k n : ℤ) (x y : ℝ) (h1 : 1 / 2 ≤ 2 ^ (-k) *
 Product of scaled Haar functions is `-2^(-k)` when one takes values from right half and the second one takes values from left half of `[2^k n, 2^k (n+1))`
 -/
 
-theorem haarFunction_product3 (k n : ℤ) (x y : ℝ) (h1 : 1 / 2 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) (h3 : 0 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1 / 2): haarFunctionScaled k n x  * haarFunctionScaled k n y  = -2^(-k) := by
+theorem haarFunction_product3 (k n : ℤ) (x y : ℝ) (h1 : 1 / 2 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) (h3 : 0 ≤ 2 ^ (-k) * y - n) (h4 : 2 ^ (-k) * y - n < 1 / 2) : haarFunctionScaled k n x  * haarFunctionScaled k n y  = -2^(-k) := by
   rw[haarFunctionScaled_right_half ,haarFunctionScaled_left_half]
   · simp only [neg_mul, zpow_neg, neg_inj]
     · rw[← pow_two, ←Real.rpow_mul_natCast]
@@ -497,7 +497,7 @@ The integral of squere of scaled Haar function over `[2^k n, 2^k (n+1))` equals 
 theorem haarFunctionScaled_normalization (k n : ℤ) : ∫ x in Set.Ico (2^k*n : ℝ) (2^k*(n+1) : ℝ), (haarFunctionScaled k n x)^2 = 1 := by
   have h : EqOn (fun (x) ↦ haarFunctionScaled k n x ^ 2) (2 ^ (-k))  (Set.Ico (2^k*n : ℝ) (2^k*(n+1) : ℝ)):= by
     intro x hx
-    simp only [Pi.pow_apply, Pi.ofNat_apply, Nat.cast_ofNat, zpow_neg]
+    simp only [Pi.pow_apply, Pi.ofNat_apply, zpow_neg]
     simp only [mem_Ico] at hx
     obtain ⟨hx1,hx2 ⟩ := hx
     rw[haarFunctionScaled_sqr]
@@ -517,8 +517,7 @@ theorem haarFunctionScaled_normalization (k n : ℤ) : ∫ x in Set.Ico (2^k*n :
   have h1 : MeasurableSet (Set.Ico (2^k*n : ℝ) (2^k*(n+1) : ℝ)) := by
     simp
   rw [MeasureTheory.setIntegral_congr_fun h1 h]
-  simp only [Pi.pow_apply, Pi.ofNat_apply, Nat.cast_ofNat, zpow_neg, integral_const,
-    MeasurableSet.univ, Measure.restrict_apply, univ_inter, Real.volume_Ico, smul_eq_mul]
+  simp only [Pi.pow_apply, Pi.ofNat_apply, zpow_neg, integral_const, smul_eq_mul]
   have : ((2 ^ k : ℝ ) * (↑n + 1) - 2 ^ k * ↑n) = 2^k := by
     rw[mul_add]
     simp
@@ -616,7 +615,7 @@ theorem haarsumzero2 (k : ℕ) (x : ℝ) (hx : x ∈ Ico 0.5 1) : ∑ n ∈ Fins
 
 theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) MeasureTheory.volume := by
   unfold haarFunctionScaled
-  simp only [Int.cast_natCast, zpow_neg, zpow_natCast]
+  simp only [zpow_neg]
   apply MeasureTheory.BoundedCompactSupport.const_mul
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
@@ -662,7 +661,7 @@ def rademacherFunction (k : ℕ) (t : ℝ) : ℝ :=
   2^(- k / 2 : ℝ ) * ∑ n ∈ Finset.range (2 ^ k), haarFunctionScaled (-k) n t
 
 
-def rademacherFunctionzeroleft {t : ℝ} (h1 : 0 ≤ t) (h2 : t < 0.5): rademacherFunction 0 t = 1 := by
+def rademacherFunctionzeroleft {t : ℝ} (h1 : 0 ≤ t) (h2 : t < 0.5) : rademacherFunction 0 t = 1 := by
   simp only [rademacherFunction, CharP.cast_eq_zero, neg_zero, zero_div, Real.rpow_zero, pow_zero,
     Finset.range_one, haarFunctionScaled, Int.cast_zero, zpow_zero, one_mul, Int.cast_natCast,
     Finset.sum_singleton, sub_zero]
@@ -707,7 +706,7 @@ theorem rademacherassumofhaar {k : ℕ} {x : ℝ} : rademacherFunction (k+1) x =
   unfold rademacherFunction
   push_cast
   rw[← left_distrib]
-  simp only [ Int.reduceNeg, mul_eq_mul_left_iff, Nat.ofNat_nonneg]
+  simp only [mul_eq_mul_left_iff]
   left
   have h1 : Disjoint (Finset.range (2^k)) (Finset.range (2^(k+1))\ Finset.range (2^k)) := by
     apply disjoint_sdiff_self_right
@@ -723,8 +722,7 @@ theorem rademacherassumofhaar {k : ℕ} {x : ℝ} : rademacherFunction (k+1) x =
 theorem rademacher2assumofhaar1 {k : ℕ} {x : ℝ} : rademacherFunction k (2*x) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   unfold haarFunctionScaled
-  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
-    Int.cast_add, Int.cast_one]
+  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.cast_add, Int.cast_one]
   rw[Finset.mul_sum, Finset.mul_sum, ← mul_assoc, ← pow_succ]
   apply Finset.sum_congr rfl
   intro n hn
@@ -753,8 +751,7 @@ theorem rademacher2assumofhaar1 {k : ℕ} {x : ℝ} : rademacherFunction k (2*x)
 theorem rademacher2assumofhaar2 {k : ℕ} {x : ℝ} : rademacherFunction k (2*x -1 ) =  2^(- (k+1)/ 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction
   unfold haarFunctionScaled
-  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.reduceNeg,
-    Int.cast_add, Int.cast_one]
+  simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast, Int.cast_add, Int.cast_one]
   rw[Finset.mul_sum, Finset.mul_sum]
   have h1 : (2 : ℝ) ^ ((k : ℝ ) * (1/2)) ≠ 0 := by
     by_cases hk : k = 0
@@ -831,7 +828,7 @@ theorem rademachernextfirsthalf {k : ℕ} {x : ℝ} (hx : x ∈ Ico 0 0.5) : rad
   rw[rademachernext]
   simp only [add_eq_left]
   unfold rademacherFunction
-  simp only [mul_eq_zero, Nat.ofNat_nonneg]
+  simp only [mul_eq_zero]
   right
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast]
@@ -856,8 +853,8 @@ theorem rademachernextfirsthalf {k : ℕ} {x : ℝ} (hx : x ∈ Ico 0 0.5) : rad
     · exact hx
   unfold haarFunctionScaled at h
   simp only [neg_add_rev, Int.reduceNeg, Int.cast_add, Int.cast_neg, Int.cast_one, Int.cast_natCast,
-    neg_neg, mul_eq_zero, Nat.ofNat_nonneg] at h
-  simp only [one_div, mul_eq_zero, Nat.ofNat_nonneg]
+    neg_neg, mul_eq_zero] at h
+  simp only [one_div, mul_eq_zero]
   right
   rw[mul_comm]
   apply Or.resolve_left h
@@ -873,7 +870,7 @@ theorem rademachernextsecondhalf {k : ℕ} {x : ℝ} (hx : x ∈ Ico 0.5 1) : ra
   rw[rademachernext]
   simp only [add_eq_right]
   unfold rademacherFunction
-  simp only [mul_eq_zero, Nat.ofNat_nonneg]
+  simp only [mul_eq_zero]
   right
   unfold haarFunctionScaled
   simp only [Int.cast_neg, Int.cast_natCast, neg_neg, zpow_natCast]
@@ -887,8 +884,8 @@ theorem rademachernextsecondhalf {k : ℕ} {x : ℝ} (hx : x ∈ Ico 0.5 1) : ra
     · exact hx
   unfold haarFunctionScaled at h
   simp only [neg_add_rev, Int.reduceNeg, Int.cast_add, Int.cast_neg, Int.cast_one, Int.cast_natCast,
-    neg_neg, mul_eq_zero, Nat.ofNat_nonneg] at h
-  simp only [one_div, mul_eq_zero, Nat.ofNat_nonneg]
+    neg_neg, mul_eq_zero] at h
+  simp only [one_div, mul_eq_zero]
   right
   rw[mul_comm]
   apply Or.resolve_left h
@@ -966,7 +963,7 @@ theorem rad_sqr {k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : (rademacherF
         · exact hx
         · exact hx2
 
-theorem bcs_rademacher {k : ℕ}: BoundedCompactSupport (rademacherFunction k) := by
+theorem bcs_rademacher {k : ℕ} : BoundedCompactSupport (rademacherFunction k) := by
   unfold rademacherFunction
   apply MeasureTheory.BoundedCompactSupport.const_mul
   apply MeasureTheory.BoundedCompactSupport.finset_sum
