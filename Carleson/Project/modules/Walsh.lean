@@ -247,10 +247,10 @@ theorem walsh_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n + 
 /--
 Relation between Walsh function of `2n` and `2n+1`.
 -/
-theorem walsh_even_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2): walsh (2*n) x = walsh (2*n +1) x:= by
+theorem walsh_even_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2*n) x = walsh (2*n +1) x:= by
   rw[ walsh_even_left h2, walsh_odd_left h2]
 
-theorem walsh_even_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x): walsh (2*n) x = - walsh (2*n +1) x:= by
+theorem walsh_even_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2*n) x = - walsh (2*n +1) x:= by
   rw[ walsh_even_right h1, walsh_odd_right h1]
   simp
 
@@ -316,7 +316,7 @@ Walsh function is zero outside the interval `[0, 1)`.
 -/
 @[simp]
 theorem walsh_zero_outside_domain (n : ℕ) (x : ℝ) (h : x < 0 ∨ x ≥ 1) : walsh n x = 0 := by
-simp [walsh, h]
+simp [h]
 
 
 
@@ -736,13 +736,13 @@ theorem intofodd {n : ℕ} (h : Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 :=
 
 
 
-theorem intofeven {n k : ℕ} (hk : 2 * k = n): ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
+theorem intofeven {n k : ℕ} (hk : 2 * k = n) : ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
   rw[← intsum, ← hk, ← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf, ← mul_add, Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))]
   simp
 
 
 
-theorem bcs_walsh {n : ℕ}: BoundedCompactSupport (walsh n) MeasureTheory.volume := by
+theorem bcs_walsh {n : ℕ} : BoundedCompactSupport (walsh n) MeasureTheory.volume := by
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
     · apply Measurable.aestronglyMeasurable (measurability_of_walsh)
@@ -766,7 +766,7 @@ theorem bcs_walsh {n : ℕ}: BoundedCompactSupport (walsh n) MeasureTheory.volum
 
 
 
-theorem walshsizing_firsthalf {n : ℕ} {x : ℝ}: 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
+theorem walshsizing_firsthalf {n : ℕ} {x : ℝ} : 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
   by_cases h : x < 1/2
   · rw[walsh_even_odd_left h, walsh_odd_left h, two_mul]
   · push_neg at h
@@ -776,11 +776,11 @@ theorem walshsizing_firsthalf {n : ℕ} {x : ℝ}: 2* walsh n (2* x) = walsh (2*
     linarith
 
 
-theorem walshsizing_firsthalf' {n : ℕ} {x : ℝ}: walsh n (2* x) = 1/2 *  (walsh (2*n) x + walsh (2* n + 1) x ):= by
+theorem walshsizing_firsthalf' {n : ℕ} {x : ℝ} : walsh n (2* x) = 1/2 *  (walsh (2*n) x + walsh (2* n + 1) x ):= by
   rw [← @walshsizing_firsthalf]
   simp
 
-theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
+theorem walshsizing_secondhalf {n : ℕ} {x : ℝ} : 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
   by_cases h : 1/2 ≤ x
   · rw[walsh_even_odd_right h, walsh_odd_right h]
     simp only [neg_neg, sub_neg_eq_add]
@@ -791,7 +791,7 @@ theorem walshsizing_secondhalf {n : ℕ} {x : ℝ}: 2* walsh n (2*x -1) = walsh 
     left
     linarith
 
-theorem walshsizing_secondhalf' {n : ℕ} {x : ℝ}: walsh n (2*x -1) = 1/2 *(walsh (2*n) x - walsh (2* n + 1) x ):= by
+theorem walshsizing_secondhalf' {n : ℕ} {x : ℝ} : walsh n (2*x -1) = 1/2 *(walsh (2*n) x - walsh (2* n + 1) x ):= by
   rw [← @walshsizing_secondhalf]
   simp
 
@@ -824,7 +824,7 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
 
 
 
-theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
+theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   rw[← walshsizing_zero]
   induction' M with M ih generalizing k x
   · simp only [ pow_zero, Nat.lt_one_iff] at hk
@@ -871,7 +871,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           exact Nat.two_mul_div_two_of_even hm2
         · unfold MapsTo
           intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, i] at hk
+          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
           simp only [Finset.coe_range, mem_Iio, i]
           refine Nat.div_lt_of_lt_mul ?_
           rw [← @Nat.pow_add_one']
@@ -880,12 +880,12 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Even l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Classical.not_imp, Decidable.not_not, i,exists_prop, exists_and_left, i]
+              not_and, and_imp, not_forall, Decidable.not_not, i, exists_prop, i]
             use 2*l
             simp only [even_two, Even.mul_right, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-              mul_div_cancel_left₀, and_self, and_true, i]
+              mul_div_cancel_left₀, and_self, and_true]
             rw[pow_add, pow_one,mul_comm]
-            simp only [Nat.ofNat_pos, mul_lt_mul_right, i]
+            simp only [Nat.ofNat_pos, mul_lt_mul_right]
             exact hl
           intro hl1
           exfalso
@@ -914,7 +914,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
         · --to samo co powyzej
           unfold MapsTo
           intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, i] at hk
+          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
           simp only [Finset.coe_range, mem_Iio, i]
           refine Nat.div_lt_of_lt_mul ?_
           rw [← @Nat.pow_add_one']
@@ -924,14 +924,14 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Classical.not_imp, Decidable.not_not, i]
+              not_and, and_imp, not_forall, Decidable.not_not, i]
             use 2 * l + 1
-            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop, i]
+            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop]
             constructor
             · apply Nat.add_one_le_of_lt at hl
               rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two)] at hl
               rw[pow_add]
-              simp only [pow_one, i]
+              simp only [pow_one]
               rw[mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc ] at hl
               apply Nat.lt_of_add_one_le
               rw[mul_comm, mul_comm (a:= 2^M)]
@@ -982,7 +982,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           exact Nat.two_mul_div_two_of_even hm2
         · unfold MapsTo
           intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, i] at hk
+          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
           simp only [Finset.coe_range, mem_Iio, i]
           refine Nat.div_lt_of_lt_mul ?_
           rw [← @Nat.pow_add_one']
@@ -991,15 +991,15 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Even l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Classical.not_imp, Decidable.not_not, i]
-            simp only [exists_prop, exists_and_left, i]
+              not_and, and_imp, not_forall, Decidable.not_not, i]
+            simp only [exists_prop]
             use 2*l
             simp only [even_two, Even.mul_right, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-              mul_div_cancel_left₀, and_self, and_true, i]
+              mul_div_cancel_left₀, and_self, and_true]
             rw[pow_add]
-            simp only [pow_one, i]
+            simp only [pow_one]
             rw[mul_comm]
-            simp only [Nat.ofNat_pos, mul_lt_mul_right, i]
+            simp only [Nat.ofNat_pos, mul_lt_mul_right]
             exact hl
           intro hl1
           exfalso
@@ -1027,7 +1027,7 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           exact Nat.two_mul_div_two_add_one_of_odd hm2
         · unfold MapsTo
           intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, i] at hk
+          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
           simp only [Finset.coe_range, mem_Iio, i]
           refine Nat.div_lt_of_lt_mul ?_
           rw [← @Nat.pow_add_one']
@@ -1036,14 +1036,14 @@ theorem walshindicator {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M): ∃ (f:ℕ  → �
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Classical.not_imp, Decidable.not_not, i]
+              not_and, and_imp, not_forall, Decidable.not_not, i]
             use 2 * l + 1
-            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop, i]
+            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop]
             constructor
             · apply Nat.add_one_le_of_lt at hl
               rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two)] at hl
               rw[pow_add]
-              simp only [pow_one, i]
+              simp only [pow_one]
               rw[mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc ] at hl
               apply Nat.lt_of_add_one_le
               rw[mul_comm, mul_comm (a:= 2^M)]
