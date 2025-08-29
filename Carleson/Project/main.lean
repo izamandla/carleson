@@ -6,7 +6,7 @@ open Walsh Function Set MeasureTheory
 
 
 
-theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f):
+theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) :
   MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
   refine MeasureTheory.IntegrableOn.integrable ?_
   apply MeasureTheory.IntegrableOn.mono_set ( t := Icc 0 1)
@@ -16,7 +16,7 @@ theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f):
   · exact Ico_subset_Icc_self
 
 
-theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) (hf : MeasureTheory.LocallyIntegrable f):
+theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) (hf : MeasureTheory.LocallyIntegrable f) :
   Walsh.walshFourierPartialSum f N x = (∫ y in Set.Ico 0 1, f y * Walsh.walsh N y * Walsh.walsh N x * Kernel.kernel N x y) := by
   apply inthelp at hf
   simp only [walshFourierPartialSum]
