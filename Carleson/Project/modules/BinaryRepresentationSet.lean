@@ -1,4 +1,9 @@
-import Mathlib.Algebra.GeomSum
+import Mathlib.Algebra.Group.NatPowAssoc
+import Mathlib.Algebra.Order.Field.GeomSum
+import Mathlib.Algebra.Order.Ring.GeomSum
+import Mathlib.Algebra.Ring.Regular
+import Mathlib.Tactic.Abel
+import Mathlib.Tactic.Positivity.Basic
 import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.Normed.Ring.Lemmas
 import Mathlib.Data.Int.Star
@@ -32,7 +37,7 @@ theorem mem_binaryRepresentationSet_iff (n m : ℕ) :
 Binary representation set of `0` is empty.
 -/
 theorem binaryRepresentationSet_zero : binaryRepresentationSet 0 = ∅ := by
-  simp[binaryRepresentationSet, Nat.testBit_zero]
+  simp [binaryRepresentationSet]
 
 
 /--
@@ -54,7 +59,7 @@ theorem binaryRepresentationSet_not_zero (n : ℕ) (h : n > 0) : binaryRepresent
 Binary representation set of `2^M` equals `M`.
 -/
 
-theorem binaryforpower (M : ℕ): binaryRepresentationSet (2^M) = { M } := by
+theorem binaryforpower (M : ℕ) : binaryRepresentationSet (2^M) = { M } := by
   rw[binaryRepresentationSet]
   ext x
   simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_singleton]
@@ -282,7 +287,7 @@ theorem binaryRepresentationSet_equiv2plus1result (n : ℕ) : ∑ k ∈ binaryRe
 /--
 relation of prodacts between `n` and `2n+1`.
 -/
-theorem binaryRepresentationSet_equiv2plus1resultprod {n : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α): (f 0) * ∏
+theorem binaryRepresentationSet_equiv2plus1resultprod {n : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α) : (f 0) * ∏
   k ∈ binaryRepresentationSet n, f (k + 1) =  ∏ k ∈ binaryRepresentationSet (2 * n + 1), f k:= by
   rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), binaryRepresentationSet_equiv2resultprod]
 
