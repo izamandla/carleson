@@ -400,7 +400,7 @@ theorem haarFunctionScaled_orthogonal {k n n' : ℤ} (h_diff : n ≠ n') : ∫ x
 The square of the scaled Haar function is `2^k` in `[2^k n, 2^k (n+1))` and `0` outside.
 -/
 @[simp]
-theorem haarFunctionScaled_sqr (k n : ℤ) (x : ℝ) (h1 : 0 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) : (haarFunctionScaled k n x) ^ 2 = 2^(-k):= by
+theorem haarFunctionScaled_sqr {k n : ℤ} {x : ℝ} (h1 : 0 ≤ 2 ^ (-k) * x - n) (h2 : 2 ^ (-k) * x - n < 1) : (haarFunctionScaled k n x) ^ 2 = 2^(-k):= by
   simp only [haarFunctionScaled, zpow_neg]
   rw[mul_pow, haar_sqr]
   simp only [sub_nonneg, mul_ite, mul_one, mul_zero]
