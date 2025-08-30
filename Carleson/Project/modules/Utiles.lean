@@ -403,8 +403,7 @@ theorem walshhaarprop'' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : (fun x �
 
 theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  (walshhaar M k x)*(walshhaar M k x) = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x:= by
   rw[walshhaarprop hk hx1 hx2]
-  rw[indicator, indicator]
-  simp only [zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, mul_ite, ite_mul,
+  simp_rw[indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, mul_ite, ite_mul,
     zero_mul, mul_zero]
   by_cases h : (2 ^ M)⁻¹ * ↑k ≤ x ∧ x < (2 ^ M)⁻¹ * (↑k + 1)
   · simp only [h, and_self, ↓reduceIte]
@@ -416,14 +415,12 @@ theorem walshhaarsqr' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) :  (walshhaa
   ext x
   by_cases h : 0 ≤ x ∧ x<1
   · simp only [Pi.mul_apply]
-    rw[walshhaarpropsqr hk h.1 h.2]
-    rw[walshhaarprop hk h.1 h.2]
+    rw[walshhaarpropsqr hk h.1 h.2, walshhaarprop hk h.1 h.2]
     simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply,
       Real.rpow_natCast, mul_ite, mul_zero]
     split_ifs with h1
-    · rw[← Real.rpow_add ]
-      · simp
-      · simp
+    · rw[← Real.rpow_add (zero_lt_two)]
+      simp
     · simp
   · unfold walshhaar
     simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, mul_eq_mul_right_iff, mul_eq_zero]
@@ -431,19 +428,15 @@ theorem walshhaarsqr' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) :  (walshhaa
     · left
       left
       simp only
-    · rw[Decidable.not_and_iff_or_not] at h
-      simp only [not_le, not_lt] at h
+    · rw[Decidable.not_and_iff_or_not, not_le, not_lt] at h
       exact h
 
 
 
---był bład w definicji walshhaar - UWAZAJ!
-
 theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k') :  walshhaar M k x * walshhaar M k' x = 0 := by
   unfold walshhaar
-  rw[mul_comm]
-  rw [@mul_mul_mul_comm]
-  rw[haarFunctionScaled_mul ]
+  rw[mul_comm, mul_mul_mul_comm]
+  rw[haarFunctionScaled_mul]
   · simp only [mul_zero]
   · simp only [ne_eq, Nat.cast_inj]
     rw[ne_comm, ne_eq] at h
@@ -456,46 +449,33 @@ theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k') :  ∫ y in Set.Ico 0 1, wal
     unfold EqOn
     intro z hz
     apply walshHaar_ort_help h
-  have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
-    simp
   simp_rw[← Pi.mul_apply]
-  rw[MeasureTheory.setIntegral_congr_fun h2 h1]
+  rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h1]
   simp
 
 
 
 theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by
-  have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
-    refine Eq.symm (Ico_union_Ico_eq_Ico ?_ ?_)
-    · linarith
-    · linarith
-  simp_rw[this]
+  conv_rhs => rw[Eq.symm (Ico_union_Ico_eq_Ico (b:= 0.5) (by linarith) (by linarith))]
+  unfold walshhaar
   rw[MeasureTheory.integral_union_ae]
-  · refine Disjoint.aedisjoint ?_
-    simp
+  · refine Disjoint.aedisjoint (Ico_disjoint_Ico_same)
   · simp
-  · unfold walshhaar
-    simp only
-    apply MeasureTheory.BoundedCompactSupport.integrable_mul
-    · refine MeasureTheory.BoundedCompactSupport.restrict ?_
-      exact bcs_walsh
+  · apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · refine MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
     · apply MeasureTheory.BoundedCompactSupport.integrable
-      refine MeasureTheory.BoundedCompactSupport.restrict ?_
-      exact bcs_haarscaled
-  · unfold walshhaar
-    simp only
-    apply MeasureTheory.BoundedCompactSupport.integrable_mul
-    · refine MeasureTheory.BoundedCompactSupport.restrict ?_
-      exact bcs_walsh
+      refine MeasureTheory.BoundedCompactSupport.restrict bcs_haarscaled
+  · apply MeasureTheory.BoundedCompactSupport.integrable_mul
+    · refine MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
     · apply MeasureTheory.BoundedCompactSupport.integrable
-      refine MeasureTheory.BoundedCompactSupport.restrict ?_
-      exact bcs_haarscaled
+      refine MeasureTheory.BoundedCompactSupport.restrict bcs_haarscaled
 
 
 
-theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
-  rw[← MeasureTheory.integral_indicator (measurableSet_Ico)]
-  have h1: ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x := by
+
+
+
+theorem wlashhaar_normhelp {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x := by
     congr
     ext x
     conv_lhs => simp[indicator]
@@ -528,58 +508,39 @@ theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ y in Set.Ico 0 1
         simp[h0_01] at h
         linarith
       · simp
-  rw[h1]
+
+
+
+theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
+  rw[← MeasureTheory.integral_indicator (measurableSet_Ico), wlashhaar_normhelp hk]
   rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
   simp only [zpow_neg, zpow_natCast, Pi.pow_apply, Pi.ofNat_apply, Real.rpow_natCast,
     MeasureTheory.integral_const, MeasurableSet.univ, MeasureTheory.measureReal_restrict_apply,
     univ_inter, Real.volume_real_Ico, smul_eq_mul]
   have : ((2 ^ M)⁻¹ : ℝ )* (↑k + 1) - (2 ^ M)⁻¹ * ↑k = (2 ^ M)⁻¹ := by
     linarith
-  simp_rw[this]
+  simp_rw[this] -- to jest jakies mega bez sensu
   simp
+
+
 
 
 theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= walshhaar M k x:= by
   rw[walshhaarprop']
-  · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
-      simp[indicator]
-    rw[this]
-    have hp : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
-      exact walshindicator hk
-    obtain ⟨ g, hg⟩ := hp
-    simp_rw[mul_comm]
-    rw[← hg]
-    rw[mul_comm, Finset.sum_mul]
+  · obtain ⟨ g, hg⟩ := walshindicator hk (x:=x)
     use g * 2 ^ (M / 2 :ℝ )
-    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply]
-    congr
-    ext i
-    linarith
+    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, ← mul_assoc, ← Finset.sum_mul, hg]
+    simp_rw[← indicator_mul_const, Pi.one_apply, one_mul]
+    refine indicator_eq_indicator ?_ rfl
+    ring_nf
   · simp only [Finset.mem_range]
     exact hk
 
 theorem walshindicatorrightform' {M k : ℕ} {x : ℝ} : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= walshhaar M k x:= by
   by_cases hk : k < 2 ^ M
-  · rw[walshhaarprop']
-    · have : (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x = ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x := by
-        simp[indicator]
-      rw[this]
-      have hp : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
-        exact walshindicator hk
-      obtain ⟨ g, hg⟩ := hp
-      simp_rw[mul_comm]
-      rw[← hg]
-      rw[mul_comm, Finset.sum_mul]
-      use g * 2 ^ (M / 2 :ℝ )
-      simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply]
-      congr
-      ext i
-      linarith
-    · simp only [Finset.mem_range]
-      exact hk
+  · exact walshindicatorrightform hk
   · use 0
-    simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero]
-    simp only [walshhaar, zero_eq_mul]
+    simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero, walshhaar, zero_eq_mul]
     by_cases h : walsh (2 ^ M) x = 0
     · left
       exact h
