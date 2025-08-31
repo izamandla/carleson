@@ -514,32 +514,33 @@ theorem wlashhaar_normhelp {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ (x : ℝ), (
 theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
   rw[← MeasureTheory.integral_indicator (measurableSet_Ico), wlashhaar_normhelp hk]
   rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
-  simp only [zpow_neg, zpow_natCast, Pi.pow_apply, Pi.ofNat_apply, Real.rpow_natCast,
-    MeasureTheory.integral_const, MeasurableSet.univ, MeasureTheory.measureReal_restrict_apply,
-    univ_inter, Real.volume_real_Ico, smul_eq_mul]
-  have : ((2 ^ M)⁻¹ : ℝ )* (↑k + 1) - (2 ^ M)⁻¹ * ↑k = (2 ^ M)⁻¹ := by
-    linarith
-  simp_rw[this] -- to jest jakies mega bez sensu
+  ring_nf
   simp
 
 
 
 
-theorem walshindicatorrightform {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= walshhaar M k x:= by
-  rw[walshhaarprop']
-  · obtain ⟨ g, hg⟩ := walshindicator hk (x:=x)
+theorem walshindicatorrightformhelp {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fun x ↦∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))=  (fun x ↦ walshhaar M k x):= by
+  rw[walshhaarprop'']
+  · obtain ⟨ g, hg⟩ := (walshindicator' hk)
     use g * 2 ^ (M / 2 :ℝ )
-    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, ← mul_assoc, ← Finset.sum_mul, hg]
+    simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply, ← mul_assoc, ← Finset.sum_mul]
+    rw [@funext_iff] at hg
+    ext x
+    rw[hg]
     simp_rw[← indicator_mul_const, Pi.one_apply, one_mul]
     refine indicator_eq_indicator ?_ rfl
     ring_nf
   · simp only [Finset.mem_range]
     exact hk
 
-theorem walshindicatorrightform' {M k : ℕ} {x : ℝ} : ∃ (f:ℕ  → ℝ), ∑ j ∈ Finset.range (2^M), (walsh j x  * f j )= walshhaar M k x:= by
+
+
+theorem walshindicatorrightform {M k : ℕ} : ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦walshhaar M k x):= by
   by_cases hk : k < 2 ^ M
-  · exact walshindicatorrightform hk
+  · exact walshindicatorrightformhelp hk
   · use 0
+    ext x
     simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero, walshhaar, zero_eq_mul]
     by_cases h : walsh (2 ^ M) x = 0
     · left
@@ -549,74 +550,29 @@ theorem walshindicatorrightform' {M k : ℕ} {x : ℝ} : ∃ (f:ℕ  → ℝ), �
       rw[haarFunctionScaled_outside]
       simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
       left
-      simp only [not_lt] at hk
-      have : 2 ^ M * x < 2^M := by
-        norm_num
+      apply lt_of_lt_of_le (b:= 2^M)
+      · norm_num
         exact h.2
-      apply lt_of_lt_of_le this
-      norm_cast
+      · simp only [not_lt] at hk
+        norm_cast
 
 
-theorem walshindicatorrightform1 {M k : ℕ}: ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦walshhaar M k x):= by
-  by_cases hk : k < 2 ^ M
-  · rw[walshhaarprop'']
-    · have : (fun x↦ (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator ((2 : ℝ → ℝ) ^ ((M : ℝ) / 2)) x) = (fun x ↦ ((2 : ℝ) ^ ((M : ℝ) / 2)) * (Ico (2 ^ (-↑M :ℤ ) * ↑k :ℝ ) (2 ^ (-↑M :ℤ ) * (↑k + 1))).indicator 1 x ):= by
-        simp[indicator]
-      rw[this]
-      have hp : ∃ (f:ℕ  → ℝ),(fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦ (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x ):= by
-
-        --walshindicator.choose_spec (M:= M ) (k:= k)  hk
-        sorry
-      obtain ⟨ g, hg⟩ := hp
-      use g * 2 ^ (M / 2 :ℝ )
-      ext x
-      have h_p := congrFun hg x
-      simp_rw[mul_comm]
-      rw[← h_p]
-      simp only [Pi.mul_apply, Pi.pow_apply, Pi.ofNat_apply]
-      rw[mul_comm, Finset.sum_mul]
-      congr
-      ext i
-      linarith
-    · simp only [Finset.mem_range]
-      exact hk
-  · use 0
-    simp only [Pi.zero_apply, mul_zero, Finset.sum_const_zero]
-    simp only [walshhaar]
-    ext x
-    simp only [zero_eq_mul]
-    by_cases h : walsh (2 ^ M) x = 0
-    · left
-      exact h
-    · right
-      apply domain at h
-      rw[haarFunctionScaled_outside]
-      simp only [neg_neg, zpow_natCast, Int.cast_natCast, sub_neg, ge_iff_le]
-      left
-      simp only [not_lt] at hk
-      have : 2 ^ M * x < 2^M := by
-        norm_num
-        exact h.2
-      apply lt_of_lt_of_le this
-      norm_cast
 
 def coef (M k : ℕ) : ℕ → ℝ :=
-  (walshindicatorrightform1 (M := M) (k := k)).choose
+  (walshindicatorrightform (M := M) (k := k)).choose
 
 
 theorem basiccoef (M k : ℕ) {x : ℝ} : ∑ j ∈ Finset.range (2 ^ M),  walsh j x * coef M k j = walshhaar M k x := by
-  apply congrFun ((walshindicatorrightform1 (M := M) (k := k)).choose_spec) x
+  apply congrFun ((walshindicatorrightform (M := M) (k := k)).choose_spec) x
 
 
 theorem notsobasiccoef (M k j : ℕ) (hj : j ∈ Finset.range (2 ^ M)) : coef M k j = ∫ y in Set.Ico 0 1, walshhaar M k y * walsh j y := by
   simp_rw[← basiccoef, Finset.sum_mul, mul_assoc, mul_comm, mul_assoc]
   rw[MeasureTheory.integral_finset_sum]
   · simp_rw[MeasureTheory.integral_const_mul]
-    have : ∑ x ∈ Finset.range (2 ^ M), coef M k x * ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh x a = (∑ x ∈ Finset.range (2 ^ M) \{j}, coef M k x * ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh x a ) + coef M k j * ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh j a := by
-      exact
-        Finset.sum_eq_sum_diff_singleton_add hj fun x ↦
-          coef M k x * ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh x a
-    rw[this, walsh_norm']
+    rw[Finset.sum_eq_sum_diff_singleton_add hj fun x ↦
+          coef M k x * ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh x a]
+    rw[walsh_norm']
     simp only [mul_one, right_eq_add]
     apply Finset.sum_eq_zero
     intro i hi
@@ -629,9 +585,7 @@ theorem notsobasiccoef (M k j : ℕ) (hj : j ∈ Finset.range (2 ^ M)) : coef M 
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
     apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul
-    · exact bcs_walsh
-    · exact bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
 
 
 
@@ -642,9 +596,9 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
     refine walshHaar_ort h0
   rw[← h]
   have hf (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M), walsh j x * coef M k j = walshhaar M k x :=by
-    apply congrFun ((walshindicatorrightform1 (M := M) (k := k)).choose_spec) x
+    apply congrFun ((walshindicatorrightform (M := M) (k := k)).choose_spec) x
   have hg (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M), walsh j x * coef M k' j = walshhaar M k' x := by
-    apply congrFun ((walshindicatorrightform1 (M := M) (k := k')).choose_spec) x
+    apply congrFun ((walshindicatorrightform (M := M) (k := k')).choose_spec) x
   have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k' y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (walsh j y * coef M k j)) * (∑ j ∈ Finset.range (2 ^ M), (walsh j y * coef M k' j)) := by
     congr
     ext y
@@ -662,11 +616,8 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
           ext a
           rw[← mul_assoc]
         simp_rw[this]
-        have : ∑ x ∈ Finset.range (2 ^ M), coef M k' x * coef M k n * ∫ (a : ℝ) in Ico 0 1, walsh n a * walsh x a =(coef M k' n * coef M k n * ∫ (a : ℝ) in Ico 0 1, walsh n a * walsh n a) +  ∑ x ∈ Finset.range (2 ^ M) \ {n}, coef M k' x * coef M k n * ∫ (a : ℝ) in Ico 0 1, walsh n a * walsh x a   := by
-          exact
-            Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
-              coef M k' x * coef M k n * ∫ (a : ℝ) in Ico 0 1, walsh n a * walsh x a
-        rw[this]
+        rw[Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
+              coef M k' x * coef M k n * ∫ (a : ℝ) in Ico 0 1, walsh n a * walsh x a]
         rw[walsh_norm' n, mul_comm]
         simp only [mul_one, left_eq_add]
         apply Finset.sum_eq_zero
@@ -678,15 +629,12 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
         push_neg at hp
         exact hp.2
       · intro i hi
-        simp at hi
         simp_rw[mul_assoc]
         apply MeasureTheory.Integrable.const_mul
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
         apply BoundedCompactSupport.restrict
-        apply BoundedCompactSupport.mul
-        · exact bcs_walsh
-        · exact bcs_walsh
+        apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -695,12 +643,8 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
     apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul
-    · exact bcs_walsh
-    · exact bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
 
-
--- ajaj potrzeba nowego twierdzenia!!
 
 
 
@@ -708,12 +652,9 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
 
 
 theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
-  rw[h0]
-  have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k y = 1:= by
-    apply wlashhaar_norm hk
-  rw[← h]
+  rw[h0, ← wlashhaar_norm hk]
   have hf (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M), walsh j x * coef M k j = walshhaar M k x :=by
-    apply congrFun ((walshindicatorrightform1 (M := M) (k := k)).choose_spec) x
+    apply congrFun ((walshindicatorrightform (M := M) (k := k)).choose_spec) x
   have hr : ∫ (y : ℝ) in Ico 0 1, walshhaar M k y * walshhaar M k y = ∫ (y : ℝ) in Ico 0 1,  (∑ j ∈ Finset.range (2 ^ M), (walsh j y * coef M k j)) * (∑ j ∈ Finset.range (2 ^ M), (walsh j y * coef M k j)) := by
     congr
     ext y
@@ -725,14 +666,9 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
     · simp
     · intro j hj
       rw[MeasureTheory.integral_finset_sum]
-      · have : ∫ (a : ℝ) in Ico 0 1, walsh j a * walsh j a = 1 := by
-          exact walsh_norm' j
-        conv_lhs => rw[← mul_one (a:= coef M k' j * coef M k' j), ← this, ← h0, ← MeasureTheory.integral_const_mul, ← zero_add (a:= ∫ (a : ℝ) in Ico 0 1, coef M k j * coef M k j * (walsh j a * walsh j a))]
-        have : ∑ i ∈ Finset.range (2 ^ M), ∫ (a : ℝ) in Ico 0 1, coef M k i * coef M k j * walsh j a * walsh i a = (∑ i ∈ Finset.range (2 ^ M) \ {j}, ∫ (a : ℝ) in Ico 0 1, coef M k i * coef M k j * walsh j a * walsh i a ) + ∫ (a : ℝ) in Ico 0 1, coef M k j * coef M k j * walsh j a * walsh j a:= by
-          exact
-            Finset.sum_eq_sum_diff_singleton_add hj fun x ↦
-              ∫ (a : ℝ) in Ico 0 1, coef M k x * coef M k j * walsh j a * walsh x a
-        rw[this]
+      · conv_lhs => rw[← mul_one (a:= coef M k' j * coef M k' j), ← walsh_norm' j, ← h0, ← MeasureTheory.integral_const_mul, ← zero_add (a:= ∫ (a : ℝ) in Ico 0 1, coef M k j * coef M k j * (walsh j a * walsh j a))]
+        rw[Finset.sum_eq_sum_diff_singleton_add hj fun x ↦
+              ∫ (a : ℝ) in Ico 0 1, coef M k x * coef M k j * walsh j a * walsh x a]
         congr
         · rw[eq_comm ]
           apply Finset.sum_eq_zero
@@ -747,19 +683,16 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
           rw[walsh_ort]
           · simp
           · simp only [ne_eq]
-            exact hm.2
+            exact  hm.2
         · ext y
           rw[← mul_assoc]
       · intro i hi
-        simp at hi
         simp_rw[mul_assoc]
         apply MeasureTheory.Integrable.const_mul
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
         apply BoundedCompactSupport.restrict
-        apply BoundedCompactSupport.mul
-        · exact bcs_walsh
-        · exact bcs_walsh
+        apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -768,9 +701,8 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
     apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul
-    · exact bcs_walsh
-    · exact bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+
 
 theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k j = 1 := by
   exact bighelpextra1 hk rfl
@@ -786,16 +718,13 @@ theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M)
   apply hp at hx
   rw[hx]
   have h : ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), walsh n y = ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (k + 1)), p := by
-    refine setIntegral_congr_fun ?_ hp
-    simp
+    refine setIntegral_congr_fun measurableSet_Ico hp
   rw[h]
   simp only [integral_const, MeasurableSet.univ, measureReal_restrict_apply, univ_inter,
     Real.volume_real_Ico, smul_eq_mul, mul_eq_mul_right_iff]
-  left
-  have : (2 ^ (-M :ℤ ) :ℝ ) * (k + 1) - 2 ^ (-M :ℤ ) * ↑k=  2^ (-M :ℤ ) := by
-    linarith
-  rw[this]
+  ring_nf
   simp
+
 
 
 
@@ -827,11 +756,9 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
             exact False.elim (h4 h1)
         · simp only [Finset.mem_range]
           exact hk
-      · rw[Decidable.not_and_iff_or_not] at h2
-        simp only [not_le, not_lt, ← ge_iff_le] at h2
+      · rw[Decidable.not_and_iff_or_not, not_le, not_lt, ← ge_iff_le] at h2
         rw[walsh_zero_outside_domain n x h2]
-      · --rw[← mem_Ico] at h1
-        rw[walshhaarprop ?_ h3.1 h3.2]
+      · rw[walshhaarprop ?_ h3.1 h3.2]
         · simp only [indicator]
           rw[mul_assoc]
           simp only [zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, ite_mul,
@@ -853,43 +780,31 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
 
 
 theorem ayayayhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
-  have : ∑ l ∈ Finset.range (2 ^ M), coef M l n * walshhaar M l x  = (∑ l ∈ Finset.range (2 ^ M) \ {k}, coef M l n * walshhaar M l x)  + coef M k n * walshhaar M k x := by
-      exact Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦ coef M x_1 n * walshhaar M x_1 x
-  rw[this]
+  rw[Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦ coef M x_1 n * walshhaar M x_1 x]
   simp only [add_eq_right]
   apply Finset.sum_eq_zero
   intro l hl
-  rw[walshhaarprop ]
-  · simp only [zpow_neg, zpow_natCast, mul_eq_zero, indicator_apply_eq_zero, mem_Ico, Pi.pow_apply,
+  simp only [Finset.mem_range] at hk
+  rw[walshhaarprop (Finset.sdiff_subset hl) (ago hk hx).1 (ago hk hx).2]
+  simp only [zpow_neg, zpow_natCast, mul_eq_zero, indicator_apply_eq_zero, mem_Ico, Pi.pow_apply,
     Pi.ofNat_apply]
-    right
-    intro h
-    have h1 : x ∈ dyadicInterval (-↑M) l := by
+  right
+  intro h
+  have h1 : x ∈ dyadicInterval (-↑M) l := by
       simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq]
       exact h
-    have h2 : dyadicInterval  (-↑M) ↑l ∩ dyadicInterval  (-↑M) k = ∅ := by
+  have h2 : dyadicInterval  (-↑M) ↑l ∩ dyadicInterval  (-↑M) k = ∅ := by
       apply dyadicInterval_disjoint
       simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hl
       rw [@Ne.eq_def]
       norm_cast
       exact hl.2
-    exfalso
-    have : x ∉ dyadicInterval (-↑M) ↑k := by
-      rw[← Set.disjoint_iff_inter_eq_empty ] at h2
-      exact Disjoint.notMem_of_mem_left h2 h1
-    exact this hx
-  · have : Finset.range (2 ^ M) \ {k} ⊆ Finset.range (2 ^ M) := by
-      simp
-    exact this hl
-  · simp only [Finset.mem_range] at hk
-    apply (ago hk hx).1
-  · simp only [Finset.mem_range] at hk
-    apply (ago hk hx).2
+  exfalso
+  rw[← Set.disjoint_iff_inter_eq_empty ] at h2
+  apply Disjoint.notMem_of_mem_left h2 h1 hx
 
 
 
-
---to podobno powinno działać
 theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
   ext x
   by_cases hx : x<0 ∨  x ≥ 1
@@ -911,24 +826,19 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ 
   simp only [Finset.mem_range] at hp1
   rw[aboutwalsh hn hp1 hp2]
   simp only [mul_eq_mul_left_iff]
-  left
   rw[← Finset.mem_range] at hp1
-  rw[walshhaarprop hp1 hx.1 hx.2 ]
-  rw[indicator]
+  rw[walshhaarprop hp1 hx.1 hx.2 , indicator]
   rw[intervalform_dyadicInterval ] at hp2
   split_ifs with h1
   · simp
   · exfalso
-    simp only [Int.cast_natCast] at hp2
     exact h1 hp2
 
 
 
 
 theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range (2 ^ M)) (hk' : k' ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
-  have h: ∫ y in Set.Ico 0 1, walsh k y * walsh k' y = 0 := by
-    exact walsh_ort (id (Ne.symm h0))
-  rw[← h]
+  rw[← walsh_ort (id (Ne.symm h0))]
   have hf (x : ℝ ) : walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
     simp only [Finset.mem_range] at hk
     apply congrFun (ayayay hk)
@@ -944,55 +854,43 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range
   rw[hr]
   simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc]
   rw[MeasureTheory.integral_finset_sum]
-  · apply Finset.sum_congr
-    · simp
-    · intro n hn
-      rw[MeasureTheory.integral_finset_sum]
-      · have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, coef M i k' * walshhaar M i a * coef M n k * walshhaar M n a = coef M i k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M i a * walshhaar M n a := by
-          rw[← MeasureTheory.integral_const_mul]
-          congr
-          ext a
-          rw[← mul_assoc]
-          linarith
-        simp_rw[this]
-        have : ∑ x ∈ Finset.range (2 ^ M), coef M x k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a  =(coef M n k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M n a * walshhaar M n a) +  ∑ x ∈ Finset.range (2 ^ M) \{n}, coef M x k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a   := by
-          exact
-            Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
-              coef M x k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a
-        rw[this]
-        rw[wlashhaar_norm, mul_comm]
-        · simp only [mul_one, left_eq_add]
-          apply Finset.sum_eq_zero
-          intro p hp
-          rw [@mul_eq_zero]
-          right
-          rw[walshHaar_ort]
-          simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
-          push_neg at hp
-          exact hp.2
-        · rw[← Nat.lt_iff_le_pred]
-          · exact List.mem_range.mp hn
-          · exact Nat.two_pow_pos M
-      · intro i hi
-        simp only [Finset.mem_range] at hi
-        have : (fun a ↦ coef M i k' * walshhaar M i a * coef M n k * walshhaar M n a)= (fun a ↦ ( coef M i k' *  coef M n k ) * (walshhaar M i a * walshhaar M n a)) := by
+  · apply Finset.sum_congr (by simp)
+    intro n hn
+    rw[MeasureTheory.integral_finset_sum]
+    · have (i : ℕ): ∫ (a : ℝ) in Ico 0 1, coef M i k' * walshhaar M i a * coef M n k * walshhaar M n a = coef M i k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M i a * walshhaar M n a := by
+        rw[← MeasureTheory.integral_const_mul]
+        congr
+        ext a
+        rw[← mul_assoc]
+        linarith
+      simp_rw[this]
+      rw[Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
+              coef M x k' * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a, wlashhaar_norm, mul_comm]
+      · simp only [mul_one, left_eq_add]
+        apply Finset.sum_eq_zero
+        intro p hp
+        rw [@mul_eq_zero]
+        right
+        rw[walshHaar_ort]
+        simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hp
+        push_neg at hp
+        exact hp.2
+      · rw[← Nat.lt_iff_le_pred]
+        · exact List.mem_range.mp hn
+        · exact Nat.two_pow_pos M
+    · intro i hi
+      simp only [Finset.mem_range] at hi
+      have : (fun a ↦ coef M i k' * walshhaar M i a * coef M n k * walshhaar M n a)= (fun a ↦ ( coef M i k' *  coef M n k ) * (walshhaar M i a * walshhaar M n a)) := by
           ext a
           linarith
-        rw[this]
-        apply MeasureTheory.Integrable.const_mul
-        apply BoundedCompactSupport.integrable
-        apply BoundedCompactSupport.restrict
-        apply BoundedCompactSupport.mul
-        · unfold walshhaar
-          simp only
-          apply BoundedCompactSupport.mul
-          · exact bcs_walsh
-          · exact bcs_haarscaled
-        · unfold walshhaar
-          simp only
-          apply BoundedCompactSupport.mul
-          · exact bcs_walsh
-          · exact bcs_haarscaled
+      rw[this]
+      unfold walshhaar
+      apply MeasureTheory.Integrable.const_mul
+      apply BoundedCompactSupport.integrable
+      apply BoundedCompactSupport.restrict
+      apply BoundedCompactSupport.mul
+      · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+      · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -1000,26 +898,17 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range
       ext a
       linarith
     simp_rw[this]
+    unfold walshhaar
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
     apply BoundedCompactSupport.restrict
     apply BoundedCompactSupport.mul
-    · unfold walshhaar
-      simp only
-      apply BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
-    · unfold walshhaar
-      simp only
-      apply BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
 
 
 theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by
-  have h: ∫ y in Set.Ico 0 1, walsh k y * walsh k y = 1 := by
-    exact walsh_norm' k
-  rw[← h]
+  rw[← walsh_norm' k]
   have hf (x : ℝ ) : walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
     simp only [Finset.mem_range] at hk
     apply congrFun (ayayay hk)
@@ -1046,11 +935,8 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
           rw[← mul_assoc]
           linarith
         simp_rw[this]
-        have : ∑ x ∈ Finset.range (2 ^ M), coef M x k * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a  =(coef M n k * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M n a * walshhaar M n a) +  ∑ x ∈ Finset.range (2 ^ M) \{n}, coef M x k * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a   := by
-          exact
-            Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
-              coef M x k * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a
-        rw[this]
+        rw[Finset.sum_eq_add_sum_diff_singleton hn fun x ↦
+              coef M x k * coef M n k * ∫ (a : ℝ) in Ico 0 1, walshhaar M x a * walshhaar M n a]
         rw[wlashhaar_norm, mul_comm]
         · simp only [mul_one, left_eq_add]
           apply Finset.sum_eq_zero
@@ -1070,20 +956,13 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
           ext a
           linarith
         rw[this]
+        unfold walshhaar
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
         apply BoundedCompactSupport.restrict
         apply BoundedCompactSupport.mul
-        · unfold walshhaar
-          simp only
-          apply BoundedCompactSupport.mul
-          · exact bcs_walsh
-          · exact bcs_haarscaled
-        · unfold walshhaar
-          simp only
-          apply BoundedCompactSupport.mul
-          · exact bcs_walsh
-          · exact bcs_haarscaled
+        · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+        · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -1091,20 +970,13 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
       ext a
       linarith
     simp_rw[this]
+    unfold walshhaar
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
     apply BoundedCompactSupport.restrict
     apply BoundedCompactSupport.mul
-    · unfold walshhaar
-      simp only
-      apply BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
-    · unfold walshhaar
-      simp only
-      apply BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
 
 
 
@@ -1115,7 +987,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
       f y * walshhaar M k y) * walshhaar M k x:= by
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm]
-  rw[ ← MeasureTheory.integral_finset_sum]
+  rw[ ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
     have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
@@ -1159,10 +1031,8 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
               apply MeasureTheory.integrable_finset_sum
               intro j hj
               apply MeasureTheory.Integrable.mul_const
-              apply MeasureTheory.BoundedCompactSupport.integrable_mul
-              · apply MeasureTheory.BoundedCompactSupport.restrict
-                exact bcs_walsh
-              · exact hf'
+              apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
+              apply MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
           · intro i hi
             apply MeasureTheory.integrable_finset_sum
             intro j hj
@@ -1176,48 +1046,33 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
             apply MeasureTheory.integrable_finset_sum
             intro j hj
             apply MeasureTheory.Integrable.mul_const
-            apply MeasureTheory.BoundedCompactSupport.integrable_mul
-            · apply MeasureTheory.BoundedCompactSupport.restrict
-              exact bcs_walsh
-            · exact hf'
+            apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
+            apply MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
     simp_rw[← this]
-    apply Finset.sum_congr
-    · simp
-    · intro n hn
-      have : ∑ i ∈ Finset.range (2 ^ M),
-    (∫ (a : ℝ) in Ico 0 1, f a * walsh i a * walsh n x) *
-      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 i = (∑ i ∈ Finset.range (2 ^ M) \ {n},
-    (∫ (a : ℝ) in Ico 0 1, f a * walsh i a * walsh n x) *
-      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 i) + (∫ (a : ℝ) in Ico 0 1, f a * walsh n a * walsh n x) *
-      ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 n * coef M x_1 n := by
-        exact
-          Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
+    apply Finset.sum_congr (by simp)
+    intro n hn
+    rw[Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
             (∫ (a : ℝ) in Ico 0 1, f a * walsh x_1 a * walsh n x) *
-              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1
-      rw[this, bighelpextra1wrr (M:= M) hn]
-      simp only [mul_one, add_eq_right]
-      apply Finset.sum_eq_zero
-      intro h hj
-      simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
-      rw[bighelpextra0wrr]
-      · rw[mul_zero]
-      · simp only [ne_eq]
-        rw[eq_comm]
-        exact hj.2
-      · exact hn
-      · simp only [Finset.mem_range]
-        exact hj.1
+              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, bighelpextra1wrr (M:= M) hn]
+    simp only [mul_one, add_eq_right]
+    apply Finset.sum_eq_zero
+    intro h hj
+    simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
+    rw[bighelpextra0wrr]
+    · rw[mul_zero]
+    · simp only [ne_eq]
+      rw[eq_comm]
+      exact hj.2
+    · exact hn
+    · simp only [Finset.mem_range]
+      exact hj.1
   · intro i hi
     simp_rw[ mul_comm,  ← mul_assoc, mul_comm  ]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul
     · apply MeasureTheory.BoundedCompactSupport.restrict
       unfold walshhaar
-      simp only
-      apply MeasureTheory.BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
-    · apply MeasureTheory.Integrable.mul_const
-      exact hf'
+      apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    · apply MeasureTheory.Integrable.mul_const hf'
 
 
 
@@ -1273,6 +1128,7 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
       ∏ m ∈ binaryRepresentationSet (N - 2 ^ M), rademacherFunction m x) *
     (haarFunctionScaled (-↑M) (↑k) y * haarFunctionScaled (-↑M) (↑k) x ):= by
           linarith
+        ring_nf
         rw[this]
         conv_rhs => rw[← one_mul (a:= haarFunctionScaled (-↑M) (↑k) y), mul_assoc]
         simp only [mul_eq_mul_right_iff]
@@ -1280,9 +1136,8 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
         · right
           simp only [mul_eq_zero]
           by_cases h_1 : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1)
-          · rw[haarFunctionScaled_outside (-M) k x ?_]
-            · right
-              simp
+          · rw[haarFunctionScaled_outside (-M) k x ]
+            · simp
             · simp only [neg_neg]
               exact h_1
           · rw[or_iff_right h_1] at h
