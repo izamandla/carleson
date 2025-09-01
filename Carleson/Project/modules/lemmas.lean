@@ -6,6 +6,9 @@ open Function Set
 open unitInterval DyadicStructures
 
 noncomputable section
+
+namespace Lemmas
+
 theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
@@ -517,3 +520,5 @@ theorem partition {M N : ℕ} (h1 : 2 ^ M ≤ N) (f : ℝ → ℝ) (x : ℝ) : �
   rw[Finset.sum_sdiff ]
   rw[Finset.range_subset]
   exact Nat.le_add_right_of_le h1
+
+end Lemmas
