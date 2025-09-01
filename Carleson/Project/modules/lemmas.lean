@@ -92,12 +92,12 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
     · simp only [Finset.mem_range]
       exact hj.1
   · intro i hi
-    simp_rw[ mul_comm,  ← mul_assoc, mul_comm  ]
-    apply MeasureTheory.BoundedCompactSupport.integrable_mul
-    · apply MeasureTheory.BoundedCompactSupport.restrict
-      unfold walshhaar
-      apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
-    · apply MeasureTheory.Integrable.mul_const hf'
+    apply MeasureTheory.Integrable.mul_const
+    simp_rw[mul_comm (a:= f ?_)]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
+    apply MeasureTheory.BoundedCompactSupport.restrict
+    unfold walshhaar
+    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
 
 
 
