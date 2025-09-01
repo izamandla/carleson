@@ -35,8 +35,8 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
     simp only [mul_one]
   push_neg at hN
   obtain ⟨M, hM⟩ := max_binaryRepresentationSet N (Nat.zero_lt_of_ne_zero hN)
-  have hM1 : 2^M ≤ N := aboutM1 hM.1
-  have hM2 : N < 2^(M+1) := aboutM2 hM.2
+  obtain hM1 := aboutM1 hM.1
+  obtain hM2 := aboutM2 hM.2
   set N' := N - 2^M with hN'
   have hN'' : N' < N := by
     rw[hN']
@@ -79,14 +79,12 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
           rw[this ]
           have h1_1 : (rademacherFunction M * walsh N') x = walsh N x:= by
             simp only [Pi.mul_apply]
-            rw[hN', walshRademacherRelationresult hM.1 hx1 hx2]
-            rw[differentwalshRademacherRelation hx1 hx2]
+            rw[hN', walshRademacherRelationresult hM.1 hx1 hx2, differentwalshRademacherRelation hx1 hx2]
             simp only [mul_eq_mul_left_iff]
             left
             exact walshRademacherRelation hx1 hx2
           have h1_2 : rademacherFunction M y * walsh N' y = walsh N y:= by
-            rw[hN', walshRademacherRelationresult hM.1 h1.1 h1.2]
-            rw[differentwalshRademacherRelation h1.1 h1.2]
+            rw[hN', walshRademacherRelationresult hM.1 h1.1 h1.2, differentwalshRademacherRelation h1.1 h1.2]
             simp only [mul_eq_mul_left_iff]
             left
             exact walshRademacherRelation h1.1 h1.2
@@ -95,12 +93,11 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
             simp only [Pi.mul_apply]
             linarith
           rw[this]
-          have : (f y * walsh N y * walsh N x *
-      ∑ i ∈ Finset.range (2 ^ M), haarFunctionScaled (-↑M) (↑i) y * haarFunctionScaled (-↑M) (↑i) x +
-    f y * walsh N y * walsh N x * kernel N' x y)= f y * walsh N y * walsh N x *
-      (∑ i ∈ Finset.range (2 ^ M), haarFunctionScaled (-↑M) (↑i) y * haarFunctionScaled (-↑M) (↑i) x + kernel N' x y) := by
-            linarith
-          rw[this]
+          rw[Eq.symm
+                (LeftDistribClass.left_distrib (f y * walsh N y * walsh N x)
+                  (∑ i ∈ Finset.range (2 ^ M),
+                    haarFunctionScaled (-↑M) (↑i) y * haarFunctionScaled (-↑M) (↑i) x)
+                  (kernel N' x y))]
           simp only [mul_eq_mul_left_iff, mul_eq_zero]
           left
           simp only [kernel]
@@ -125,15 +122,12 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
           ext a
           linarith
         rw[this]
-        apply MeasureTheory.BoundedCompactSupport.integrable_mul
-        · simp_rw[mul_assoc]
-          apply MeasureTheory.BoundedCompactSupport.const_mul
-          apply MeasureTheory.BoundedCompactSupport.const_mul
-          apply MeasureTheory.BoundedCompactSupport.restrict
-          apply MeasureTheory.BoundedCompactSupport.mul
-          · exact bcs_walsh
-          · exact bcs_haarscaled
-        · exact hf
+        apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf
+        simp_rw[mul_assoc]
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.const_mul
+        apply MeasureTheory.BoundedCompactSupport.restrict
+        apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
       · simp_rw[hg]
         simp only [Pi.mul_apply]
         have : (fun a ↦
@@ -147,34 +141,27 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
           apply MeasureTheory.BoundedCompactSupport.const_mul
           apply MeasureTheory.BoundedCompactSupport.const_mul
           apply MeasureTheory.BoundedCompactSupport.restrict
-          apply MeasureTheory.BoundedCompactSupport.mul
-          · exact bcs_rademacher
-          · exact bcs_walsh
+          apply MeasureTheory.BoundedCompactSupport.mul bcs_rademacher bcs_walsh
         · unfold kernel
           simp_rw[add_mul]
           simp only [one_mul]
           apply MeasureTheory.Integrable.add''
           · exact hf
-          · apply MeasureTheory.BoundedCompactSupport.integrable_mul
-            · apply BoundedCompactSupport.finset_sum
-              intro i hi
-              apply BoundedCompactSupport.finset_sum
-              intro j hj
-              apply MeasureTheory.BoundedCompactSupport.restrict
-              apply MeasureTheory.BoundedCompactSupport.const_mul
-              exact bcs_haarscaled
-            · exact hf
+          · apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf
+            apply BoundedCompactSupport.finset_sum
+            intro i hi
+            apply BoundedCompactSupport.finset_sum
+            intro j hj
+            apply MeasureTheory.BoundedCompactSupport.restrict
+            apply MeasureTheory.BoundedCompactSupport.const_mul bcs_haarscaled
     intro i hi
     have : (fun a ↦ f a * walsh N a * haarFunctionScaled (-↑M) (↑i) a * walsh N x * haarFunctionScaled (-↑M) (↑i) x) = (fun a ↦ walsh N x * haarFunctionScaled (-↑M) (↑i) x  * walsh N a * haarFunctionScaled (-↑M) (↑i) a * f a ) := by
       ext a
       linarith
     simp_rw[this]
-    apply MeasureTheory.BoundedCompactSupport.integrable_mul
-    · simp_rw[mul_assoc]
-      apply MeasureTheory.BoundedCompactSupport.const_mul
-      apply MeasureTheory.BoundedCompactSupport.const_mul
-      apply MeasureTheory.BoundedCompactSupport.restrict
-      apply MeasureTheory.BoundedCompactSupport.mul
-      · exact bcs_walsh
-      · exact bcs_haarscaled
-    · exact hf
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf
+    simp_rw[mul_assoc]
+    apply MeasureTheory.BoundedCompactSupport.const_mul
+    apply MeasureTheory.BoundedCompactSupport.const_mul
+    apply MeasureTheory.BoundedCompactSupport.restrict
+    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
