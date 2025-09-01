@@ -1,6 +1,11 @@
 import Carleson.Project.modules.coef
 
+open InnerProductSpace MeasureTheory Set BigOperators
+open Walsh Haar BinaryRepresentationSet WalshHaar WalshRademacher Coef
+open Function Set
+open unitInterval DyadicStructures
 
+noncomputable section
 theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
