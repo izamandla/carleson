@@ -8,6 +8,8 @@ open unitInterval DyadicStructures
 
 noncomputable section
 
+namespace WalshHaar
+
 def walshhaar (M k : ℕ) : ℝ → ℝ
 | x =>
   walsh (2^M) x * (haarFunctionScaled (-M) k x)
@@ -235,3 +237,7 @@ theorem walshindicatorrightform {M k : ℕ} : ∃ (f:ℕ  → ℝ), (fun x ↦ �
         exact h.2
       · simp only [not_lt] at hk
         norm_cast
+
+
+
+end WalshHaar
