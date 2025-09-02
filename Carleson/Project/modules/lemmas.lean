@@ -361,11 +361,10 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
       linarith
     simp_rw[this]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-    apply MeasureTheory.BoundedCompactSupport.restrict
     simp_rw[mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.const_mul
     apply MeasureTheory.BoundedCompactSupport.const_mul
-    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
   · simp only [Finset.mem_range]
     intro i hi
     have : (fun y ↦
@@ -378,10 +377,9 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     simp_rw[this]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
     simp_rw[mul_assoc]
-    apply MeasureTheory.BoundedCompactSupport.restrict
     apply MeasureTheory.BoundedCompactSupport.const_mul
     apply MeasureTheory.BoundedCompactSupport.const_mul
-    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
 
 
 
@@ -472,9 +470,8 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
       linarith
     simp_rw[this]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-    apply MeasureTheory.BoundedCompactSupport.restrict
-    apply MeasureTheory.BoundedCompactSupport.mul ?_ bcs_rademacher
-    apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh
+    apply MeasureTheory.BoundedCompactSupport.mul ?_ bcs_rademacher01
+    apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh01
   · intro i hi
     have : (fun y ↦ f y * walsh i y * walsh i x)= (fun y ↦ walsh i x * walsh i y *  f y ) := by
       ext y

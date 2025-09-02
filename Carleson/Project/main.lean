@@ -44,10 +44,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
   · set g:= rademacherFunction M * f with hg
     have hg2 :  Integrable g (volume.restrict (Ico 0 1)) := by
       rw[hg]
-      apply BoundedCompactSupport.integrable_mul
-      · refine BoundedCompactSupport.restrict ?_
-        exact bcs_rademacher
-      · exact hf
+      apply BoundedCompactSupport.integrable_mul bcs_rademacher01 hf
     have :( ∑ i ∈ Finset.range (N' + 1), walshInnerProduct g i * rademacherFunction M x * walsh i x) = rademacherFunction M x * (∑ x_1 ∈ Finset.range (N' + 1),  walshInnerProduct g x_1 * walsh x_1 x):= by
       conv_rhs => rw[mul_comm, Finset.sum_mul ]
       congr
@@ -108,12 +105,11 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
             congr
             ext i
             linarith
-          rw[this, ← Finset.sum_union ]
-          · congr
-            simp only [Finset.sdiff_union_self_eq_union, Finset.union_eq_left,
-              Finset.singleton_subset_iff]
-            exact aboutMfinal hM1 hM2
-          · simp
+          rw[this, ← Finset.sum_union (by simp) ]
+          congr
+          simp only [Finset.sdiff_union_self_eq_union, Finset.union_eq_left,
+            Finset.singleton_subset_iff]
+          exact aboutMfinal hM1 hM2
         · linarith
       · apply MeasureTheory.integrable_finset_sum
         intro i hi
@@ -125,8 +121,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         simp_rw[mul_assoc]
         apply MeasureTheory.BoundedCompactSupport.const_mul
         apply MeasureTheory.BoundedCompactSupport.const_mul
-        apply MeasureTheory.BoundedCompactSupport.restrict
-        apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+        apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
       · simp_rw[hg]
         simp only [Pi.mul_apply]
         have : (fun a ↦
@@ -139,8 +134,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         · simp_rw[mul_assoc]
           apply MeasureTheory.BoundedCompactSupport.const_mul
           apply MeasureTheory.BoundedCompactSupport.const_mul
-          apply MeasureTheory.BoundedCompactSupport.restrict
-          apply MeasureTheory.BoundedCompactSupport.mul bcs_rademacher bcs_walsh
+          apply MeasureTheory.BoundedCompactSupport.mul bcs_rademacher01 bcs_walsh01
         · unfold kernel
           simp_rw[add_mul]
           simp only [one_mul]
@@ -151,8 +145,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
             intro i hi
             apply BoundedCompactSupport.finset_sum
             intro j hj
-            apply MeasureTheory.BoundedCompactSupport.restrict
-            apply MeasureTheory.BoundedCompactSupport.const_mul bcs_haarscaled
+            apply MeasureTheory.BoundedCompactSupport.const_mul bcs_haarscaled01
     intro i hi
     have : (fun a ↦ f a * walsh N a * haarFunctionScaled (-↑M) (↑i) a * walsh N x * haarFunctionScaled (-↑M) (↑i) x) = (fun a ↦ walsh N x * haarFunctionScaled (-↑M) (↑i) x  * walsh N a * haarFunctionScaled (-↑M) (↑i) a * f a ) := by
       ext a
@@ -162,8 +155,7 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
     simp_rw[mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.const_mul
     apply MeasureTheory.BoundedCompactSupport.const_mul
-    apply MeasureTheory.BoundedCompactSupport.restrict
-    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
 
 
 
@@ -195,9 +187,7 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
   set g:= rademacherFunction M * f with hg
   have hg2 :  Integrable g (volume.restrict (Ico 0 1)) := by
     rw[hg]
-    apply BoundedCompactSupport.integrable_mul
-    · refine BoundedCompactSupport.restrict bcs_rademacher
-    · exact hf
+    apply BoundedCompactSupport.integrable_mul bcs_rademacher01 hf
   have :( ∑ i ∈ Finset.range (N' + 1), walshInnerProduct g i * rademacherFunction M x * walsh i x) = rademacherFunction M x * (∑ x_1 ∈ Finset.range (N' + 1),  walshInnerProduct g x_1 * walsh x_1 x):= by
     conv_rhs => rw[mul_comm, Finset.sum_mul ]
     congr
@@ -271,8 +261,7 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
       simp_rw[mul_assoc]
       apply MeasureTheory.BoundedCompactSupport.const_mul
       apply MeasureTheory.BoundedCompactSupport.const_mul
-      apply MeasureTheory.BoundedCompactSupport.restrict
-      apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+      apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
     · simp_rw[hg]
       simp only [Pi.mul_apply]
       have : (fun a ↦
@@ -285,8 +274,7 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
       · simp_rw[mul_assoc]
         apply MeasureTheory.BoundedCompactSupport.const_mul
         apply MeasureTheory.BoundedCompactSupport.const_mul
-        apply MeasureTheory.BoundedCompactSupport.restrict
-        apply MeasureTheory.BoundedCompactSupport.mul bcs_rademacher bcs_walsh
+        apply MeasureTheory.BoundedCompactSupport.mul bcs_rademacher01 bcs_walsh01
       · unfold kernel
         simp_rw[add_mul]
         simp only [one_mul]
@@ -297,6 +285,5 @@ theorem mainresult' (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 :
           intro i hi
           apply BoundedCompactSupport.finset_sum
           intro j hj
-          apply MeasureTheory.BoundedCompactSupport.restrict
-          apply MeasureTheory.BoundedCompactSupport.const_mul bcs_haarscaled
+          apply MeasureTheory.BoundedCompactSupport.const_mul bcs_haarscaled01
   · sorry

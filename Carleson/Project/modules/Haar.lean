@@ -650,7 +650,8 @@ theorem bcs_haarscaled {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k
         exact hx.le
 
 
-
+theorem bcs_haarscaled01 {n k : ℤ} : BoundedCompactSupport (haarFunctionScaled k n) (volume.restrict (Ico 0 1) ):= by
+  refine BoundedCompactSupport.restrict bcs_haarscaled
 
 
 
@@ -970,6 +971,8 @@ theorem bcs_rademacher {k : ℕ} : BoundedCompactSupport (rademacherFunction k) 
   intro i hi
   apply bcs_haarscaled
 
+theorem bcs_rademacher01 {k : ℕ} : BoundedCompactSupport (rademacherFunction k) (volume.restrict (Ico 0 1) ):= by
+  refine BoundedCompactSupport.restrict bcs_rademacher
 
 
 
