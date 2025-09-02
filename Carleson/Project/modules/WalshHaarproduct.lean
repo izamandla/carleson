@@ -239,5 +239,11 @@ theorem walshindicatorrightform {M k : ℕ} : ∃ (f:ℕ  → ℝ), (fun x ↦ �
         norm_cast
 
 
+theorem bcs_WalshHaar {M i : ℕ} : BoundedCompactSupport (walshhaar M i) volume := by
+  apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+
+theorem bcs_WalshHaar01 {M i : ℕ} : BoundedCompactSupport (walshhaar M i) (volume.restrict (Ico 0 1)) := by
+  apply MeasureTheory.BoundedCompactSupport.restrict
+  exact bcs_WalshHaar
 
 end WalshHaar

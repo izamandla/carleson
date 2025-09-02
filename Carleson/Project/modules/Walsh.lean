@@ -763,8 +763,8 @@ theorem bcs_walsh {n : ℕ} : BoundedCompactSupport (walsh n) MeasureTheory.volu
       · right
         exact hx.le
 
-
-
+theorem bcs_walsh01 {n : ℕ} : BoundedCompactSupport (walsh n) (volume.restrict (Ico 0 1)) := by
+  refine BoundedCompactSupport.restrict bcs_walsh
 
 theorem walshsizing_firsthalf {n : ℕ} {x : ℝ} : 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
   by_cases h : x < 1/2

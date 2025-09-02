@@ -9,6 +9,9 @@ noncomputable section
 
 namespace Lemmas
 
+
+
+
 theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
@@ -59,8 +62,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
               apply MeasureTheory.integrable_finset_sum
               intro j hj
               apply MeasureTheory.Integrable.mul_const
-              apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-              apply MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
+              apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
           · intro i hi
             apply MeasureTheory.integrable_finset_sum
             intro j hj
@@ -74,8 +76,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
             apply MeasureTheory.integrable_finset_sum
             intro j hj
             apply MeasureTheory.Integrable.mul_const
-            apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-            apply MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
+            apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
     simp_rw[← this]
     apply Finset.sum_congr (by simp)
     intro n hn
@@ -97,10 +98,8 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
   · intro i hi
     apply MeasureTheory.Integrable.mul_const
     simp_rw[mul_comm (a:= f ?_)]
-    apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-    apply MeasureTheory.BoundedCompactSupport.restrict
-    unfold walshhaar
-    apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
+
 
 
 
@@ -482,8 +481,7 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
       linarith
     simp_rw[this]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
-    apply MeasureTheory.BoundedCompactSupport.restrict
-    apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh
+    apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh01
 
 
 
