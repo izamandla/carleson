@@ -287,6 +287,7 @@ theorem binaryRepresentationSet_equiv2plus1result (n : ℕ) : ∑ k ∈ binaryRe
 /--
 relation of prodacts between `n` and `2n+1`.
 -/
+--@[to_additive]
 theorem binaryRepresentationSet_equiv2plus1resultprod {n : ℕ} {α : Type*} [CommMonoid α] (f : ℕ → α) : (f 0) * ∏
   k ∈ binaryRepresentationSet n, f (k + 1) =  ∏ k ∈ binaryRepresentationSet (2 * n + 1), f k:= by
   rw[bin2insert2plus1, Finset.prod_insert (lackofzeroin2 n), binaryRepresentationSet_equiv2resultprod]

@@ -20,6 +20,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
+
     --here
     have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
@@ -102,8 +103,102 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
     simp_rw[mul_comm (a:= f ?_)]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
 
+/-theorem Finset.sum_comm_cycle_int {κ : Type*} {α : Type*} {β : Type*} {γ : Type*} {δ : Type*} [AddCommMonoid β] {s : Finset γ} {t : Finset α} {u : Finset κ} {m : MeasurableSpace δ} {μ : Measure δ} {f : γ → α → κ → β} :
+∫ (a :δ), (∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, f x y z) = ∑ z ∈ u, ∑ x ∈ s, ∑ y ∈ t, f x y z := by sorry -/
 
 
+
+theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
+  ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
+  ∑ k ∈ Finset.range (2 ^ M),
+    (∫ y in Set.Ico 0 1,
+      f y * walshhaar M k y) * walshhaar M k x:= by
+  simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
+  rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
+  · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
+    --simp_rw[mul_assoc (a:= f ?_ * walsh ?_ ?_ ), mul_comm (a:= coef ?_ ?_ ?_ ), ← mul_assoc, mul_assoc (a:= f ?_ * walsh ?_ ?_ * walsh ?_ ?_ )]
+
+    --here
+    have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
+      ∑ x_2 ∈ Finset.range (2 ^ M),
+        ∑ i ∈ Finset.range (2 ^ M), f a * walsh i a * coef M x_1 i * walsh x_2 x * coef M x_1 x_2  =
+      ∑ x_2 ∈ Finset.range (2 ^ M),
+        ∑ i ∈ Finset.range (2 ^ M), f a * walsh i a  * walsh x_2 x *(∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i) := by
+          simp_rw[Finset.mul_sum]
+          rw[Finset.sum_comm]
+          congr
+          ext y
+          rw[Finset.sum_comm]
+          congr
+          ext k
+          congr
+          ext i
+          rw[← mul_assoc]
+          linarith
+    simp_rw[this]
+    --here
+    have :
+    ∑ x_2 ∈ Finset.range (2 ^ M),
+      ∑ i ∈ Finset.range (2 ^ M),
+        (∫ (a : ℝ) in Ico 0 1,f a * walsh i a * walsh x_2 x )* ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i = ∫ (a : ℝ) in Ico 0 1,
+    ∑ x_2 ∈ Finset.range (2 ^ M),
+      ∑ i ∈ Finset.range (2 ^ M),
+        f a * walsh i a * walsh x_2 x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 x_2 * coef M x_1 i := by
+          rw[MeasureTheory.integral_finset_sum]
+          · congr
+            ext i
+            rw[MeasureTheory.integral_finset_sum]
+            · congr
+              ext m
+              rw[← MeasureTheory.integral_mul_const]
+            · intro m hm
+              have : (fun a ↦ f a * walsh m a * walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 m)= (fun a ↦  ∑ x_1 ∈ Finset.range (2 ^ M), ( walsh m a  * f a ) *(walsh i x* coef M x_1 i * coef M x_1 m) ):= by
+                ext a
+                rw[mul_comm, Finset.sum_mul]
+                congr
+                ext y
+                linarith
+              simp_rw[this]
+              apply MeasureTheory.integrable_finset_sum
+              intro j hj
+              apply MeasureTheory.Integrable.mul_const
+              apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
+          · intro i hi
+            apply MeasureTheory.integrable_finset_sum
+            intro j hj
+            have : (fun a ↦ f a * walsh j a * walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 j) = (fun a ↦ ∑ x_1 ∈ Finset.range (2 ^ M),  ( walsh j a * f a  )* (walsh i x * coef M x_1 i * coef M x_1 j) ):= by
+              ext a
+              rw[mul_comm, Finset.sum_mul]
+              congr
+              ext y
+              linarith
+            simp_rw[this]
+            apply MeasureTheory.integrable_finset_sum
+            intro j hj
+            apply MeasureTheory.Integrable.mul_const
+            apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
+    simp_rw[← this]
+    apply Finset.sum_congr (by simp)
+    intro n hn
+    rw[Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
+            (∫ (a : ℝ) in Ico 0 1, f a * walsh x_1 a * walsh n x) *
+              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, bighelpextra1wrr (M:= M) hn]
+    simp only [mul_one, add_eq_right]
+    apply Finset.sum_eq_zero
+    intro h hj
+    simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
+    rw[bighelpextra0wrr]
+    · rw[mul_zero]
+    · simp only [ne_eq]
+      rw[eq_comm]
+      exact hj.2
+    · exact hn
+    · simp only [Finset.mem_range]
+      exact hj.1
+  · intro i hi
+    apply MeasureTheory.Integrable.mul_const
+    simp_rw[mul_comm (a:= f ?_)]
+    apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
 
 
 
