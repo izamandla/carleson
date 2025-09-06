@@ -65,6 +65,9 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
         · rw[mul_comm] at hg
           rw[hg]
           simp only [Pi.mul_apply]
+          --here
+          --simp_rw[mul_assoc, ← Finset.mul_sum ]
+          --simp_rw[mul_left_comm (a:= haarFunctionScaled _ _ y ), ← Finset.mul_sum ]
           have : (∑ i ∈ Finset.range (2 ^ M),
         f y * walsh N y * haarFunctionScaled (-↑M) (↑i) y * walsh N x * haarFunctionScaled (-↑M) (↑i) x) = (f y * walsh N y * walsh N x * ∑ i ∈ Finset.range (2 ^ M),
         haarFunctionScaled (-↑M) (↑i) y * haarFunctionScaled (-↑M) (↑i) x) := by
@@ -149,8 +152,10 @@ theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : 
     intro i hi
     have : (fun a ↦ f a * walsh N a * haarFunctionScaled (-↑M) (↑i) a * walsh N x * haarFunctionScaled (-↑M) (↑i) x) = (fun a ↦ walsh N x * haarFunctionScaled (-↑M) (↑i) x  * walsh N a * haarFunctionScaled (-↑M) (↑i) a * f a ) := by
       ext a
-      linarith
+      ring
+    --thats annoying
     simp_rw[this]
+    -- doing the second diretion with lemma below
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf
     simp_rw[mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.const_mul

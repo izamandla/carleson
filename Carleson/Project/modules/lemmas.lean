@@ -20,6 +20,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
+    --here
     have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
         ∑ i ∈ Finset.range (2 ^ M), f a * walsh i a * coef M x_1 i * walsh x_2 x * coef M x_1 x_2  =
@@ -37,6 +38,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
           rw[← mul_assoc]
           linarith
     simp_rw[this]
+    --here
     have :
     ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),

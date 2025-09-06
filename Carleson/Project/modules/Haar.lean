@@ -968,8 +968,8 @@ theorem bcs_rademacher {k : ℕ} : BoundedCompactSupport (rademacherFunction k) 
   unfold rademacherFunction
   apply MeasureTheory.BoundedCompactSupport.const_mul
   apply MeasureTheory.BoundedCompactSupport.finset_sum
-  intro i hi
-  apply bcs_haarscaled
+  exact fun i a ↦ bcs_haarscaled
+
 
 theorem bcs_rademacher01 {k : ℕ} : BoundedCompactSupport (rademacherFunction k) (volume.restrict (Ico 0 1) ):= by
   refine BoundedCompactSupport.restrict bcs_rademacher
