@@ -61,24 +61,17 @@ theorem walsh_one_left (x : ℝ) (h1 : 0 ≤ x) (h2 : x < 1 / 2) : walsh 1 x =  
   simp only [walsh, one_div, one_ne_zero, ↓reduceIte, Nat.reduceDiv, ite_self, Nat.mod_succ,
     sub_neg]
   split_ifs with h_1 h_2 h_3 h_4
-  · exfalso
-    obtain h_l|h_r := h_1
+  · obtain h_l|h_r := h_1
     · linarith
     · linarith
-  · exfalso
-    obtain h_l|h_r := h_3
+  · obtain h_l|h_r := h_3
     · linarith
     · linarith
   · rfl
-  · exfalso
-    obtain h_l|h_r := h_4
-    · push_neg at h_2
-      simp at h2
-      linarith
+  · obtain h_l|h_r := h_4
     · linarith
-  · exfalso
-    push_neg at h_1 h_4
-    linarith
+    · linarith
+  · linarith
 
 /--
 Walsh function for `n=1` is 1 on the right half of `[0,1)`.
@@ -89,24 +82,15 @@ theorem walsh_one_right (x : ℝ) (h1 : 1 / 2 ≤ x) (h2 : x < 1) : walsh 1 x = 
   simp only [walsh, one_div, one_ne_zero, ↓reduceIte, Nat.reduceDiv, ite_self, Nat.mod_succ,
     sub_neg]
   split_ifs with h_1 h_2 h_3 h_4
-  · exfalso
-    obtain h_l|h_r := h_1
+  · obtain h_l|h_r := h_1
     · linarith
     · linarith
-  · exfalso
-    obtain h_l|h_r := h_3
+  · obtain h_l|h_r := h_3
     · linarith
-    · push_neg at h_1
-      simp at h1
-      linarith
-  · exfalso
-    push_neg at h_1 h_3
-    linarith
-  · exfalso
-    obtain h_l|h_r := h_4
-    · push_neg at h_2 h_1
-      rw[inv_le_iff_one_le_mul₀ (zero_lt_two)] at h_2
-      linarith
+    · linarith
+  · linarith
+  · obtain h_l|h_r := h_4
+    · linarith
     · linarith
   · rfl
 
@@ -131,12 +115,10 @@ theorem walsh_even_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n) x =
     · linarith
     · linarith
   · rfl
-  · push_neg at h_1 h_2
-    rw[h_4, walsh_zero]
+  · rw[h_4, walsh_zero]
     · linarith
     · linarith
-  · push_neg at h_1 h_2 h_4
-    exfalso
+  · exfalso
     linarith
 
 /--
@@ -152,12 +134,10 @@ theorem walsh_even_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n) 
     · rw[walsh_not_in]
       right
       linarith
-  · push_neg at h_1
-    rw[h_3, walsh_zero]
+  · rw[h_3, walsh_zero]
     · linarith
     · linarith
-  · push_neg at h_1 h_3
-    exfalso
+  · exfalso
     linarith
   · push_neg at h_1 h_2
     rw[h_4, walsh_zero]
@@ -165,6 +145,9 @@ theorem walsh_even_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n) 
     · linarith
   · rfl
 
+
+theorem odd_div {n : ℕ} : (2 * n + 1) / 2 = n := by
+    rw[← Nat.mul_left_inj (Ne.symm (Nat.zero_ne_add_one 1)), one_add_one_eq_two, mul_comm, Nat.two_mul_odd_div_two (by simp), add_tsub_cancel_right, mul_comm]
 
 /--
 Walsh function for n being odd on the left half of `[0,1)`.
@@ -176,16 +159,6 @@ theorem walsh_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n +1) x
     unfold walsh
   simp only [one_div, AddLeftCancelMonoid.add_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
     one_ne_zero, and_false, ↓reduceIte]
-  have h_odd0 : Odd (2 * n + 1) := by
-    simp
-  have h_oddp : 2*((2 * n + 1  )/2) = 2*n := by
-    rw[Nat.odd_iff] at h_odd0
-    rw[Nat.two_mul_odd_div_two h_odd0]
-    simp
-  have h_odd : (2 * n + 1) / 2 = n := by
-    rw[← Nat.mul_left_inj (a:=2), mul_comm, h_oddp]
-    linarith
-    simp
   split_ifs with h_1 h_2 h_3
   · rw[walsh_not_in]
     obtain hl|hp := h_1
@@ -195,14 +168,13 @@ theorem walsh_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n +1) x
       exact hl
     · linarith
   · push_neg at h_1
-    rw[h_odd]
-  · rw[h_odd]
+    rw[odd_div]
+  · rw[odd_div]
     push_neg at h_1 h_2
     exfalso
-    rw[Nat.odd_iff] at h_odd0
     linarith
   · push_neg at h_1 h_2 h_3
-    rw[h_odd]
+    rw[odd_div]
     linarith
 
 /--
@@ -215,16 +187,6 @@ theorem walsh_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n + 
     unfold walsh
   simp only [one_div, AddLeftCancelMonoid.add_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
     one_ne_zero, and_false, ↓reduceIte]
-  have h_odd0 : Odd (2 * n + 1) := by
-    simp
-  have h_oddp : 2*((2 * n + 1  )/2) = 2*n := by
-    rw[Nat.odd_iff] at h_odd0
-    rw[Nat.two_mul_odd_div_two h_odd0]
-    simp
-  have h_odd : (2 * n + 1) / 2 = n := by
-    rw[← Nat.mul_left_inj (a:=2), mul_comm, h_oddp]
-    linarith
-    simp
   split_ifs with h_1 h_2 h_3
   · obtain hl|hp := h_1
     · linarith
@@ -235,13 +197,11 @@ theorem walsh_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n + 
   · push_neg at h_1
     exfalso
     linarith
-  · rw[h_odd]
+  · rw[odd_div]
     push_neg at h_1 h_2
-    exfalso
-    rw[Nat.odd_iff] at h_odd0
-    linarith
+    simp at h_3
   · push_neg at h_1 h_2 h_3
-    rw[h_odd]
+    rw[odd_div]
 
 
 /--
@@ -282,8 +242,7 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
       · linarith
       · linarith
     · push_neg at h
-      rw[walsh_odd_right h]
-      simp only [mul_neg, neg_mul, neg_neg]
+      rw[walsh_odd_right h, mul_neg, neg_mul, neg_neg]
       apply ih (2*x -1)
       constructor
       · linarith
@@ -297,9 +256,8 @@ Squere of Wlash functions is 1 on `[0,1).`
 
 theorem sqr_walsh {n : ℕ} (x : ℝ) (h1 : 0 ≤ x) (h2 : x < 1) : (walsh n x)*(walsh n x) = 1 := by
   apply walsh_sqr1
-  constructor
-  · exact h1
-  · exact h2
+  exact And.symm ⟨h2, h1⟩
+
 
 /--
 Walsh functions are nonzero on `[0,1)`.
@@ -322,25 +280,22 @@ simp [h]
 
 theorem walsh_values {n : ℕ} {x : ℝ} (h1 : 0 ≤ x) (h2 : x < 1) : walsh n x = 1 ∨ walsh n x =-1 := by
   rw[← sq_eq_one_iff, pow_two]
-  apply sqr_walsh
-  · exact h1
-  exact h2
+  apply sqr_walsh x h1 h2
+
 
 
 /--
 Product of Wlash functions of fixed `n` and different arguments is 0 outside `[0, 1)`.
 -/
 theorem mul_walsh_outside {n : ℕ} (x y : ℝ) (h : x < 0 ∨ 1 ≤ x) : (walsh n x)*(walsh n y ) =  0:= by
-  rw[walsh_not_in]
-  · simp only [zero_mul]
-  exact  h
+  rw[walsh_not_in x h]
+  exact zero_mul (walsh n y)
+
 
 
 theorem mul_walsh_outside' {n : ℕ} (x y : ℝ) (h : x < 0 ∨ 1 ≤ x) : (walsh n y )*(walsh n x) =  0:= by
   rw[mul_comm, mul_walsh_outside]
   exact  h
-
-
 
 
 
@@ -357,29 +312,22 @@ def walshInnerProduct (f : ℝ → ℝ) (n : ℕ) : ℝ :=
 -/
 theorem walshInnermul {n m : ℕ} : walshInnerProduct (walsh n) m = walshInnerProduct (walsh m) n := by
   simp only [walshInnerProduct]
-  have h1 : EqOn ((walsh n)*(walsh m)) ((walsh m)*(walsh n))  (Set.Ico 0 (1:ℝ)):= by
-    rw[mul_comm]
-    exact fun ⦃x⦄ ↦ congrFun rfl
-  have h2 : MeasurableSet (Set.Ico 0 (1:ℝ)) := by
-    simp
   change ∫ (x : ℝ) in Ico 0 1, (walsh n * walsh m) x = ∫ (x : ℝ) in Ico 0 1, (walsh m * walsh n) x
-  rw[MeasureTheory.setIntegral_congr_fun h2 h1]
-
+  rw[MeasureTheory.setIntegral_congr_fun measurableSet_Ico]
+  rw[mul_comm]
+  exact fun ⦃x⦄ ↦ congrFun rfl
 
 
 /--
 Walsh functions have norm 1.
 -/
 theorem walsh_norm' (n : ℕ) :  ∫ (x : ℝ) in Ico 0 1, walsh n x * walsh n x = 1:= by
-  have hs : MeasurableSet (Set.Ico 0 (1 : ℝ )) := by
-    simp
   have h1 : EqOn ((walsh n)*(walsh n)) 1  (Set.Ico 0 (1:ℝ)):= by
     intro x hx
-    rw [Pi.mul_apply, Pi.one_apply, sqr_walsh ]
-    · simp_all
-    · simp_all
+    simp only [mem_Ico] at hx
+    rw [Pi.mul_apply, Pi.one_apply, sqr_walsh x hx.1 hx.2]
   change ∫ (x : ℝ) in Ico 0 1, (walsh n * walsh n) x = 1
-  rw[MeasureTheory.setIntegral_congr_fun hs h1]
+  rw[MeasureTheory.setIntegral_congr_fun measurableSet_Ico h1]
   simp
 
 theorem walsh_norm (n : ℕ) :
@@ -403,7 +351,7 @@ theorem walsh_leq_one {n : ℕ} {x : ℝ} : |walsh n x| ≤ 1 := by
   · rw [@abs_le_one_iff_mul_self_le_one, walsh_sqr1]
     exact h
   · rw[Mathlib.Tactic.PushNeg.not_and_or_eq, not_le, not_lt, ← ge_iff_le] at h
-    rw[walsh_zero_outside_domain n  x h ]
+    rw[walsh_zero_outside_domain n x h ]
     simp
 
 
@@ -447,43 +395,39 @@ def walshFourierSeries (f : ℝ → ℝ) : ℝ → ℝ :=
 
 
 theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
-  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
-  · simp
-  · apply Filter.Eventually.of_forall
-    intro z hz
-    simp at hz
-    ring_nf at hz
-    rw[walsh_even_left hz.2]
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
+  apply Filter.Eventually.of_forall
+  intro z hz
+  simp at hz
+  ring_nf at hz
+  rw[walsh_even_left hz.2]
 
 
 theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0.5 1, walsh (2*n) x := by
-  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
-  · simp
-  · apply Filter.Eventually.of_forall
-    intro z hz
-    simp at hz
-    ring_nf at hz
-    rw[walsh_even_right hz.1]
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
+  apply Filter.Eventually.of_forall
+  intro z hz
+  simp at hz
+  ring_nf at hz
+  rw[walsh_even_right hz.1]
 
 theorem relbetweenintodd1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n +1) x := by
-  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
-  · simp
-  · apply Filter.Eventually.of_forall
-    intro z hz
-    simp at hz
-    ring_nf at hz
-    rw[walsh_odd_left hz.2]
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
+  apply Filter.Eventually.of_forall
+  intro z hz
+  simp at hz
+  ring_nf at hz
+  rw[walsh_odd_left hz.2]
 
 theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = - ∫ x in Set.Ico 0.5 1, walsh (2*n+1) x := by
   rw[← MeasureTheory.integral_neg]
-  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ ?_ ?_)
-  · simp
-  · apply Filter.Eventually.of_forall
-    intro z hz
-    simp at hz
-    ring_nf at hz
-    rw[walsh_odd_right hz.1]
-    simp
+  refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
+  apply Filter.Eventually.of_forall
+  intro z hz
+  simp at hz
+  ring_nf at hz
+  rw[walsh_odd_right hz.1]
+  simp
 
 
 theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun _ ↦ 1 : ℝ → ℝ ) := by
@@ -500,27 +444,24 @@ theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun _ ↦ 1 : ℝ �
 
 theorem walshevenasfun {n : ℕ} : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ walsh n (2*x -1) : ℝ → ℝ )  := by
   ext x
-  simp only [Pi.add_apply]
-  rw[indicator, indicator]
+  rw[Pi.add_apply, indicator, indicator]
   split_ifs with h1 h2 h3
   · exfalso
     simp at h1
     simp at h2
     linarith
-  · simp only [add_zero]
-    rw[walsh_even_left]
+  · rw[add_zero, walsh_even_left]
     simp at h1
     ring_nf at h1
     exact h1.2
-  · simp only [zero_add]
-    rw[walsh_even_right]
+  · rw[zero_add, walsh_even_right]
     simp at h3
     ring_nf at h3
     exact h3.1
   · simp only [add_zero]
     simp only [mem_Ico, not_and, not_lt] at h3
     simp only [mem_Ico, not_and, not_lt] at h1
-    rw[walsh_zero_outside_domain  ]
+    rw[walsh_zero_outside_domain]
     by_contra h
     push_neg at h
     obtain ⟨hx₀, hx₁⟩ := h
@@ -530,27 +471,24 @@ theorem walshevenasfun {n : ℕ} : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5) 
 
 theorem walshoddasfun {n : ℕ} : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ - walsh n (2*x -1) : ℝ → ℝ )  := by
   ext x
-  simp only [Pi.add_apply]
-  rw[indicator, indicator]
+  rw[Pi.add_apply, indicator, indicator]
   split_ifs with h1 h2 h3
   · exfalso
     simp at h1
     simp at h2
     linarith
-  · simp only [add_zero]
-    rw[walsh_odd_left]
+  · rw[add_zero, walsh_odd_left]
     simp at h1
     ring_nf at h1
     exact h1.2
-  · simp only [zero_add]
-    rw[walsh_odd_right]
+  · rw[zero_add, walsh_odd_right]
     simp at h3
     ring_nf at h3
     exact h3.1
   · simp only [add_zero]
     simp only [mem_Ico, not_and, not_lt] at h3
     simp only [mem_Ico, not_and, not_lt] at h1
-    rw[walsh_zero_outside_domain  ]
+    rw[walsh_zero_outside_domain]
     by_contra h
     push_neg at h
     obtain ⟨hx₀, hx₁⟩ := h
@@ -561,24 +499,15 @@ theorem walshoddasfun {n : ℕ} : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5
 theorem measurability_of_walsh {n : ℕ} : Measurable (walsh n):= by
   induction' n using Nat.evenOddRec with n ih n ih
   · rw[walsh0asfun]
-    refine (measurable_indicator_const_iff 1).mpr ?_
-    simp
+    refine (measurable_indicator_const_iff 1).mpr measurableSet_Ico
   · rw[walshevenasfun]
-    refine (Measurable.add_iff_right ?_).mpr ?_
-    · apply Measurable.indicator
-      · fun_prop
-      · simp
-    · apply Measurable.indicator
-      · fun_prop
-      · simp
+    apply Measurable.add
+    · apply Measurable.indicator (by fun_prop) (by simp)
+    · apply Measurable.indicator (by fun_prop) (by simp)
   · rw[walshoddasfun]
-    refine (Measurable.add_iff_right ?_).mpr ?_
-    · apply Measurable.indicator
-      · fun_prop
-      · simp
-    · apply Measurable.indicator
-      · fun_prop
-      · simp
+    apply Measurable.add
+    · apply Measurable.indicator (by fun_prop) (by simp)
+    · apply Measurable.indicator (by fun_prop) (by simp)
 
 
 
