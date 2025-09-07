@@ -736,9 +736,41 @@ theorem sum_of_even_odd_set {s t u : Finset ℕ} (hs : s = {l ∈ u | Odd l}) (h
   rw[hs, ht, ← @Finset.filter_or, @Finset.filter_eq_self]
   exact fun x a ↦ Or.symm (Nat.even_or_odd x)
 
-theorem div_of_nat_inj {s t : Finset ℕ} {i : ℕ → ℕ} {n m : ℕ} (hi : i = fun n ↦ n / 2) : BijOn i s t:= by
+theorem div_of_nat_inj_even {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Even l}) := by
+  unfold InjOn
+  simp only [mem_setOf_eq, and_imp]
+  intro n hn hn2 m hm hm2 himp
+  simp only [hi] at himp
+  set k:= n/2 with hk
+  rw[← Nat.two_mul_div_two_of_even hn2, ← hk, himp]
+  exact Nat.two_mul_div_two_of_even hm2
 
-  sorry
+
+theorem div_of_nat_mapsto_even {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Even l}) (Iio  (2^m)) := by
+  unfold MapsTo
+  intro k hk
+  simp only [Finset.mem_range, mem_setOf_eq, Nat.pow_add_one, mul_comm] at hk
+  simp only [mem_Iio, hi]
+  refine Nat.div_lt_of_lt_mul hk.1
+
+
+
+theorem div_of_nat_inj_odd {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Odd l}) := by
+  unfold InjOn
+  simp only [mem_setOf_eq, and_imp]
+  intro n hn hn2 m hm hm2 himp
+  simp only [hi] at himp
+  set k:= n/2 with hk
+  rw[← Nat.two_mul_div_two_add_one_of_odd hn2, ← hk, himp]
+  exact Nat.two_mul_div_two_add_one_of_odd hm2
+
+
+theorem div_of_nat_mapsto_odd {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Odd l}) (Iio  (2^m)) := by
+  unfold MapsTo
+  intro k hk
+  simp only [Finset.mem_range, mem_setOf_eq, Nat.pow_add_one, mul_comm] at hk
+  simp only [mem_Iio, hi]
+  refine Nat.div_lt_of_lt_mul hk.1
 
 
 theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦ (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x ):= by
@@ -756,9 +788,8 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
       · rw[sum_of_even_odd_set hs ht]
       · rw[hs, ht]
         refine Finset.disjoint_filter.mpr ?_
-        intro k hk h1
         simp only [Nat.not_even_iff_odd]
-        exact h1
+        exact fun x a a ↦ a
     by_cases h : k < 2^M
     · specialize ih (k:=k) h
       obtain ⟨g, hg⟩ := ih
@@ -773,23 +804,12 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
       rw[add_comm]
       refine Eq.symm (Mathlib.Tactic.LinearCombination.add_eq_eq ?_ ?_)
       · rw[ht, eq_comm ]
-        let i : ℕ → ℕ  := fun i ↦ i/2
+        set i : ℕ → ℕ  := fun i ↦ i/2 with hi
         apply Finset.sum_of_injOn i
-        · unfold InjOn
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, and_imp]
-          intro n hn hn2 m hm hm2 himp
-          simp only [i] at himp
-          set k:= n/2
-          have hk' : 2*k = n := Nat.two_mul_div_two_of_even hn2
-          rw[← hk', himp]
-          exact Nat.two_mul_div_two_of_even hm2
-        · unfold MapsTo
-          intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
-          simp only [Finset.coe_range, mem_Iio, i]
-          refine Nat.div_lt_of_lt_mul ?_
-          rw [← @Nat.pow_add_one']
-          exact hk.1
+        · norm_cast
+          apply div_of_nat_inj_even hi (s:=  Finset.range (2 ^ (M + 1)))
+        · norm_cast
+          apply div_of_nat_mapsto_even (m:= M) hi
         · simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Even l})) := by
@@ -813,45 +833,22 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           congr
           exact Eq.symm (Nat.div_two_mul_two_of_even hii)
       · rw[hs, eq_comm ]
-        let i : ℕ → ℕ  := fun i ↦ i/2
+        set i : ℕ → ℕ  := fun i ↦ i/2 with hi
         apply Finset.sum_of_injOn i
-        · -- dla tego i dla parzysych osobny tw ze inj
-          unfold InjOn
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, and_imp]
-          intro n hn hn2 m hm hm2 himp
-          simp only [i] at himp
-          set k:= n/2
-          have hk' : 2*k +1 = n := Nat.two_mul_div_two_add_one_of_odd hn2
-          rw[himp] at hk'
-          rw[← hk']
-          exact Nat.two_mul_div_two_add_one_of_odd hm2
-        · --to samo co powyzej
-          unfold MapsTo
-          intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
-          simp only [Finset.coe_range, mem_Iio, i]
-          refine Nat.div_lt_of_lt_mul ?_
-          rw [← @Nat.pow_add_one']
-          exact hk.1
+        · norm_cast
+          apply div_of_nat_inj_odd hi (s:=  Finset.range (2 ^ (M + 1)))
+        · norm_cast
+          apply div_of_nat_mapsto_odd (m:= M) hi
         · --obraz przez podzielenie to cos tam - lemat
           simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
-            simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Decidable.not_not, i]
-            use 2 * l + 1
-            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop]
-            constructor
-            · apply Nat.add_one_le_of_lt at hl
-              rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two)] at hl
-              rw[pow_add]
-              simp only [pow_one]
-              rw[mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc ] at hl
-              apply Nat.lt_of_add_one_le
-              rw[mul_comm, mul_comm (a:= 2^M)]
-              exact hl
-            · rw [Nat.add_div_of_dvd_right (Exists.intro l rfl)]
-              simp
+            refine not_notMem.mpr ?_
+            rw[Set.SurjOn.image_eq_of_mapsTo (t := Iio  (2^M)) ]
+            · exact hl
+            · sorry
+            · norm_cast
+              apply div_of_nat_mapsto_odd (m:= M) hi
           intro hl1
           exfalso
           exact this hl1
@@ -874,36 +871,19 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
       have hg1 :  ∀ (x : ℝ), ∑ j ∈ Finset.range (2 ^ M), walsh j ((2*x)-1) * g j = walsh 0 (2 ^ M * ((2*x)-1) - ↑(k-2^M)) := by
         exact fun x ↦ hg (2 * x - 1)
       simp_rw[mul_sub, ← mul_assoc, ← pow_succ   ] at hg1
-      simp only [mul_one] at hg1
-      rw[Nat.cast_sub h] at hg1
-      simp only [Nat.cast_pow, Nat.cast_ofNat, sub_sub_eq_add_sub, sub_add_cancel] at hg1
-      simp_rw[walshsizing_secondhalf'] at hg1
+      simp only [mul_one, Nat.cast_sub h, Nat.cast_pow, Nat.cast_ofNat, sub_sub_eq_add_sub, sub_add_cancel, walshsizing_secondhalf'] at hg1
       rw[← hg1]
-      simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib]
-      simp_rw[hw]
+      simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib, hw]
       conv_rhs => rw[sub_eq_add_neg,← mul_neg_one, Finset.sum_mul]
       rw[← mul_neg_one,add_comm]
       refine Eq.symm (Mathlib.Tactic.LinearCombination.add_eq_eq ?_ ?_)
       · rw[ht, eq_comm ]
-        let i : ℕ → ℕ  := fun i ↦ i/2
+        set i : ℕ → ℕ  := fun i ↦ i/2 with hi
         apply Finset.sum_of_injOn i
-        · unfold InjOn
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, and_imp]
-          intro n hn hn2 m hm hm2 himp
-          simp only [i] at himp
-          set k:= n/2
-          have hk' : 2*k = n := by
-            exact Nat.two_mul_div_two_of_even hn2
-          rw[himp] at hk'
-          rw[← hk']
-          exact Nat.two_mul_div_two_of_even hm2
-        · unfold MapsTo
-          intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
-          simp only [Finset.coe_range, mem_Iio, i]
-          refine Nat.div_lt_of_lt_mul ?_
-          rw [← @Nat.pow_add_one']
-          exact hk.1
+        · norm_cast
+          apply div_of_nat_inj_even hi (s:=  Finset.range (2 ^ (M + 1)))
+        · norm_cast
+          apply div_of_nat_mapsto_even (m:= M) hi
         · simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Even l})) := by
@@ -930,25 +910,12 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           congr
           exact Eq.symm (Nat.div_two_mul_two_of_even hii)
       · rw[hs, eq_comm ]
-        let i : ℕ → ℕ  := fun i ↦ i/2
+        set i : ℕ → ℕ  := fun i ↦ i/2 with hi
         apply Finset.sum_of_injOn i
-        · unfold InjOn
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq, and_imp]
-          intro n hn hn2 m hm hm2 himp
-          simp only [i] at himp
-          set k:= n/2
-          have hk' : 2*k +1 = n := by
-            exact Nat.two_mul_div_two_add_one_of_odd hn2
-          rw[himp] at hk'
-          rw[← hk']
-          exact Nat.two_mul_div_two_add_one_of_odd hm2
-        · unfold MapsTo
-          intro k hk
-          simp only [Finset.coe_filter, Finset.mem_range, mem_setOf_eq] at hk
-          simp only [Finset.coe_range, mem_Iio, i]
-          refine Nat.div_lt_of_lt_mul ?_
-          rw [← @Nat.pow_add_one']
-          exact hk.1
+        · norm_cast
+          apply div_of_nat_inj_odd hi (s:=  Finset.range (2 ^ (M + 1)))
+        · norm_cast
+          apply div_of_nat_mapsto_odd (m:= M) hi
         · simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
@@ -1027,8 +994,7 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
     use 1
     intro x hx
     rw[walsh_zero hx.1 hx.2]
-  · have hM : dyadicInterval (-(M + 1)) (k :ℤ)  ⊆ dyadicInterval (-(↑M + 1) + 1)  (k/2) := by
-      apply dyadicin (k := -(M + 1)) (n := k)
+  · have hM := dyadicin (k := -(M + 1)) (n := k)
     simp only [neg_add_rev, Int.reduceNeg, neg_add_cancel_comm] at hM
     have hk' : k/2 < 2 ^ M := Nat.nat_repr_len_aux k 2 M (two_pos) hk
     set l := n/2 with hl
@@ -1037,8 +1003,7 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
       rw[hl', @walshoddasfun]
       simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg, Pi.add_apply]
       have hl0 : l < 2^M := by
-        rw[hl', pow_add] at hn
-        simp at hn
+        rw[hl', pow_add, pow_one] at hn
         linarith
       by_cases hk' :  k < 2^ M
       · obtain ⟨ p, hp⟩ := ih hl0 hk'
