@@ -514,17 +514,15 @@ theorem measurability_of_walsh {n : ℕ} : Measurable (walsh n):= by
 
 theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
   induction' n using Nat.evenOddRec with n ih n ih
-  · rw[walsh0asfun, MeasureTheory.integrableOn_univ, MeasureTheory.integrable_indicator_iff]
-    · simp
-    · simp
+  · rw[walsh0asfun, MeasureTheory.integrableOn_univ, MeasureTheory.integrable_indicator_iff measurableSet_Ico]
+    simp
   · rw[walshevenasfun, MeasureTheory.integrableOn_univ]
     apply MeasureTheory.Integrable.add
     · rw[ MeasureTheory.Integrable.eq_1 ]
       constructor
       · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ ?_
-        · apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
-        · simp
+        refine Measurable.indicator ?_ (by simp)
+        apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
         · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
           simp
@@ -538,11 +536,9 @@ theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ Measu
     · rw[ MeasureTheory.Integrable.eq_1 ]
       constructor
       · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ ?_
-        · apply Measurable.comp (measurability_of_walsh)
-          refine Measurable.add_const ?_ (-1)
-          exact measurable_const_mul 2
-        · simp
+        refine Measurable.indicator ?_ (by simp)
+        apply Measurable.comp (measurability_of_walsh)
+        refine Measurable.add_const (measurable_const_mul 2) (-1)
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
         · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
           simp
@@ -558,9 +554,8 @@ theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ Measu
     · rw[ MeasureTheory.Integrable.eq_1 ]
       constructor
       · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ ?_
-        · apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
-        · simp
+        refine Measurable.indicator ?_ (by simp)
+        apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
         · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
           simp
@@ -574,12 +569,10 @@ theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ Measu
     · rw[ MeasureTheory.Integrable.eq_1 ]
       constructor
       · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ ?_
+        refine Measurable.indicator ?_ (by simp)
         · simp only [measurable_neg_iff]
           apply Measurable.comp (measurability_of_walsh)
-          refine Measurable.add_const ?_ (-1)
-          exact measurable_const_mul 2
-        · simp
+          refine Measurable.add_const (measurable_const_mul 2) (-1)
       · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
         · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
           simp
@@ -599,19 +592,19 @@ theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ Measu
 
 
 theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n x := by
-  rw[← MeasureTheory.integral_indicator ]
-  · apply MeasureTheory.integral_congr_ae
-    rw[Filter.EventuallyEq ]
-    apply Filter.Eventually.of_forall
-    simp only [indicator_apply_eq_self]
-    intro x hx
-    simp_rw[Ico] at hx
-    simp only [mem_setOf_eq, Decidable.not_and_iff_or_not] at hx
-    apply walsh_zero_outside_domain
-    simp only [ge_iff_le]
-    push_neg at hx
-    exact hx
-  · exact measurableSet_Ico
+  rw[← MeasureTheory.integral_indicator measurableSet_Ico ]
+  apply MeasureTheory.integral_congr_ae
+  rw[Filter.EventuallyEq ]
+  apply Filter.Eventually.of_forall
+  simp only [indicator_apply_eq_self]
+  intro x hx
+  simp_rw[Ico] at hx
+  simp only [mem_setOf_eq, Decidable.not_and_iff_or_not] at hx
+  apply walsh_zero_outside_domain
+  simp only [ge_iff_le]
+  push_neg at hx
+  exact hx
+
 
 
 
@@ -620,48 +613,39 @@ theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n
 
 theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
   simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-  rw[← intervalIntegral.integral_of_le, ← intervalIntegral.integral_of_le]
-  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     intervalIntegral.integral_comp_mul_left, mul_zero, smul_eq_mul, one_div, mul_eq_mul_left_iff,
     inv_eq_zero, or_false]
-    ring_nf
-  · linarith
-  · linarith
+  ring_nf
+
 
 
 theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by
   simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-  rw[← intervalIntegral.integral_of_le, ← intervalIntegral.integral_of_le]
-  · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     intervalIntegral.integral_comp_mul_sub, mul_one, smul_eq_mul, one_div, mul_eq_mul_left_iff,
     inv_eq_zero, or_false]
-    ring_nf
-  · linarith
-  · linarith
+  ring_nf
+
 
 theorem intsum {n : ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
-  have : (Set.Ico 0 (1 :ℝ )) = (Set.Ico 0 0.5) ∪ (Set.Ico 0.5 1) := by
-    refine Eq.symm (Ico_union_Ico_eq_Ico ?_ ?_)
-    · linarith
-    · linarith
-  simp_rw[this]
-  rw[MeasureTheory.integral_union_ae]
-  · refine Disjoint.aedisjoint ?_
-    simp
-  · simp
+  conv_rhs => rw [← Ico_union_Ico_eq_Ico (b := 0.5) (by norm_num) (by norm_num)]
+  rw[MeasureTheory.integral_union_ae ?_ (by simp)]
   · apply MeasureTheory.IntegrableOn.mono_set (intergability)
     simp
   · apply MeasureTheory.IntegrableOn.mono_set (intergability)
     simp
+  · refine Disjoint.aedisjoint Ico_disjoint_Ico_same
+
 
 
 theorem intofodd {n : ℕ} (h : Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
   rw[← intsum]
-  set l :=n/2 with hl
-  have hl' : 2*l + 1 = n := by
-    exact Nat.two_mul_div_two_add_one_of_odd h
-  simp_rw[← hl']
-  rw[← relbetweenintodd1, ← sub_neg_eq_add, ← relbetweenintodd2, changeofint_firsthalf, changeofint_secondhalf, sub_self]
+  set l :=n/2
+  have hl' : 2*l + 1 = n := Nat.two_mul_div_two_add_one_of_odd h
+  rw[← hl', ← relbetweenintodd1, ← sub_neg_eq_add, ← relbetweenintodd2, changeofint_firsthalf, changeofint_secondhalf, sub_self]
 
 
 
@@ -692,8 +676,7 @@ theorem bcs_walsh {n : ℕ} : BoundedCompactSupport (walsh n) MeasureTheory.volu
       · right
         exact hx.le
 
-theorem bcs_walsh01 {n : ℕ} : BoundedCompactSupport (walsh n) (volume.restrict (Ico 0 1)) := by
-  refine BoundedCompactSupport.restrict bcs_walsh
+theorem bcs_walsh01 {n : ℕ} : BoundedCompactSupport (walsh n) (volume.restrict (Ico 0 1)) := BoundedCompactSupport.restrict bcs_walsh
 
 theorem walshsizing_firsthalf {n : ℕ} {x : ℝ} : 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
   by_cases h : x < 1/2
@@ -711,8 +694,7 @@ theorem walshsizing_firsthalf' {n : ℕ} {x : ℝ} : walsh n (2* x) = 1/2 *  (wa
 
 theorem walshsizing_secondhalf {n : ℕ} {x : ℝ} : 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
   by_cases h : 1/2 ≤ x
-  · rw[walsh_even_odd_right h, walsh_odd_right h]
-    simp only [neg_neg, sub_neg_eq_add]
+  · rw[walsh_even_odd_right h, walsh_odd_right h, neg_neg, sub_neg_eq_add]
     linarith
   · push_neg at h
     simp only [walsh_even_odd_left h, sub_self, mul_eq_zero, OfNat.ofNat_ne_zero, false_or]
@@ -729,9 +711,8 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
   split_ifs with h
   · rw[walsh_zero]
     · obtain ⟨ h1, h2⟩ := h
-      rw [@sub_nonneg]
+      rw [@sub_nonneg, mul_comm]
       rw[mul_inv_le_iff₀ (pow_pos (zero_lt_two) M)] at h1
-      rw[mul_comm]
       exact h1
     · rw [@sub_lt_iff_lt_add']
       obtain ⟨ h1, h2⟩ := h
@@ -751,6 +732,14 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
       linarith
 
 
+theorem sum_of_even_odd_set {s t u : Finset ℕ} (hs : s = {l ∈ u | Odd l}) (ht : t = {l ∈ u | Even l}) : s ∪ t = u := by
+  rw[hs, ht, ← @Finset.filter_or, @Finset.filter_eq_self]
+  exact fun x a ↦ Or.symm (Nat.even_or_odd x)
+
+theorem div_of_nat_inj {s t : Finset ℕ} {i : ℕ → ℕ} {n m : ℕ} (hi : i = fun n ↦ n / 2) : BijOn i s t:= by
+
+  sorry
+
 
 theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦ (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x ):= by
   simp_rw[funext_iff, ← walshsizing_zero]
@@ -762,15 +751,9 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
     simp
   · set s:= {l ∈ Finset.range (2^(M+1)) | Odd l} with hs
     set t := { l ∈ Finset.range (2^(M+1)) |  Even l}  with ht
-    --osobny lemat ze to zawsze jest prawda
-    have hp : Finset.range (2^(M+1)) = s ∪ t := by
-      rw[hs, ht]
-      ext k
-      simp only [Finset.mem_range, Finset.mem_union, Finset.mem_filter, ← and_or_left, iff_self_and]
-      exact fun a ↦ Or.symm (Nat.even_or_odd k)
     have hw (f:ℕ  → ℝ) (x : ℝ): ∑ x_1 ∈ Finset.range (2 ^ (M + 1)), f x_1 * walsh x_1 x = ∑ x_1 ∈ s, f x_1 * walsh x_1 x + ∑ x_1 ∈ t, f x_1 * walsh x_1 x := by
-      rw[← Finset.sum_union]
-      · congr
+      rw[← Finset.sum_union ]
+      · rw[sum_of_even_odd_set hs ht]
       · rw[hs, ht]
         refine Finset.disjoint_filter.mpr ?_
         intro k hk h1
