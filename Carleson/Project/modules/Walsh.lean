@@ -796,8 +796,7 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
       set f: ℕ → ℝ := (fun x ↦ g (x/2)*(1 / 2)) with hf
       use f
       intro x
-      have hg1 :  ∀ (x : ℝ), ∑ j ∈ Finset.range (2 ^ M), walsh j (2*x) * g j = walsh 0 (2 ^ M * (2*x) - ↑k) := by
-        exact fun x ↦ hg (2 * x)
+      have hg1 := fun x ↦ hg (2 * x)
       simp_rw[← mul_assoc, ← pow_succ, walshsizing_firsthalf'] at hg1
       rw[← hg1]
       simp_rw[mul_comm, ← mul_assoc, mul_add, Finset.sum_add_distrib, hw]
@@ -839,24 +838,28 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           apply div_of_nat_inj_odd hi (s:=  Finset.range (2 ^ (M + 1)))
         · norm_cast
           apply div_of_nat_mapsto_odd (m:= M) hi
-        · --obraz przez podzielenie to cos tam - lemat
-          simp only [Finset.mem_range]
+        · simp only [Finset.mem_range]
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Odd l})) := by
-            refine not_notMem.mpr ?_
-            rw[Set.SurjOn.image_eq_of_mapsTo (t := Iio  (2^M)) ]
-            · exact hl
-            · sorry
-            · norm_cast
-              apply div_of_nat_mapsto_odd (m:= M) hi
+            simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
+              not_and, and_imp, not_forall, Decidable.not_not, i]
+            use 2 * l + 1
+            simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop]
+            constructor
+            · apply Nat.add_one_le_of_lt at hl
+              rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two), mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc ] at hl
+              apply Nat.lt_of_add_one_le
+              rw[mul_comm, pow_add, pow_one, mul_comm (a:= 2^M)]
+              exact hl
+            · rw [Nat.add_div_of_dvd_right (Exists.intro l rfl)]
+              simp
           intro hl1
           exfalso
           exact this hl1
-        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i]
-          rw[hf]
+        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i, hf]
           intro i hi hii
-          simp only [one_div, mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero,
-            or_false, *]
+          simp only [mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero, or_false,
+            *]
           left
           congr
           exact Eq.symm (Nat.div_two_mul_two_add_one_of_odd hii)
@@ -868,10 +871,8 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
       set f: ℕ → ℝ := (fun x ↦ g (x/2)*(1 / 2)*((-1)^x)) with hf
       use f
       intro x
-      have hg1 :  ∀ (x : ℝ), ∑ j ∈ Finset.range (2 ^ M), walsh j ((2*x)-1) * g j = walsh 0 (2 ^ M * ((2*x)-1) - ↑(k-2^M)) := by
-        exact fun x ↦ hg (2 * x - 1)
-      simp_rw[mul_sub, ← mul_assoc, ← pow_succ   ] at hg1
-      simp only [mul_one, Nat.cast_sub h, Nat.cast_pow, Nat.cast_ofNat, sub_sub_eq_add_sub, sub_add_cancel, walshsizing_secondhalf'] at hg1
+      have hg1 :=  fun x ↦ hg (2 * x - 1)
+      simp_rw[mul_sub, ← mul_assoc, ← pow_succ , mul_one, Nat.cast_sub h, Nat.cast_pow, Nat.cast_ofNat, sub_sub_eq_add_sub, sub_add_cancel, walshsizing_secondhalf'] at hg1
       rw[← hg1]
       simp_rw[mul_comm, ← mul_assoc, mul_sub, Finset.sum_sub_distrib, hw]
       conv_rhs => rw[sub_eq_add_neg,← mul_neg_one, Finset.sum_mul]
@@ -888,24 +889,20 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           intro l hl
           have : ¬ (l ∉ i '' ↑({l ∈ Finset.range (2 ^ (M + 1)) | Even l})) := by
             simp only [Finset.coe_filter, Finset.mem_range, mem_image, mem_setOf_eq, not_exists,
-              not_and, and_imp, not_forall, Decidable.not_not, i]
-            simp only [exists_prop]
+              not_and, and_imp, not_forall, Decidable.not_not, i, exists_prop]
             use 2*l
             simp only [even_two, Even.mul_right, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
               mul_div_cancel_left₀, and_self, and_true]
-            rw[pow_add]
-            simp only [pow_one]
-            rw[mul_comm]
+            rw[pow_add, pow_one, mul_comm]
             simp only [Nat.ofNat_pos, mul_lt_mul_right]
             exact hl
           intro hl1
           exfalso
           exact this hl1
-        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i]
-          rw[hf]
+        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i, hf]
           intro i hi hii
-          simp only [one_div, *, Even.neg_one_pow ,mul_one, mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero, OfNat.ofNat_ne_zero,
-            or_false, *]
+          simp only [*, Even.neg_one_pow, mul_one, mul_eq_mul_left_iff, mul_eq_zero, inv_eq_zero,
+            OfNat.ofNat_ne_zero, or_false, *]
           left
           congr
           exact Eq.symm (Nat.div_two_mul_two_of_even hii)
@@ -925,10 +922,8 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
             simp only [even_two, Even.mul_right, Even.add_one, exists_const, exists_prop]
             constructor
             · apply Nat.add_one_le_of_lt at hl
-              rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two)] at hl
-              rw[pow_add]
-              simp only [pow_one]
-              rw[mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc ] at hl
+              rw[← Nat.mul_le_mul_left_iff (Nat.zero_lt_two), mul_comm, add_mul, add_comm, Nat.mul_two (n := 1), add_comm, ← add_assoc] at hl
+              rw[pow_add, pow_one]
               apply Nat.lt_of_add_one_le
               rw[mul_comm, mul_comm (a:= 2^M)]
               exact hl
@@ -937,11 +932,10 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           intro hl1
           exfalso
           exact this hl1
-        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i]
-          rw[hf]
+        · simp only [Finset.mem_filter, Finset.mem_range, one_div, and_imp, i, hf]
           intro i hi hii
           simp_rw[Odd.neg_one_pow hii]
-          simp only [one_div, mul_neg, mul_one, neg_mul, neg_inj, mul_eq_mul_left_iff, mul_eq_zero,
+          simp only [mul_neg, mul_one, neg_mul, neg_inj, mul_eq_mul_left_iff, mul_eq_zero,
             inv_eq_zero, OfNat.ofNat_ne_zero, or_false, *]
           left
           congr
@@ -960,8 +954,8 @@ theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
 
 
 theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by
-  apply le_trans ?_ hx1
-  simp
+  apply le_trans (by simp) hx1
+
 
 
 theorem ago2 {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by
@@ -999,11 +993,10 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
     have hk' : k/2 < 2 ^ M := Nat.nat_repr_len_aux k 2 M (two_pos) hk
     set l := n/2 with hl
     by_cases hn' : Odd n
-    · have hl' : n = 2*l + 1 := Eq.symm (Nat.two_mul_div_two_add_one_of_odd hn')
-      rw[hl', @walshoddasfun]
+    · rw[Eq.symm (Nat.two_mul_div_two_add_one_of_odd hn'), @walshoddasfun]
       simp only [Nat.cast_add, Nat.cast_one, neg_add_rev, Int.reduceNeg, Pi.add_apply]
       have hl0 : l < 2^M := by
-        rw[hl', pow_add, pow_one] at hn
+        rw[Eq.symm (Nat.two_mul_div_two_add_one_of_odd hn'), pow_add, pow_one] at hn
         linarith
       by_cases hk' :  k < 2^ M
       · obtain ⟨ p, hp⟩ := ih hl0 hk'
@@ -1049,22 +1042,20 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
         simp only [h0, not_false_eq_true, indicator_of_notMem, h01, indicator_of_mem, zero_add, neg_inj]
         simp_rw[← neg_add] at hx
         norm_cast at hx
-        have : 1 + M ≠ 0 := Ne.symm (NeZero.ne' (1 + M))
         apply xinsecondhalf' at hx
         simp only [ne_eq, Nat.add_eq_zero, one_ne_zero, false_and, not_false_eq_true, Nat.cast_add,
           Nat.cast_one, neg_add_rev, Int.reduceNeg, neg_add_cancel_right, add_tsub_cancel_left,
           forall_const] at hx
         rw[hp (2 * x - 1) ]
+        push_neg at hk'
         have : dyadicInterval (-↑M) ↑(k - 2 ^ M) = dyadicInterval (-↑M) (↑k - 2 ^ M) := by
-          push_neg at hk'
           norm_cast
         rw[this]
         exact hx
     · simp only [Nat.not_odd_iff_even] at hn'
-      have hl' : n = 2*l  := Eq.symm (Nat.two_mul_div_two_of_even hn')
-      rw[hl', @walshevenasfun]
+      rw[Eq.symm (Nat.two_mul_div_two_of_even hn'), @walshevenasfun]
       have hl0 : l < 2^M := by
-        rw[hl', pow_add, mul_comm, pow_one, mul_lt_mul_iff_of_pos_right (two_pos)] at hn
+        rw[Eq.symm (Nat.two_mul_div_two_of_even hn'), pow_add, mul_comm, pow_one, mul_lt_mul_iff_of_pos_right (two_pos)] at hn
         exact hn
       by_cases hk' :  k < 2^ M
       · obtain ⟨ p, hp⟩ := ih hl0 hk'
@@ -1089,8 +1080,7 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
         exact hp (2 * x) hx
       · have hk1 : (k - 2^M) < 2^M := by
           apply Nat.sub_lt_left_of_lt_add
-          · simp only [not_lt] at hk'
-            exact hk'
+          · exact Nat.le_of_not_lt hk'
           · rw [← Nat.two_pow_succ]
             exact hk
         obtain ⟨ p, hp⟩ := ih hl0 hk1
@@ -1110,7 +1100,6 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
           refine notMem_Ico_of_ge h01.1
         simp only [Pi.add_apply, h0, not_false_eq_true, indicator_of_notMem, h01, indicator_of_mem,
           zero_add]
-        have : 1 + M ≠ 0 := Ne.symm (NeZero.ne' (1 + M))
         apply xinsecondhalf' at hx
         simp only [ne_eq, Nat.add_eq_zero, one_ne_zero, and_false, not_false_eq_true, Nat.cast_add,
           Nat.cast_one, neg_add_rev, Int.reduceNeg, neg_add_cancel_comm, add_tsub_cancel_right,
