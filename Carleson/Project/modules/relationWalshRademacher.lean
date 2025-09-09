@@ -50,7 +50,6 @@ theorem walsh_haar_one (x : ℝ) : walsh 1 x  = haarFunction x := by
 /--
 Walsh functions expressed using products of Rademacher functions.
 -/
-
 theorem walshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : walsh n x = ∏
   m ∈ binaryRepresentationSet n, rademacherFunction m x := by
   induction' n using Nat.strong_induction_on with n ih generalizing x
