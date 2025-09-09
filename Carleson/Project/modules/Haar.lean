@@ -736,7 +736,7 @@ theorem rademacherFunction_outside {k : ℕ} {t : ℝ} (h : t < 0 ∨ t ≥ 1) :
 
 
 /--
-Rademacher function as product of sums of scaled haar functions.
+Rademacher function of `k+1`.
 -/
 theorem rademacherassumofhaar {k : ℕ} {x : ℝ} : rademacherFunction (k+1) x = 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x + 2^(- (k+1) / 2 : ℝ ) * ∑ n ∈  Finset.range (2^(k+1))\ Finset.range (2^k), haarFunctionScaled (-(k+1)) n x := by
   unfold rademacherFunction

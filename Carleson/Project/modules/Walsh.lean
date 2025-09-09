@@ -35,7 +35,7 @@ def walsh (n : ℕ) : ℝ → ℝ
 
 
 /--
-Walsh function is 0 outisde`[0,1)`.
+Walsh function is `0` outisde`[0,1)`.
 -/
 @[simp]
 theorem walsh_not_in {n : ℕ} (x : ℝ) (h : x < 0 ∨ 1 ≤ x) : walsh n x = 0 := by
@@ -45,8 +45,20 @@ theorem walsh_not_in {n : ℕ} (x : ℝ) (h : x < 0 ∨ 1 ≤ x) : walsh n x = 0
   · simp only [h, ↓reduceIte]
   simp only [h, ↓reduceIte]
 
+
 /--
-Walsh function for `n=0` is 1 on `[0,1)`.
+If walsh function does not equal `0`, we have that `x` belongs to `Ico 0 1`.
+-/
+theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
+  by_contra hc
+  simp only [Decidable.not_and_iff_or_not, not_le, not_lt] at hc
+  have : walsh n x = 0 := by
+    apply walsh_not_in x hc
+  exact h this
+
+
+/--
+Walsh function for `n=0` is `1` on `[0,1)`.
 -/
 @[simp]
 theorem walsh_zero {x : ℝ} (h1 : 0 ≤ x) (h2 : x < 1) : walsh 0 x = 1 := by
@@ -54,7 +66,7 @@ theorem walsh_zero {x : ℝ} (h1 : 0 ≤ x) (h2 : x < 1) : walsh 0 x = 1 := by
 
 
 /--
-Walsh function for `n=1` is 1 on the left half of `[0,1)`.
+Walsh function for `n=1` is `1` on the left half of `[0,1)`.
 -/
 @[simp]
 theorem walsh_one_left (x : ℝ) (h1 : 0 ≤ x) (h2 : x < 1 / 2) : walsh 1 x =  1:= by
@@ -73,10 +85,10 @@ theorem walsh_one_left (x : ℝ) (h1 : 0 ≤ x) (h2 : x < 1 / 2) : walsh 1 x =  
     · linarith
   · linarith
 
-/--
-Walsh function for `n=1` is 1 on the right half of `[0,1)`.
--/
 
+/--
+Walsh function for `n=1` is `1` on the right half of `[0,1)`.
+-/
 @[simp]
 theorem walsh_one_right (x : ℝ) (h1 : 1 / 2 ≤ x) (h2 : x < 1) : walsh 1 x = -1:= by
   simp only [walsh, one_div, one_ne_zero, ↓reduceIte, Nat.reduceDiv, ite_self, Nat.mod_succ,
@@ -96,7 +108,7 @@ theorem walsh_one_right (x : ℝ) (h1 : 1 / 2 ≤ x) (h2 : x < 1) : walsh 1 x = 
 
 
 /--
-Walsh function for n being even on the left half of `[0,1)`.
+Walsh function for even `n` on the left half of `[0,1)`.
 -/
 theorem walsh_even_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n) x = walsh n (2 * x) := by
   conv_lhs =>
@@ -121,8 +133,9 @@ theorem walsh_even_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n) x =
   · exfalso
     linarith
 
+
 /--
-Walsh function for n being even on the right half of `[0,1)`.
+Walsh function for even `n` on the right half of `[0,1)`.
 -/
 theorem walsh_even_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n) x = walsh n (2 * x - 1) := by
   conv_lhs => unfold walsh
@@ -146,14 +159,16 @@ theorem walsh_even_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n) 
   · rfl
 
 
+/--
+Lacking lemma in Basic parity lemmas.
+-/
 theorem odd_div {n : ℕ} : (2 * n + 1) / 2 = n := by
     rw[← Nat.mul_left_inj (Ne.symm (Nat.zero_ne_add_one 1)), one_add_one_eq_two, mul_comm, Nat.two_mul_odd_div_two (by simp), add_tsub_cancel_right, mul_comm]
 
+
 /--
-Walsh function for n being odd on the left half of `[0,1)`.
+Walsh function for odd `n` on the left half of `[0,1)`.
 -/
-
-
 theorem walsh_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n +1) x = walsh n (2 * x) := by
   conv_lhs =>
     unfold walsh
@@ -177,11 +192,10 @@ theorem walsh_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2 * n +1) x
     rw[odd_div]
     linarith
 
+
 /--
-Walsh function for n being odd on the right half of `[0,1)`.
+Walsh function for odd `n` on the right half of `[0,1)`.
 -/
-
-
 theorem walsh_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n + 1) x =- walsh n (2 * x - 1) := by
   conv_lhs =>
     unfold walsh
@@ -205,17 +219,23 @@ theorem walsh_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2 * n + 
 
 
 /--
-Relation between Walsh function of `2n` and `2n+1`.
+Relation between Walsh function of `2n` and `2n+1` on for `x < 1 / 2`.
 -/
 theorem walsh_even_odd_left {n : ℕ} {x : ℝ} (h2 : x < 1 / 2) : walsh (2*n) x = walsh (2*n +1) x:= by
   rw[ walsh_even_left h2, walsh_odd_left h2]
 
+
+/--
+Relation between Walsh function of `2n` and `2n+1` on for `1 / 2 ≤ x`.
+-/
 theorem walsh_even_odd_right {n : ℕ} {x : ℝ} (h1 : 1 / 2 ≤ x) : walsh (2*n) x = - walsh (2*n +1) x:= by
   rw[ walsh_even_right h1, walsh_odd_right h1]
   simp
 
 
-
+/--
+Squere of Wlash functions is `1` on `[0,1).`
+-/
 theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(walsh n x) =1 := by
   induction' n using Nat.evenOddRec with n ih n ih
   · intro x hx
@@ -249,14 +269,25 @@ theorem walsh_sqr1 (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → (walsh n x)*(
       · linarith
 
 
-
 /--
-Squere of Wlash functions is 1 on `[0,1).`
+Squere of Wlash functions is `1` on `[0,1).`
 -/
-
 theorem sqr_walsh {n : ℕ} (x : ℝ) (h1 : 0 ≤ x) (h2 : x < 1) : (walsh n x)*(walsh n x) = 1 := by
   apply walsh_sqr1
   exact And.symm ⟨h2, h1⟩
+
+
+/--
+Walsh functions have norm `1`.
+-/
+theorem walsh_norm' (n : ℕ) :  ∫ (x : ℝ) in Ico 0 1, walsh n x * walsh n x = 1:= by
+  have h1 : EqOn ((walsh n)*(walsh n)) 1  (Set.Ico 0 (1:ℝ)):= by
+    intro x hx
+    simp only [mem_Ico] at hx
+    rw [Pi.mul_apply, Pi.one_apply, sqr_walsh x hx.1 hx.2]
+  change ∫ (x : ℝ) in Ico 0 1, (walsh n * walsh n) x = 1
+  rw[MeasureTheory.setIntegral_congr_fun measurableSet_Ico h1]
+  simp
 
 
 /--
@@ -269,6 +300,7 @@ theorem walsh_in (n : ℕ) : ∀ x : ℝ, 0 ≤ x ∧  x < 1 → walsh n x ≠ 0
   rw[pow_two]
   linarith
 
+
 /--
 Walsh function is zero outside the interval `[0, 1)`.
 -/
@@ -277,26 +309,32 @@ theorem walsh_zero_outside_domain (n : ℕ) (x : ℝ) (h : x < 0 ∨ x ≥ 1) : 
 simp [h]
 
 
-
+/--
+Walsh functions take value `1` or `-1` on the interval `[0, 1)`.
+-/
 theorem walsh_values {n : ℕ} {x : ℝ} (h1 : 0 ≤ x) (h2 : x < 1) : walsh n x = 1 ∨ walsh n x =-1 := by
   rw[← sq_eq_one_iff, pow_two]
   apply sqr_walsh x h1 h2
 
 
+/--
+The absolute value of walsh function is less or equal to `1`.
+-/
+theorem walsh_leq_one {n : ℕ} {x : ℝ} : |walsh n x| ≤ 1 := by
+  by_cases h : 0 ≤ x ∧ x < 1
+  · rw [@abs_le_one_iff_mul_self_le_one, walsh_sqr1]
+    exact h
+  · rw[Mathlib.Tactic.PushNeg.not_and_or_eq, not_le, not_lt, ← ge_iff_le] at h
+    rw[walsh_zero_outside_domain n x h ]
+    simp
+
 
 /--
-Product of Wlash functions of fixed `n` and different arguments is 0 outside `[0, 1)`.
+Product of Wlash functions of fixed `n` and different arguments is `0` outside `[0, 1)`.
 -/
 theorem mul_walsh_outside {n : ℕ} (x y : ℝ) (h : x < 0 ∨ 1 ≤ x) : (walsh n x)*(walsh n y ) =  0:= by
   rw[walsh_not_in x h]
   exact zero_mul (walsh n y)
-
-
-
-theorem mul_walsh_outside' {n : ℕ} (x y : ℝ) (h : x < 0 ∨ 1 ≤ x) : (walsh n y )*(walsh n x) =  0:= by
-  rw[mul_comm, mul_walsh_outside]
-  exact  h
-
 
 
 /--
@@ -304,7 +342,6 @@ Walsh inner product definition.
 -/
 def walshInnerProduct (f : ℝ → ℝ) (n : ℕ) : ℝ :=
   ∫ x in Set.Ico 0 1, f x * walsh n x
-
 
 
 /--
@@ -319,17 +356,8 @@ theorem walshInnermul {n m : ℕ} : walshInnerProduct (walsh n) m = walshInnerPr
 
 
 /--
-Walsh functions have norm 1.
+`n`th Walsh inner product of walsh function of `n` is equal to `1`.
 -/
-theorem walsh_norm' (n : ℕ) :  ∫ (x : ℝ) in Ico 0 1, walsh n x * walsh n x = 1:= by
-  have h1 : EqOn ((walsh n)*(walsh n)) 1  (Set.Ico 0 (1:ℝ)):= by
-    intro x hx
-    simp only [mem_Ico] at hx
-    rw [Pi.mul_apply, Pi.one_apply, sqr_walsh x hx.1 hx.2]
-  change ∫ (x : ℝ) in Ico 0 1, (walsh n * walsh n) x = 1
-  rw[MeasureTheory.setIntegral_congr_fun measurableSet_Ico h1]
-  simp
-
 theorem walsh_norm (n : ℕ) :
   walshInnerProduct (walsh n) n = 1 := by
   unfold walshInnerProduct
@@ -342,17 +370,6 @@ Walsh functions are orthogonal.
 theorem walsh_ort_same {n m : ℕ} (h : m = n) : walshInnerProduct (walsh n) m  = 1 := by
   rw [h]
   apply walsh_norm
-
-
-
-
-theorem walsh_leq_one {n : ℕ} {x : ℝ} : |walsh n x| ≤ 1 := by
-  by_cases h : 0 ≤ x ∧ x < 1
-  · rw [@abs_le_one_iff_mul_self_le_one, walsh_sqr1]
-    exact h
-  · rw[Mathlib.Tactic.PushNeg.not_and_or_eq, not_le, not_lt, ← ge_iff_le] at h
-    rw[walsh_zero_outside_domain n x h ]
-    simp
 
 
 /--
@@ -372,6 +389,10 @@ theorem mul_walshInnerProduct (f g : ℝ → ℝ) (n : ℕ) (x : ℝ) :
   unfold walshInnerProduct
   simp
 
+
+/--
+Walsh inner product of sum.
+-/
 theorem add_walshInnerProduct (f g : ℝ → ℝ) (n : ℕ) :
   walshInnerProduct (fun y ↦ g y + f y) n = ∫ y in Set.Ico 0 1, (g y + f y) * walsh n y := by
   unfold walshInnerProduct
@@ -384,6 +405,7 @@ Definition of Walsh Fourier partial sum.
 def walshFourierPartialSum (f : ℝ → ℝ) (N : ℕ) : ℝ → ℝ :=
  fun x => ∑ n ∈ Finset.range (N + 1), (walshInnerProduct f n) * walsh n x
 
+
 /--
 Definition of Walsh Fourier Series.
 -/
@@ -391,9 +413,9 @@ def walshFourierSeries (f : ℝ → ℝ) : ℝ → ℝ :=
   fun x => tsum (fun N => walshFourierPartialSum f N x)
 
 
-
-
-
+/--
+Integral of walsh function of even `n` on `Ico 0 0.5`.
+-/
 theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n) x := by
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
   apply Filter.Eventually.of_forall
@@ -403,6 +425,9 @@ theorem relbetweeninteven1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) =
   rw[walsh_even_left hz.2]
 
 
+/--
+Integral of walsh function of even `n` on `Ico 0.5 1`.
+-/
 theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = ∫ x in Set.Ico 0.5 1, walsh (2*n) x := by
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
   apply Filter.Eventually.of_forall
@@ -411,6 +436,10 @@ theorem relbetweeninteven2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) 
   ring_nf at hz
   rw[walsh_even_right hz.1]
 
+
+/--
+Integral of walsh function of odd `n` on `Ico 0 0.5`.
+-/
 theorem relbetweenintodd1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = ∫ x in Set.Ico 0 0.5, walsh (2*n +1) x := by
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
   apply Filter.Eventually.of_forall
@@ -419,6 +448,10 @@ theorem relbetweenintodd1 {n : ℕ} : ∫ x in Set.Ico 0 0.5 ,  walsh n (2*x) = 
   ring_nf at hz
   rw[walsh_odd_left hz.2]
 
+
+/--
+Integral of walsh function of odd `n` on `Ico 0.5 1`.
+-/
 theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = - ∫ x in Set.Ico 0.5 1, walsh (2*n+1) x := by
   rw[← MeasureTheory.integral_neg]
   refine Eq.symm (MeasureTheory.setIntegral_congr_ae₀ (by simp) ?_)
@@ -430,6 +463,9 @@ theorem relbetweenintodd2 {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) =
   simp
 
 
+/--
+Walsh function of `n = 0` written using indicator function.
+-/
 theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun _ ↦ 1 : ℝ → ℝ ) := by
   ext x
   rw[indicator]
@@ -442,6 +478,10 @@ theorem walsh0asfun : walsh 0 = Set.indicator (Set.Ico 0 1) (fun _ ↦ 1 : ℝ �
     rw[walsh_zero_outside_domain]
     exact h1
 
+
+/--
+Walsh function of even `n` written using indicator function.
+-/
 theorem walshevenasfun {n : ℕ} : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ walsh n (2*x -1) : ℝ → ℝ )  := by
   ext x
   rw[Pi.add_apply, indicator, indicator]
@@ -469,6 +509,10 @@ theorem walshevenasfun {n : ℕ} : walsh (2*n)  = Set.indicator (Set.Ico 0 0.5) 
     have h1' : 1 ≤ x := h3 h0_5
     linarith
 
+
+/--
+Walsh function of odd `n` written using indicator function.
+-/
 theorem walshoddasfun {n : ℕ} : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5) (fun x ↦ walsh n (2*x) : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun x ↦ - walsh n (2*x -1) : ℝ → ℝ )  := by
   ext x
   rw[Pi.add_apply, indicator, indicator]
@@ -496,6 +540,10 @@ theorem walshoddasfun {n : ℕ} : walsh (2*n +1)  = Set.indicator (Set.Ico 0 0.5
     have h1' : 1 ≤ x := h3 h0_5
     linarith
 
+
+/--
+Walsh function is measurable.
+-/
 theorem measurability_of_walsh {n : ℕ} : Measurable (walsh n):= by
   induction' n using Nat.evenOddRec with n ih n ih
   · rw[walsh0asfun]
@@ -510,151 +558,9 @@ theorem measurability_of_walsh {n : ℕ} : Measurable (walsh n):= by
     · apply Measurable.indicator (by fun_prop) (by simp)
 
 
-
-
-theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
-  induction' n using Nat.evenOddRec with n ih n ih
-  · rw[walsh0asfun, MeasureTheory.integrableOn_univ, MeasureTheory.integrable_indicator_iff measurableSet_Ico]
-    simp
-  · rw[walshevenasfun, MeasureTheory.integrableOn_univ]
-    apply MeasureTheory.Integrable.add
-    · rw[ MeasureTheory.Integrable.eq_1 ]
-      constructor
-      · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ (by simp)
-        apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
-      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
-        · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
-          simp
-        · apply Filter.Eventually.of_forall
-          simp only [Real.norm_eq_abs]
-          intro x
-          simp only [indicator, mem_Ico, Pi.one_apply]
-          split_ifs with h
-          · apply walsh_leq_one (n := n) (x := (2*x))
-          · simp
-    · rw[ MeasureTheory.Integrable.eq_1 ]
-      constructor
-      · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ (by simp)
-        apply Measurable.comp (measurability_of_walsh)
-        refine Measurable.add_const (measurable_const_mul 2) (-1)
-      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
-        · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
-          simp
-        · apply Filter.Eventually.of_forall
-          simp only [Real.norm_eq_abs]
-          intro x
-          simp only [indicator, mem_Ico, Pi.one_apply]
-          split_ifs with h
-          · apply walsh_leq_one (n := n) (x := (2*x- 1))
-          · simp
-  · rw[walshoddasfun, MeasureTheory.integrableOn_univ]
-    apply MeasureTheory.Integrable.add
-    · rw[ MeasureTheory.Integrable.eq_1 ]
-      constructor
-      · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ (by simp)
-        apply Measurable.comp (measurability_of_walsh) (measurable_const_mul 2)
-      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0 0.5).indicator 1)
-        · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
-          simp
-        · apply Filter.Eventually.of_forall
-          simp only [Real.norm_eq_abs]
-          intro x
-          simp only [indicator, mem_Ico, Pi.one_apply]
-          split_ifs with h
-          · apply walsh_leq_one (n := n) (x := (2*x))
-          · simp
-    · rw[ MeasureTheory.Integrable.eq_1 ]
-      constructor
-      · apply Measurable.aestronglyMeasurable
-        refine Measurable.indicator ?_ (by simp)
-        · simp only [measurable_neg_iff]
-          apply Measurable.comp (measurability_of_walsh)
-          refine Measurable.add_const (measurable_const_mul 2) (-1)
-      · apply MeasureTheory.HasFiniteIntegral.mono' (g:= (Ico 0.5 1).indicator 1)
-        · simp_rw[MeasureTheory.HasFiniteIntegral,enorm_indicator_eq_indicator_enorm]
-          simp
-        · apply Filter.Eventually.of_forall
-          simp only [Real.norm_eq_abs]
-          intro x
-          simp only [indicator, mem_Ico, Pi.one_apply]
-          split_ifs with h
-          · simp only [abs_neg]
-            apply walsh_leq_one (n := n) (x := (2*x- 1))
-          · simp
-
-
-
-
-
-
-
-theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n x := by
-  rw[← MeasureTheory.integral_indicator measurableSet_Ico ]
-  apply MeasureTheory.integral_congr_ae
-  rw[Filter.EventuallyEq ]
-  apply Filter.Eventually.of_forall
-  simp only [indicator_apply_eq_self]
-  intro x hx
-  simp_rw[Ico] at hx
-  simp only [mem_setOf_eq, Decidable.not_and_iff_or_not] at hx
-  apply walsh_zero_outside_domain
-  simp only [ge_iff_le]
-  push_neg at hx
-  exact hx
-
-
-
-
-
-
-
-theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
-  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-    intervalIntegral.integral_comp_mul_left, mul_zero, smul_eq_mul, one_div, mul_eq_mul_left_iff,
-    inv_eq_zero, or_false]
-  ring_nf
-
-
-
-theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by
-  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
-  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-    intervalIntegral.integral_comp_mul_sub, mul_one, smul_eq_mul, one_div, mul_eq_mul_left_iff,
-    inv_eq_zero, or_false]
-  ring_nf
-
-
-theorem intsum {n : ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
-  conv_rhs => rw [← Ico_union_Ico_eq_Ico (b := 0.5) (by norm_num) (by norm_num)]
-  rw[MeasureTheory.integral_union_ae ?_ (by simp)]
-  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
-    simp
-  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
-    simp
-  · refine Disjoint.aedisjoint Ico_disjoint_Ico_same
-
-
-
-theorem intofodd {n : ℕ} (h : Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
-  rw[← intsum]
-  set l :=n/2
-  have hl' : 2*l + 1 = n := Nat.two_mul_div_two_add_one_of_odd h
-  rw[← hl', ← relbetweenintodd1, ← sub_neg_eq_add, ← relbetweenintodd2, changeofint_firsthalf, changeofint_secondhalf, sub_self]
-
-
-
-theorem intofeven {n k : ℕ} (hk : 2 * k = n) : ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
-  rw[← intsum, ← hk, ← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf, ← mul_add, Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))]
-  simp
-
-
-
+/--
+Walsh function is bounded compactly supported measurable function.
+-/
 theorem bcs_walsh {n : ℕ} : BoundedCompactSupport (walsh n) MeasureTheory.volume := by
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
@@ -676,8 +582,96 @@ theorem bcs_walsh {n : ℕ} : BoundedCompactSupport (walsh n) MeasureTheory.volu
       · right
         exact hx.le
 
+
+/--
+Walsh function is bounded compactly supported measurable function in regards of canonical measure restricted to `Ico 0 1`.
+-/
 theorem bcs_walsh01 {n : ℕ} : BoundedCompactSupport (walsh n) (volume.restrict (Ico 0 1)) := BoundedCompactSupport.restrict bcs_walsh
 
+
+/--
+Walsh function is integrable.
+-/
+theorem intergability {n : ℕ} :MeasureTheory.IntegrableOn (walsh n) univ MeasureTheory.volume := by
+  apply BoundedCompactSupport.integrable (BoundedCompactSupport.restrict bcs_walsh)
+
+
+/--
+Integral over `Ico 0 1` of walsh function equals it's integral over `ℝ`.
+-/
+theorem changeofint {n : ℕ} : ∫ x in Set.Ico 0 1, walsh n x = ∫ x, walsh n x := by
+  rw[← MeasureTheory.integral_indicator measurableSet_Ico ]
+  apply MeasureTheory.integral_congr_ae
+  rw[Filter.EventuallyEq ]
+  apply Filter.Eventually.of_forall
+  simp only [indicator_apply_eq_self]
+  intro x hx
+  simp_rw[Ico] at hx
+  simp only [mem_setOf_eq, Decidable.not_and_iff_or_not] at hx
+  apply walsh_zero_outside_domain
+  simp only [ge_iff_le]
+  push_neg at hx
+  exact hx
+
+
+/--
+Change of variables for walsh function on the left half of `Ico 0 1`.
+-/
+theorem changeofint_firsthalf {n : ℕ} : ∫ x in Set.Ico 0 0.5,  walsh n (2*x) = (1/2) *  ∫ x in Set.Ico 0 1, walsh n x := by
+  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    intervalIntegral.integral_comp_mul_left, mul_zero, smul_eq_mul, one_div, mul_eq_mul_left_iff,
+    inv_eq_zero, or_false]
+  ring_nf
+
+
+/--
+Change of variables for walsh function on the right half of `Ico 0 1`.
+-/
+theorem changeofint_secondhalf {n : ℕ} : ∫ x in Set.Ico 0.5 1,  walsh n (2*x-1) = (1/2) * ∫ x in Set.Ico 0 1, walsh n x := by
+  simp_rw [@MeasureTheory.restrict_Ico_eq_restrict_Ioc]
+  rw[← intervalIntegral.integral_of_le (by norm_num), ← intervalIntegral.integral_of_le (by norm_num)]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    intervalIntegral.integral_comp_mul_sub, mul_one, smul_eq_mul, one_div, mul_eq_mul_left_iff,
+    inv_eq_zero, or_false]
+  ring_nf
+
+
+/--
+Splitting the integral of a walsh function over `Ico 0 1`.
+-/
+theorem intsum {n : ℕ} : (∫ x in Set.Ico  0 0.5,  walsh n x) + ∫ x in Set.Ico 0.5 1,  walsh n x = ∫ x in Set.Ico 0 1, walsh n x := by
+  conv_rhs => rw [← Ico_union_Ico_eq_Ico (b := 0.5) (by norm_num) (by norm_num)]
+  rw[MeasureTheory.integral_union_ae ?_ (by simp)]
+  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
+    simp
+  · apply MeasureTheory.IntegrableOn.mono_set (intergability)
+    simp
+  · refine Disjoint.aedisjoint Ico_disjoint_Ico_same
+
+
+/--
+Integral of walsh function of odd `n` equals `0`.
+-/
+theorem intofodd {n : ℕ} (h : Odd n) : ∫ x in Set.Ico 0 1,  walsh n x = 0 := by
+  rw[← intsum]
+  set l :=n/2
+  have hl' : 2*l + 1 = n := Nat.two_mul_div_two_add_one_of_odd h
+  rw[← hl', ← relbetweenintodd1, ← sub_neg_eq_add, ← relbetweenintodd2, changeofint_firsthalf, changeofint_secondhalf, sub_self]
+
+
+/--
+Relation between integrals of walsh funtions of `n` and `2n`.
+-/
+theorem intofeven {n k : ℕ} (hk : 2 * k = n) : ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
+  rw[← intsum, ← hk, ← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf, ← mul_add, Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))]
+  simp
+
+
+/--
+Splitting walsh function of `2x`.
+-/
 theorem walshsizing_firsthalf {n : ℕ} {x : ℝ} : 2* walsh n (2* x) = walsh (2*n) x + walsh (2* n + 1) x := by
   by_cases h : x < 1/2
   · rw[walsh_even_odd_left h, walsh_odd_left h, two_mul]
@@ -692,6 +686,10 @@ theorem walshsizing_firsthalf' {n : ℕ} {x : ℝ} : walsh n (2* x) = 1/2 *  (wa
   rw [← @walshsizing_firsthalf]
   simp
 
+
+/--
+Splitting walsh function of `2x-1`.
+-/
 theorem walshsizing_secondhalf {n : ℕ} {x : ℝ} : 2* walsh n (2*x -1) = walsh (2*n) x - walsh (2* n + 1) x := by
   by_cases h : 1/2 ≤ x
   · rw[walsh_even_odd_right h, walsh_odd_right h, neg_neg, sub_neg_eq_add]
@@ -702,10 +700,15 @@ theorem walshsizing_secondhalf {n : ℕ} {x : ℝ} : 2* walsh n (2*x -1) = walsh
     left
     linarith
 
+
 theorem walshsizing_secondhalf' {n : ℕ} {x : ℝ} : walsh n (2*x -1) = 1/2 *(walsh (2*n) x - walsh (2* n + 1) x ):= by
   rw [← @walshsizing_secondhalf]
   simp
 
+
+/--
+Walsh function of `n = 0` written using indicator function on dyadic interval.
+-/
 theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x := by
   simp only [indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.one_apply]
   split_ifs with h
@@ -732,10 +735,17 @@ theorem walshsizing_zero {M k : ℕ} {x : ℝ} : walsh 0 (2^M* x - k) = (Ico (k 
       linarith
 
 
+/--
+Subsets of natural number can be written as a sum of sets of their odd and even elements.
+-/
 theorem sum_of_even_odd_set {s t u : Finset ℕ} (hs : s = {l ∈ u | Odd l}) (ht : t = {l ∈ u | Even l}) : s ∪ t = u := by
   rw[hs, ht, ← @Finset.filter_or, @Finset.filter_eq_self]
   exact fun x a ↦ Or.symm (Nat.even_or_odd x)
 
+
+/--
+Division by `2` is an injection of subsets of `ℕ` containing only even numbers.
+-/
 theorem div_of_nat_inj_even {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Even l}) := by
   unfold InjOn
   simp only [mem_setOf_eq, and_imp]
@@ -746,6 +756,9 @@ theorem div_of_nat_inj_even {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n �
   exact Nat.two_mul_div_two_of_even hm2
 
 
+/--
+Division by `2` sends all points of of subsets of `ℕ` containing only even numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
+-/
 theorem div_of_nat_mapsto_even {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Even l}) (Iio  (2^m)) := by
   unfold MapsTo
   intro k hk
@@ -754,7 +767,9 @@ theorem div_of_nat_mapsto_even {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n
   refine Nat.div_lt_of_lt_mul hk.1
 
 
-
+/--
+Division by `2` is an injection of subsets of `ℕ` containing only odd numbers.
+-/
 theorem div_of_nat_inj_odd {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Odd l}) := by
   unfold InjOn
   simp only [mem_setOf_eq, and_imp]
@@ -765,6 +780,9 @@ theorem div_of_nat_inj_odd {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n �
   exact Nat.two_mul_div_two_add_one_of_odd hm2
 
 
+/--
+Division by `2` sends all points of of subsets of `ℕ` containing only odd numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
+-/
 theorem div_of_nat_mapsto_odd {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Odd l}) (Iio  (2^m)) := by
   unfold MapsTo
   intro k hk
@@ -773,6 +791,9 @@ theorem div_of_nat_mapsto_odd {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n 
   refine Nat.div_lt_of_lt_mul hk.1
 
 
+/--
+Existence of coefficients such that walsh functions expend function given by indicator on dyadic interval.
+-/
 theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦ (Ico (k * 2 ^ (-M :ℤ )  : ℝ ) ((k+1)* 2 ^ (-M : ℤ )  : ℝ ) ).indicator 1 x ):= by
   simp_rw[funext_iff, ← walshsizing_zero]
   induction' M with M ih generalizing k
@@ -942,44 +963,9 @@ theorem walshindicator' {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fu
           exact Eq.symm (Nat.div_two_mul_two_add_one_of_odd hii)
 
 
-
-
-theorem domain {n : ℕ} {x : ℝ} (h : ¬walsh n x = 0) : 0≤ x ∧ x <1 := by
-  by_contra hc
-  simp only [Decidable.not_and_iff_or_not, not_le, not_lt] at hc
-  have : walsh n x = 0 := by
-    apply walsh_not_in x hc
-  exact h this
-
-
-
-theorem ago1 {M k : ℕ} {x : ℝ} (hx1 : 2 ^ (-M : ℤ) * k ≤ x) : 0 ≤ x := by
-  apply le_trans (by simp) hx1
-
-
-
-theorem ago2 {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx1 : x < 2 ^ (-M : ℤ) * (k + 1)) : x<1 := by
-  apply lt_of_lt_of_le hx1
-  rw[Nat.lt_iff_add_one_le] at hk
-  simp only [zpow_neg, zpow_natCast]
-  rw[inv_mul_le_one₀]
-  · norm_cast
-  · simp
-
-theorem ago {M k : ℕ} {x : ℝ} (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) : 0 ≤ x ∧ x<1 := by
-  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
-  obtain ⟨ hx1 , hx2 ⟩ := hx
-  constructor
-  · apply ago1 (M := M) (k := k)
-    simp only [zpow_neg, zpow_natCast]
-    exact hx1
-  · apply ago2 (M := M) (k := k) hk
-    simp only [zpow_neg, zpow_natCast]
-    exact hx2
-
-
-
-
+/--
+For dyadic interval of non positive `-M` there exist constant such that walsh function of `n<2^M` is equal to it everywhere on that interval.
+-/
 theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ , ∀ x ∈  dyadicInterval (-M : ℤ) k, walsh n x = c := by
   induction' M with M ih generalizing k n
   · simp only [pow_zero, Nat.lt_one_iff] at hn
@@ -1111,7 +1097,9 @@ theorem walshonint {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∃ c :ℝ 
         rw[this]
         exact hx
 
-
+/--
+Walsh functions of fixed `n<2^M` are equal to each other on dyadic interval of non positive `-M`.
+-/
 theorem walshonintnext {M n k : ℕ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) : ∀ x ∈  dyadicInterval (-M : ℤ) k, ∀ y ∈  dyadicInterval (-M : ℤ) k , walsh n x = walsh n y := by
   intro x hx y hy
   obtain ⟨c, hc⟩ := walshonint hn hk

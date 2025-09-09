@@ -518,4 +518,33 @@ theorem dyadic_intervals_disjoint_or_contained (k k' n n' : ℤ) :
   left
   apply dyadic_intervals_relation h_lt
 
+
+theorem ago1 {k n : ℕ} {x : ℝ} (hx1 : 2 ^ (-k : ℤ) * n ≤ x) : 0 ≤ x := by
+  apply le_trans (by simp) hx1
+
+
+theorem ago2 {k n : ℕ} {x : ℝ} (hk : n < 2 ^ k) (hx1 : x < 2 ^ (-k : ℤ) * (n + 1)) : x<1 := by
+  apply lt_of_lt_of_le hx1
+  rw[Nat.lt_iff_add_one_le] at hk
+  simp only [zpow_neg, zpow_natCast]
+  rw[inv_mul_le_one₀]
+  · norm_cast
+  · simp
+
+
+/--
+If `x` belongs to dyadic interval of non positive `-k` and `n<2^k` then it ic contained in `Ico 0 1`.
+-/
+theorem ago {k n : ℕ} {x : ℝ} (hk : n < 2 ^ k) (hx : x ∈ dyadicInterval (-k : ℤ) n) : 0 ≤ x ∧ x<1 := by
+  simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
+  obtain ⟨ hx1 , hx2 ⟩ := hx
+  constructor
+  · apply ago1 (k := k) (n := n)
+    simp only [zpow_neg, zpow_natCast]
+    exact hx1
+  · apply ago2 (k := k) (n := n) hk
+    simp only [zpow_neg, zpow_natCast]
+    exact hx2
+
+
 end DyadicStructures

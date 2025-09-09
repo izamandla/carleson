@@ -272,7 +272,7 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ 
     · simp only [Finset.mem_range]
       exact hn
   simp only [ge_iff_le, not_or, not_lt, not_le] at hx
-  obtain ⟨  p, hp1, hp2 ⟩  := (extdiin01 hx.1 hx.2  (M := M ) (x := x))
+  obtain ⟨  p, hp1, hp2 ⟩  := (extdiin01 hx.1 hx.2  (k := M ) (x := x))
   rw[ayayayhelp (k:= p) hp1 hp2 ]
   simp only [Finset.mem_range] at hp1
   rw[aboutwalsh hn hp1 hp2]
