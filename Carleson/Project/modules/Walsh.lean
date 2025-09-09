@@ -1,4 +1,3 @@
-
 import Carleson.ToMathlib.BoundedCompactSupport
 import Carleson.Project.modules.DyadicStructures
 import Mathlib.Algebra.Order.Ring.Star
