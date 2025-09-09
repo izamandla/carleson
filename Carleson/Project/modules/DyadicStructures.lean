@@ -6,51 +6,72 @@ noncomputable section
 /-!
 # Dyadic Structures
 
-We define dyadic intervals and dyadic rectangles, along with various lemmas about their properties (disjointness, covering the reals, etc.).
+We define dyadic intervals along with various lemmas about their properties (disjointness, covering the reals, etc.).
 -/
 
 namespace DyadicStructures
 
-/-- Definition 1.1: Dyadic Interval and dyadic rectangle
-  A dyadic interval is defined as `[2^k * n, 2^k * (n + 1))`. -/
+/--
+A dyadic interval is defined as `[2^k * n, 2^k * (n + 1))`.
+-/
 def dyadicInterval (k n : ℤ) : Set ℝ :=
   { x | (2^k : ℝ) * n ≤ x ∧ x < (2^k : ℝ) * (n + 1) }
 
 
-/-- Special case: the dyadic interval with `k,n = 0` is `[0, 1)`. -/
+/--
+Special case: the dyadic interval with `k,n = 0` is `[0, 1)`.
+-/
 @[simp]
 theorem zero_dyadicInterval : dyadicInterval 0 0 = Set.Ico 0 1 := by
   ext x
   simp [dyadicInterval]
 
-/-- General case: writting dyadic as Ico. -/
+
+/--
+Dyadic interval expressed as Ico.
+-/
 theorem intervalform_dyadicInterval {k n : ℤ} : dyadicInterval k n = Set.Ico ((2^k: ℝ) *n) ((2^k : ℝ )* (n + 1)) := by
   ext x
   simp [dyadicInterval]
 
-/-- Equivalent definition using interval -/
+
+/--
+Relationship between membership to dyadic interval and to `Ico`.
+-/
 @[simp]
 theorem eqdef1 (k n : ℤ) (x : ℝ) : x ∈ dyadicInterval k n  ↔ x ∈ Set.Ico ((2^k: ℝ) *n) ((2^k : ℝ )* (n + 1))   := by
   rw[intervalform_dyadicInterval]
 
 
-/-- Equivalent definition using inequalities -/
+/--
+Relationship between membership to dyadic interval and inequalities about `x`.
+-/
 @[simp]
 theorem eqdef2 (k n : ℤ) (x : ℝ) : x ∈ dyadicInterval k n  ↔ ((2^k: ℝ) *n) ≤ x ∧ x< ((2^k : ℝ )* (n + 1))  := by
   simp
 
+
+/--
+Relationship between membership to dyadic interval and inequalities about `x`.
+-/
 @[simp]
 theorem eqdef2' (k n : ℤ) (x : ℝ) : x ∈ dyadicInterval k n  ↔ n≤ x*2^(-k) ∧ x *2^(-k)<  (n + 1)  := by
   simp only [eqdef1, mem_Ico, zpow_neg]
   refine and_congr (Iff.symm (le_mul_inv_iff₀' (zpow_pos (zero_lt_two) k))) (Iff.symm (mul_inv_lt_iff₀' (zpow_pos (zero_lt_two) k)))
 
+
+/--
+Relationship between membership to dyadic interval and inequalities about `x`.
+-/
 @[simp]
 theorem eqdef2'' (k n : ℤ) (x : ℝ) : x ∈ dyadicInterval k n  ↔ 0≤ x*2^(-k)-n ∧ x *2^(-k) - n<  1  := by
   simp only [eqdef2', zpow_neg, sub_nonneg]
   refine and_congr_right' (Iff.symm sub_lt_iff_lt_add')
 
 
-/-- Special case: the dyadic interval with `k = 0` is `[n, n+1)`. -/
+/--
+Special case: the dyadic interval with `k = 0` is `[n, n+1)`.
+-/
 @[simp]
 theorem dyadicInterval_of_k_zero (n : ℤ) :
     dyadicInterval 0 n = Set.Ico (n : ℝ) (n+1) := by
@@ -58,7 +79,9 @@ theorem dyadicInterval_of_k_zero (n : ℤ) :
   simp [Set.Ico, Set.mem_setOf_eq, dyadicInterval, zpow_zero]
 
 
-/-- Special case: the dyadic interval with `k = -1` is `[n/2, (n+1)/2)`. -/
+/--
+Special case: the dyadic interval with `k = -1` is `[n/2, (n+1)/2)`.
+-/
 @[simp]
 theorem dyadicInterval_of_k_negone (n : ℤ) :
     dyadicInterval (-1) n = Set.Ico (n/2 : ℝ ) ((n + 1)/2) := by
@@ -66,14 +89,20 @@ theorem dyadicInterval_of_k_negone (n : ℤ) :
   simp [Set.Ico, Set.mem_setOf_eq, dyadicInterval]
   ring_nf
 
-/-- Special case: the dyadic interval with `n = 0` is `[0, 2^k)`. -/
+
+/--
+Special case: the dyadic interval with `n = 0` is `[0, 2^k)`.
+-/
 @[simp]
 theorem dyadicInterval_of_n_zero (k : ℤ) :
     dyadicInterval k 0 = Set.Ico (0 : ℝ) (2^k : ℝ) := by
   ext x
   simp [dyadicInterval]
 
-/-- Special case: the dyadic interval with `n = 1` is `[2^k, 2^(k+1))`. -/
+
+/--
+Special case: the dyadic interval with `n = 1` is `[2^k, 2^(k+1))`.
+-/
 @[simp]
 theorem dyadicInterval_of_n_one (k : ℤ) :
     dyadicInterval k 1 = Set.Ico (2^k : ℝ) (2^(k+1) : ℝ) := by
@@ -82,16 +111,18 @@ theorem dyadicInterval_of_n_one (k : ℤ) :
   exact Iff.symm mem_Ico
 
 
-/-
-Points inside the same dyadic interval at scale `k` are within `(2^k : ℝ)` of each other.
+/--
+Integer version of `ENNReal.ofReal_pow`.
 -/
-
 theorem ofReal_zpow {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≠ 0) (n : ℤ) :
     ENNReal.ofReal (p ^ n) = ENNReal.ofReal p ^ n := by
   rw [ ENNReal.ofReal_eq_coe_nnreal hp, ←  ENNReal.coe_zpow, ←  ENNReal.ofReal_coe_nnreal, NNReal.coe_zpow, NNReal.coe_mk]
   exact NNReal.coe_ne_zero.mp hp1
 
 
+/--
+Dyadic interval has Lebesgue meausre equal to `2^k`.
+-/
 theorem dyadicInterval_measure (k n : ℤ) : MeasureTheory.volume (dyadicInterval k n) = 2^k  := by
   rw[intervalform_dyadicInterval, Real.volume_Ico]
   ring_nf
@@ -99,8 +130,9 @@ theorem dyadicInterval_measure (k n : ℤ) : MeasureTheory.volume (dyadicInterva
   simp
 
 
-
-
+/--
+Definition of dyadic interval rewritten using `2^(k-1)`.
+-/
 theorem scale_up {k n : ℤ} : dyadicInterval k n = { x | (2^(k-1) : ℝ)*(2*n) ≤ x ∧ x < (2^(k-1) : ℝ)*(2*n+2) } := by
   have h : (2^(k-1) : ℝ)*2 = 2^k := by
     rw[← zpow_add_one₀ two_ne_zero (k-1), sub_add_cancel]
@@ -110,10 +142,10 @@ theorem scale_up {k n : ℤ} : dyadicInterval k n = { x | (2^(k-1) : ℝ)*(2*n) 
   apply and_congr_right'
   rw[mul_add, mul_one]
 
-/--
-A dyadic interval at scale `k` can be expressed as a union of two smaller intervals of the scale `k - 1`.
--/
 
+/--
+A dyadic interval with scale `k` can be expressed as a union of two smaller dyadic intervals of the scale `k - 1`.
+-/
 theorem dyadicInterval_split (k n : ℤ) :
   dyadicInterval k n = dyadicInterval (k - 1) (2 * n) ∪ dyadicInterval (k - 1) (2 * n + 1) := by
   rw[scale_up, intervalform_dyadicInterval, intervalform_dyadicInterval]
@@ -132,13 +164,19 @@ theorem dyadicInterval_split (k n : ℤ) :
     apply zpow_pos
     simp
 
+
+/--
+A dyadic interval with scale `k+1` can be expressed as a union of two smaller dyadic intervals of the scale `k `.
+-/
 theorem dyadicInterval_split' (k n : ℤ) :
   dyadicInterval (k+1) n = dyadicInterval k (2 * n) ∪ dyadicInterval k (2 * n + 1) := by
   rw[dyadicInterval_split (k+1) n]
   simp
 
 
-
+/--
+Dyadic interval of given `k` and `n` is contained in dyadic interval of `k+1` and `n/2`.
+-/
 theorem dyadicin (k n : ℤ) : dyadicInterval k n ⊆ dyadicInterval (k+1) (n/2) := by
   rw[ dyadicInterval_split (k+1)]
   simp only [add_sub_cancel_right]
@@ -150,51 +188,61 @@ theorem dyadicin (k n : ℤ) : dyadicInterval k n ⊆ dyadicInterval (k+1) (n/2)
     simp
 
 
-
-theorem natdyadicin0' {M k : ℕ} (h : k < 2 ^ M) : dyadicInterval (-M : ℤ) k ⊆ Set.Ico 0 1 := by
+/--
+Dyadic interval of given `k` and `n<2^k` is contained in `Ico 0 1`.
+-/
+theorem natdyadicin0' {k n : ℕ} (h : n < 2 ^ k) : dyadicInterval (-k : ℤ) n ⊆ Set.Ico 0 1 := by
   simp only [dyadicInterval, zpow_neg]
   rw [@Ico_def]
-  refine Ico_subset_Ico ?_ ?_
-  · simp
-  · refine inv_mul_le_one_of_le₀ ?_ ?_
-    · simp
-      rw[Nat.lt_iff_add_one_le] at h
-      norm_cast
-    · simp
+  refine Ico_subset_Ico (by simp) ?_
+  refine inv_mul_le_one_of_le₀ ?_ (by simp)
+  simp
+  rw[Nat.lt_iff_add_one_le] at h
+  norm_cast
 
 
-theorem natdyadicin0 {M k : ℕ} (h : k < 2 ^ M) : dyadicInterval (-M : ℤ) k ⊆ dyadicInterval 0 0 := by
+/--
+Dyadic interval of given negative `k` and `n<2^k` is contained in dyadic interval of `k:=0` `n:=0`.
+-/
+theorem natdyadicin0 {k n : ℕ} (h : n < 2 ^ k) : dyadicInterval (-k : ℤ) n ⊆ dyadicInterval 0 0 := by
   rw[zero_dyadicInterval]
   apply natdyadicin0' h
 
 
-theorem infirsthalf {M k : ℕ} (hM : M ≠ 0) : dyadicInterval (-M :ℤ) k ⊆ Ico 0 0.5 ↔ k < 2 ^ (M - 1 ) := by
-  simp at hM
+/--
+Dyadic interval of given negative `-k` is contained in `Ico 0 0.5` if and only if `n<2^(k-1)`
+-/
+
+theorem infirsthalf {k n : ℕ} (hk : k ≠ 0) : dyadicInterval (-k :ℤ) n ⊆ Ico 0 0.5 ↔ n < 2 ^ (k - 1 ) := by
+  simp at hk
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast, inv_pos, Nat.ofNat_pos, pow_pos, mul_nonneg_iff_of_pos_left, Nat.cast_nonneg, true_and]
-    rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
+    rw[inv_mul_le_iff₀ (pow_pos (two_pos) k)]
     ring_nf
-    rw[one_div, ← Nat.add_one_le_iff , add_comm, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hM 2))]
+    rw[one_div, ← Nat.add_one_le_iff , add_comm, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hk 2))]
     norm_cast
   · simp
 
 
-theorem insecondhalf {M k : ℕ} (hk : k < 2 ^ M) (hM : M ≠ 0) : dyadicInterval (-M :ℤ) k ⊆ Ico 0.5 1 ↔ 2 ^ (M - 1) ≤ k:= by
-  simp at hM
+/--
+Dyadic interval of given negative `-k` and `n<2^(k-1)` is contained in `Ico 0.5 1` if and only if `2^(k-1)≤ n`.
+-/
+theorem insecondhalf {k n : ℕ} (hn : n < 2 ^ k) (hk : k ≠ 0) : dyadicInterval (-k :ℤ) n ⊆ Ico 0.5 1 ↔ 2 ^ (k - 1) ≤ n:= by
+  simp at hk
   rw[intervalform_dyadicInterval, Set.Ico_subset_Ico_iff]
   · simp only [zpow_neg, zpow_natCast, Int.cast_natCast]
-    rw[inv_mul_le_iff₀ (pow_pos (two_pos) M)]
-    rw[mul_one, mul_comm, le_mul_inv_iff₀ (pow_pos (two_pos) M)]
+    rw[inv_mul_le_iff₀ (pow_pos (two_pos) k)]
+    rw[mul_one, mul_comm, le_mul_inv_iff₀ (pow_pos (two_pos) k)]
     ring_nf
-    rw[one_div, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hM 2))]
+    rw[one_div, (mul_inv_eq_iff_eq_mul₀ (two_ne_zero)).mpr (Eq.symm (pow_sub_one_mul hk 2))]
     norm_cast
     simp only [and_iff_left_iff_imp, add_comm, Nat.add_one_le_iff ]
-    exact fun a ↦ hk
+    exact fun a ↦ hn
   · simp
 
+/-- Membership of `x` to dyadic interval of negative `-k` implies that `2*x` is in dyadic interval of `-k + 1` and `n`. -/
 
-
-theorem xinfirsthalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) : 2*x ∈ dyadicInterval (-M + 1 :ℤ) k := by
+theorem xinfirsthalf' {k n : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-k : ℤ) n) : 2*x ∈ dyadicInterval (-k + 1 :ℤ) n := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   simp only [dyadicInterval, Int.cast_natCast, mem_setOf_eq]
   rw [zpow_add₀ (Ne.symm (NeZero.ne' 2)), zpow_one, mul_comm]
@@ -207,23 +255,22 @@ theorem xinfirsthalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ
     exact hx2
 
 
-theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : ℤ) k) (hM : M ≠ 0) : (2*x-1) ∈ dyadicInterval (-M + 1 :ℤ) ((k - 2^(M-1)):ℤ) := by
+/--
+Membership of `x` to dyadic interval of negative `-k` implies that `2*x-1` is in dyadic interval of `-k + 1` and `n - 2^(k-1)`.
+-/
+theorem xinsecondhalf' {k n : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-k : ℤ) n) (hk : k ≠ 0) : (2*x-1) ∈ dyadicInterval (-k + 1 :ℤ) ((n - 2^(k-1)):ℤ) := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx
   simp only [dyadicInterval, mem_setOf_eq]
   obtain ⟨ hx1, hx2 ⟩ := hx
-  have h : (2 ^ ((-M :ℤ) + 1) :ℝ ) * 2 ^ (M  - 1) = 1 := by
-    --rw[← zpow_add₀ (two_ne_zero)]??
-    have : (-M :ℤ) + 1 = - (M -1) := by
-      simp only [neg_sub]
-      rw [@neg_add_eq_sub]
-    rw[this]
-    rw [@zpow_neg]
+  have h : (2 ^ ((-k :ℤ) + 1) :ℝ ) * 2 ^ (k  - 1) = 1 := by
+    have : (-k :ℤ) + 1 = - (k -1) := by rw[neg_sub, @neg_add_eq_sub]
+    rw[this, @zpow_neg]
     apply (inv_mul_eq_one₀ ?_).mpr ?_
     · apply zpow_ne_zero
       simp
     · rw[← zpow_natCast ]
       apply (zpow_right_inj₀ (Nat.ofNat_pos) (Ne.symm (OfNat.one_ne_ofNat 2))).mpr
-      apply Eq.symm (Int.natCast_pred_of_pos (Nat.zero_lt_of_ne_zero hM))
+      apply Eq.symm (Int.natCast_pred_of_pos (Nat.zero_lt_of_ne_zero hk))
   constructor
   · push_cast
     rw[mul_sub, tsub_le_iff_right, h]
@@ -233,14 +280,13 @@ theorem xinsecondhalf' {M k : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-M : �
   · simp only [Int.cast_sub, Int.cast_natCast, Int.cast_pow, Int.cast_ofNat, mul_add, mul_sub, h, mul_one, @sub_lt_iff_lt_add]
     rw[zpow_add₀ (two_ne_zero) , zpow_one]
     ring_nf
-    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-M :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm, zpow_neg, zpow_natCast]
+    rw[← add_mul,  mul_lt_mul_right (two_pos), ← mul_one ( a := 2^(-k :ℤ )), mul_assoc, one_mul, ← mul_add, add_comm, zpow_neg, zpow_natCast]
     exact hx2
 
 
 /--
-The dyadic intervals at scale `k` cover the entire real line.
+Set of all dyadic intervals of `k` cover the entire real line.
 -/
-
 theorem dyadicInterval_cover (k : ℤ) :
   ⋃ n : ℤ, dyadicInterval k n = Set.univ := by
   ext x
@@ -262,9 +308,8 @@ theorem dyadicInterval_cover (k : ℤ) :
 
 
 /--
-The dyadic intervals with natural `k` and `n<2^k` cover the entire real line.
+Set of all dyadic intervals of natural `k` and `n<2^k` cover `Ico 0 1` .
 -/
-
 theorem dyadicInterval_cover01 (k : ℕ) :
   Ico 0 1 = ⋃ ( n ∈ Finset.range (2^k) ) , dyadicInterval (-k :ℤ) n := by
   ext x
@@ -305,19 +350,25 @@ theorem dyadicInterval_cover01 (k : ℕ) :
       · simp
 
 
-theorem extdi {M : ℤ} {x : ℝ} : ∃ k : ℤ, x ∈ dyadicInterval M k := by
+/--
+For given `x ∈ ℝ` and `k` there exist dyadic interval of `k` such that `x` belongs to it.
+-/
+theorem extdi {k : ℤ} {x : ℝ} : ∃ n : ℤ, x ∈ dyadicInterval k n := by
   refine mem_iUnion.mp ?_
   rw[dyadicInterval_cover]
   simp
 
-theorem extdiin01 {M : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : ∃  k ∈  Finset.range (2^M)  , x ∈ dyadicInterval (-M :ℤ ) k := by
+
+/--
+For given `x ∈ ℝ` and nonegative `k` there exist `n <2^k` that `x` belongs to dyadic interval of `k` and `n`.
+-/
+theorem extdiin01 {k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : ∃  n ∈  Finset.range (2^k)  , x ∈ dyadicInterval (-k :ℤ ) n := by
   have hx : x ∈ Ico 0 1 := mem_Ico.mpr (And.symm ⟨hx2, hx1⟩)
-  simp only [dyadicInterval_cover01 M , Finset.mem_range, mem_iUnion, exists_prop] at hx
+  simp only [dyadicInterval_cover01 k , Finset.mem_range, mem_iUnion, exists_prop] at hx
   simp only [Finset.mem_range]
   exact hx
 
 
---jak podpisywac helpy?
 theorem dyadicInterval_disjoint_help {k n n' : ℤ} (h : n < n') :
   (dyadicInterval k n ∩ dyadicInterval k n') = ∅ := by
   ext x
@@ -332,8 +383,9 @@ theorem dyadicInterval_disjoint_help {k n n' : ℤ} (h : n < n') :
     linarith
   linarith
 
+
 /--
-Dyadic intervals at the same scale `k` and different indices `n ≠ n'` are disjoint.
+Dyadic intervals at the same scale `k` and different `n ≠ n'` are disjoint.
 -/
 theorem dyadicInterval_disjoint {k n n' : ℤ} (h : n ≠ n') : (dyadicInterval k n ∩ dyadicInterval k n') = ∅ := by
   by_cases h1 : n<n'
@@ -346,11 +398,10 @@ theorem dyadicInterval_disjoint {k n n' : ℤ} (h : n ≠ n') : (dyadicInterval 
   apply dyadicInterval_disjoint_help
   apply h1'
 
+
 /--
-Case when dyadic intervals with the scales `k<k'` - then they are disjoint or one is contained in the other.
+Dyadic intervals with the scales `k, k'` such a `k < k'` are disjoint or the smaller one is contained in bigger.
 -/
-
-
 theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
   dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
   dyadicInterval k n ⊆ dyadicInterval k' n' := by
@@ -419,10 +470,9 @@ theorem dyadic_intervals_relation {k k' n n' : ℤ} (h : k < k') :
       linarith
 
 
-
-
-
-
+/--
+Dyadic intervals with the scales `k, k'` such a `k ≤ k'` are disjoint or the smaller one is contained in bigger.
+-/
 theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
   dyadicInterval k n ∩ dyadicInterval k' n' = ∅ ∨
   dyadicInterval k n ⊆ dyadicInterval k' n':= by
@@ -441,13 +491,9 @@ theorem dyadic_intervals_relation2 {k k' n n' : ℤ} (h1 : k ≤ k') :
   · exact hk
 
 
-
 /--
-Theorem: Two dyadic intervals are either disjoint or one is contained in the other.
+Two dyadic intervals are either disjoint or one is contained in the other.
 -/
-
-
-
 theorem dyadic_intervals_disjoint_or_contained (k k' n n' : ℤ) :
   (dyadicInterval k n ∩ dyadicInterval k' n' = ∅) ∨
   (dyadicInterval k n ⊆ dyadicInterval k' n') ∨
