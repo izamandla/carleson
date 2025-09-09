@@ -10,16 +10,11 @@ noncomputable section
 
 namespace WalshRademacher
 
-theorem wlashradhelp0 (n m : ℕ) (h : m ∈ binaryRepresentationSet n) : (m+1) ∈ binaryRepresentationSet (2*n) := by
-  rw[mem_binaryRepresentationSet_iff] at h
-  rw[mem_binaryRepresentationSet_iff, ← Nat.testBit_div_two, ← h]
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_left₀]
 
 
 /--
 Relation between Haar function and Walsh functions.
 -/
-
 theorem walsh_haar_one (x : ℝ) : walsh 1 x  = haarFunction x := by
   simp only [haarFunction, one_div]
   split_ifs with h1 h2
@@ -61,9 +56,7 @@ theorem walshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1
   · set k := n/2 with h_k
     have hk0 : k < n := by
       rw[h_k]
-      refine Nat.bitwise_rec_lemma ?_
-      push_neg at hzero
-      exact hzero
+      refine Nat.bitwise_rec_lemma hzero
     by_cases h0 : Odd n
     · have hk1 : 2*k+1 = n := by
         rw[h_k]
@@ -114,8 +107,7 @@ theorem walshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1
     · rw[Nat.not_odd_iff_even ] at h0
       have hk1 : 2*k = n := by
         rw[h_k, mul_comm]
-        apply Nat.div_two_mul_two_of_even
-        exact h0
+        apply Nat.div_two_mul_two_of_even h0
       rw[← hk1]
       by_cases h : x<1/2
       · rw[walsh_even_left  h]
@@ -180,6 +172,7 @@ theorem differentwalshRademacherRelation {n : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx
   · exact hx1
   · exact hx2
 
+
 /--
 Walsh-Rademacher relation.
 -/
@@ -189,13 +182,11 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ binaryRep
   exact Finset.prod_eq_mul_prod_diff_singleton h fun x_1 ↦ rademacherFunction x_1 x
 
 
---co jak M nie jest w rozwinieciu binarnym N?
+
 
 /--
 Product of two walsh functions
 -/
-
-
 theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (hk : k = M ^^^ N) : walsh k x = walsh M x * walsh N x:= by
   rw[differenceofbinaryrepset] at hk
   rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
@@ -204,15 +195,6 @@ theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (
     apply rad_sqr hx1 hx2
 
 
-
-
-/-theorem prodofwalsh {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) : k = M^^^N ↔ walsh k x = walsh M x * walsh N x:= by
-  rw[walshRademacherRelation hx1 hx2,walshRademacherRelation hx1 hx2, walshRademacherRelation hx1 hx2, differenceofbinaryrepset, binaryRepresentationSet_fun_prod2 , ← Finset.prod_union (disjoint_sdiff_sdiff)]
-  · --nie jestem pewna jak to zrobic - z załozen o funkcji redamachera powiino to jakosc isc ale jak?
-    sorry
-  · intro k
-    apply rad_sqr hx1 hx2
--/
 
 
 theorem walsh_int {n : ℕ} (h : n > 0) : ∫ (x : ℝ) in Ico 0 1, walsh n x = 0 := by
@@ -277,5 +259,3 @@ theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ) : rademac
     linarith
 
 end WalshRademacher
-
-#min_imports
