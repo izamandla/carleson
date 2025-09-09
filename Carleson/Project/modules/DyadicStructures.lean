@@ -202,7 +202,7 @@ theorem natdyadicin0' {k n : ℕ} (h : n < 2 ^ k) : dyadicInterval (-k : ℤ) n 
 
 
 /--
-Dyadic interval of given negative `k` and `n<2^k` is contained in dyadic interval of `k:=0` `n:=0`.
+Dyadic interval of given non positive `k` and `n<2^k` is contained in dyadic interval of `k:=0` `n:=0`.
 -/
 theorem natdyadicin0 {k n : ℕ} (h : n < 2 ^ k) : dyadicInterval (-k : ℤ) n ⊆ dyadicInterval 0 0 := by
   rw[zero_dyadicInterval]
@@ -240,7 +240,7 @@ theorem insecondhalf {k n : ℕ} (hn : n < 2 ^ k) (hk : k ≠ 0) : dyadicInterva
     exact fun a ↦ hn
   · simp
 
-/-- Membership of `x` to dyadic interval of negative `-k` implies that `2*x` is in dyadic interval of `-k + 1` and `n`. -/
+/-- Membership of `x` to dyadic interval of non positive `-k` implies that `2*x` is in dyadic interval of `-k + 1` and `n`. -/
 
 theorem xinfirsthalf' {k n : ℕ} {x : ℝ} (hx : x ∈ dyadicInterval (-k : ℤ) n) : 2*x ∈ dyadicInterval (-k + 1 :ℤ) n := by
   simp only [dyadicInterval, zpow_neg, zpow_natCast, Int.cast_natCast, mem_setOf_eq] at hx

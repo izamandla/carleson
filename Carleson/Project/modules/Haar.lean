@@ -20,6 +20,7 @@ def haarFunction (x : ℝ) : ℝ :=
   else if 1/2 ≤  x ∧ x < 1 then -1
   else 0
 
+
 /--
 Left half of haar function is equal to one.
 -/
@@ -27,6 +28,7 @@ Left half of haar function is equal to one.
 theorem haarFunction_left_half (x : ℝ) (h : 0 ≤ x ∧ x < 1 / 2) : haarFunction x = 1 := by
   unfold haarFunction
   exact if_pos h
+
 
 /--
 Right half of haar function is equal to minus one.
@@ -37,6 +39,7 @@ theorem haarFunction_right_half (x : ℝ) (h : 1 / 2 ≤ x ∧ x < 1) : haarFunc
   split_ifs with h1
   · linarith
   linarith
+
 
 /--
 Haar function is zero outisde `[0,1)`.
@@ -61,8 +64,9 @@ theorem haarFunction_outside (x : ℝ) (h : x < 0 ∨ x ≥ 1) : haarFunction x 
     contradiction
   linarith
 
+
 /--
-Square of the Haar function is equal to one.
+Square of the Haar function is equal `1`.
 -/
 @[simp]
 theorem haar_sqr (x : ℝ) : (haarFunction x)^2 = if 0 ≤ x ∧ x < 1 then 1 else 0 := by
@@ -86,10 +90,10 @@ theorem haar_sqr (x : ℝ) : (haarFunction x)^2 = if 0 ≤ x ∧ x < 1 then 1 el
   apply haarFunction_outside
   apply h
 
-/--
-The integral of Haar function over `[0,1)` equals 0.
--/
 
+/--
+The integral of Haar function over `[0,1)` equals `0`.
+-/
 @[simp]
 theorem haar_integral : ∫ x in Set.Ico 0 1, haarFunction x = 0 := by
   have hs : MeasurableSet (Set.Ico 0 (1/2 : ℝ )) := by
@@ -124,7 +128,7 @@ theorem haar_integral : ∫ x in Set.Ico 0 1, haarFunction x = 0 := by
 
 
 /--
-The integral of squere of Haar function over `[0,1)` equals 1.
+The integral of squere of Haar function over `[0,1)` equals `1`.
 -/
 theorem haar_integral_sqr : ∫ x in Set.Ico 0 1, (haarFunction x) ^ 2 = 1 := by
   have h : EqOn (fun x ↦ haarFunction x ^ 2) 1  (Ico 0 1):= by
@@ -135,6 +139,10 @@ theorem haar_integral_sqr : ∫ x in Set.Ico 0 1, (haarFunction x) ^ 2 = 1 := by
   rw [MeasureTheory.setIntegral_congr_fun h1 h]
   simp
 
+
+/--
+Equivalent definition of haar function.
+-/
 theorem haar_as_fun : haarFunction = Set.indicator (Set.Ico 0 0.5) (fun _ ↦ 1 : ℝ → ℝ )  +  Set.indicator (Set.Ico 0.5 1) (fun _ ↦ -1 : ℝ → ℝ ) := by
   ext x
   simp only [Pi.add_apply]
@@ -164,12 +172,17 @@ theorem haar_as_fun : haarFunction = Set.indicator (Set.Ico 0 0.5) (fun _ ↦ 1 
     linarith
 
 
-
+/--
+Haar function is measurable.
+-/
 theorem measurability_of_haar : Measurable haarFunction := by
   rw[haar_as_fun]
   measurability
 
 
+/--
+Haar function is bounded compactly supported measurable function.
+-/
 theorem bcs_haar : BoundedCompactSupport (haarFunction) MeasureTheory.volume := by
   refine { memLp_top := ?_, hasCompactSupport := ?_ }
   · apply MeasureTheory.memLp_top_of_bound (C := 1)
@@ -193,12 +206,16 @@ theorem bcs_haar : BoundedCompactSupport (haarFunction) MeasureTheory.volume := 
       | inl h => exact Or.inl h
       |  inr h => exact Or.inr (le_of_lt h)
 
+
+/--
+Haar function is integrable.
+-/
 theorem integrability_of_haar : Integrable haarFunction := by
   apply BoundedCompactSupport.integrable bcs_haar
 
 
 /--
-Definition of scaled Haar function `h_I(x)` for dyadic interval `I = [2^k n, 2^k (n+1))`.
+Definition of scaled Haar function `h_I(x)` for `I = [2^k n, 2^k (n+1))`.
 -/
 def haarFunctionScaled (k n : ℤ) (x : ℝ) : ℝ :=
   2^((-k / 2) : ℝ) * haarFunction (2^(-k) * x - n)
@@ -219,8 +236,6 @@ theorem haarFunctionScaled_left_half (k n : ℤ) (x : ℝ) (h1 : 0 ≤ 2 ^ (-k) 
     · linarith
 
 
---theorem haarFunctionScaled_left_half_as_fun
-
 /--
 Right half of the scaled Haar function is equal to `-2^(-k / 2)`.
 -/
@@ -235,8 +250,9 @@ theorem haarFunctionScaled_right_half (k n : ℤ) (x : ℝ) (h1 : 1 / 2 ≤ 2 ^ 
     · linarith
     · linarith
 
+
 /--
-Scaled Haar function is 0 outside `[2^k n, 2^k (n+1))`.
+Scaled Haar function is `0` outside of `[2^k n, 2^k (n+1))`.
 -/
 @[simp]
 theorem haarFunctionScaled_outside (k n : ℤ) (x : ℝ)
@@ -247,7 +263,9 @@ theorem haarFunctionScaled_outside (k n : ℤ) (x : ℝ)
   simp
 
 
-
+/--
+Equivalent definition of scaled haar function using dyadic intervals.
+-/
 theorem haarscl_di (k n : ℤ) (x : ℝ) :
   haarFunctionScaled k n x = (dyadicInterval (k-1) (2*n) ).indicator (2 ^ ((-k / 2) : ℝ)) x + (dyadicInterval (k-1) (2*n + 1) ).indicator (-2 ^ ((-k / 2) : ℝ)) x := by
     have obv : (2 ^ (k - 1) :ℝ ) * 2 = 2^k := by
@@ -306,12 +324,8 @@ theorem haarscl_di (k n : ℤ) (x : ℝ) :
           linarith
 
 
-
-
-
-
 /--
-Scaled Haar function of non positive `k` and `n ∈ {0,...,2^(-k) -1}` is 0 outside `[0,1)`.
+Scaled Haar function of non positive `k` and `n ∈ {0,...,2^(-k) -1}` is `0` outside `[0,1)`.
 -/
 @[simp]
 theorem haarFunctionScaled_outside_zero_one {k n : ℤ} {x : ℝ}
