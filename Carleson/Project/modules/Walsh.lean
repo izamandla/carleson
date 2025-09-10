@@ -743,7 +743,7 @@ theorem sum_of_even_odd_set {s t u : Finset ℕ} (hs : s = {l ∈ u | Odd l}) (h
 
 
 /--
-Division by `2` is an injection of subsets of `ℕ` containing only even numbers.
+Division by `2` is an injection on subsets of `ℕ` containing only even numbers.
 -/
 theorem div_of_nat_inj_even {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Even l}) := by
   unfold InjOn
@@ -756,7 +756,7 @@ theorem div_of_nat_inj_even {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n �
 
 
 /--
-Division by `2` sends all points of of subsets of `ℕ` containing only even numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
+Division by `2` sends all points of subsets of `ℕ` containing only even numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
 -/
 theorem div_of_nat_mapsto_even {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Even l}) (Iio  (2^m)) := by
   unfold MapsTo
@@ -767,7 +767,7 @@ theorem div_of_nat_mapsto_even {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n
 
 
 /--
-Division by `2` is an injection of subsets of `ℕ` containing only odd numbers.
+Division by `2` is an injection on subsets of `ℕ` containing only odd numbers.
 -/
 theorem div_of_nat_inj_odd {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : InjOn i ({l ∈ s | Odd l}) := by
   unfold InjOn
@@ -780,7 +780,7 @@ theorem div_of_nat_inj_odd {s : Finset ℕ} {i : ℕ → ℕ} (hi : i = fun n �
 
 
 /--
-Division by `2` sends all points of of subsets of `ℕ` containing only odd numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
+Division by `2` sends all points of subsets of `ℕ` containing only odd numbers smaller than `2^(m+1)` to subsets of `ℕ` containing numbers smaller than `2^m`.
 -/
 theorem div_of_nat_mapsto_odd {m : ℕ} {i : ℕ → ℕ} (hi : i = fun n ↦ n / 2) : MapsTo i ({l ∈ (Finset.range (2^(m+1))) | Odd l}) (Iio  (2^m)) := by
   unfold MapsTo

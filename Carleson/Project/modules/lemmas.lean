@@ -20,7 +20,6 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
-
     --here
     have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
@@ -103,8 +102,6 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
     simp_rw[mul_comm (a:= f ?_)]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
 
-/-theorem Finset.sum_comm_cycle_int {κ : Type*} {α : Type*} {β : Type*} {γ : Type*} {δ : Type*} [AddCommMonoid β] {s : Finset γ} {t : Finset α} {u : Finset κ} {m : MeasurableSpace δ} {μ : Measure δ} {f : γ → α → κ → β} :
-∫ (a :δ), (∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, f x y z) = ∑ z ∈ u, ∑ x ∈ s, ∑ y ∈ t, f x y z := by sorry -/
 
 
 
