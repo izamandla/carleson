@@ -5,7 +5,9 @@ open Walsh Function Set MeasureTheory
 /- ## Main result -/
 
 
-
+/--
+Locally integrable function is integrable on `Ico 0 1`.
+-/
 theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) :
   MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1)) := by
   apply MeasureTheory.IntegrableOn.integrable
@@ -15,6 +17,9 @@ theorem inthelp (f : ℝ → ℝ) (hf : MeasureTheory.LocallyIntegrable f) :
   exact isCompact_Icc
 
 
+/--
+Integral form of Walsh Fourier Series.
+-/
 theorem mainresult (N : ℕ) (f : ℝ → ℝ) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) (hf : MeasureTheory.LocallyIntegrable f) :
   walshFourierPartialSum f N x = (∫ y in Set.Ico 0 1, f y * walsh N y * walsh N x * kernel N x y) := by
   apply inthelp at hf
