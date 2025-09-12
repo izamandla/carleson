@@ -10,9 +10,14 @@ noncomputable section
 
 namespace WalshHaar
 
+
+/--
+Definition of Walsh Haar function - product of `2^M`-th Walsh function and scaled Haar function.
+-/
 def walshhaar (M k : ℕ) : ℝ → ℝ
 | x =>
   walsh (2^M) x * (haarFunctionScaled (-M) k x)
+
 
 theorem walshhaarprophelp {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) : (∑ n ∈ Finset.range (2 ^ M), haarFunctionScaled (-↑M) (↑n) x) *
     haarFunctionScaled (-↑M) (↑k) x = haarFunctionScaled (-↑M) (↑k) x *
@@ -27,6 +32,9 @@ theorem walshhaarprophelp {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)
       exact hl.2
 
 
+/--
+Relation betwwen Walsh Haar function and indicator of dyadic interval on `Ico 0 1`.
+-/
 theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  walshhaar M k x = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2 : ℝ)) x:= by
   unfold walshhaar
   simp only
@@ -54,9 +62,9 @@ theorem walshhaarprop {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (h
       · simp
 
 
-
-
-
+/--
+Relation betwwen Walsh Haar function and indicator of dyadic interval on `ℝ`.
+-/
 theorem walshhaarprop' {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) :  walshhaar M k x = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2 : ℝ)) x:= by
   by_cases hx : 0≤ x ∧ x<1
   · exact walshhaarprop hk hx.1 hx.2
@@ -77,12 +85,17 @@ theorem walshhaarprop' {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) :
       exact hx
 
 
+/--
+Functional version of relation betwwen Walsh Haar function and indicator of dyadic interval on `ℝ`.
+-/
 theorem walshhaarprop'' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : (fun x ↦   walshhaar M k x) =(fun x ↦  (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M / 2 : ℝ)) x):= by
   ext x
   exact walshhaarprop' hk
 
 
-
+/--
+Relation betwwen square of Walsh Haar function and indicator of dyadic interval on `Ico 0 1`.
+-/
 theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx1 : 0 ≤ x) (hx2 : x < 1) :  (walshhaar M k x)*(walshhaar M k x) = (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x:= by
   rw[walshhaarprop hk hx1 hx2]
   simp_rw[indicator, zpow_neg, zpow_natCast, mem_Ico, Pi.pow_apply, Pi.ofNat_apply, mul_ite, ite_mul,
@@ -93,6 +106,10 @@ theorem walshhaarpropsqr {M k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M))
     simp
   · simp[h]
 
+
+/--
+Relation betwwen square of Walsh Haar function and indicator of dyadic interval on `ℝ`.
+-/
 theorem walshhaarsqr' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) :  (walshhaar M k)*(walshhaar M k ) = (2 ^ (M / 2 : ℝ))* walshhaar M k := by
   ext x
   by_cases h : 0 ≤ x ∧ x<1
@@ -114,7 +131,9 @@ theorem walshhaarsqr' {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) :  (walshhaa
       exact h
 
 
-
+/--
+Product of different Walsh Haar functions is equal to `0`.
+-/
 theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k') :  walshhaar M k x * walshhaar M k' x = 0 := by
   unfold walshhaar
   rw[mul_comm, mul_mul_mul_comm]
@@ -125,7 +144,9 @@ theorem walshHaar_ort_help {M k k' : ℕ} {x : ℝ} (h : k ≠ k') :  walshhaar 
     exact h
 
 
-
+/--
+Orthogonality of Walsh Haar functions.
+-/
 theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k') :  ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
   have h1 : EqOn (walshhaar M k * walshhaar M k') 0 (Set.Ico 0 1) := by
     unfold EqOn
@@ -134,7 +155,6 @@ theorem walshHaar_ort {M k k' : ℕ} (h : k ≠ k') :  ∫ y in Set.Ico 0 1, wal
   simp_rw[← Pi.mul_apply]
   rw[MeasureTheory.setIntegral_congr_fun (measurableSet_Ico) h1]
   simp
-
 
 
 theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) + ∫ x in Set.Ico 0.5 1,  walshhaar M k x = ∫ x in Set.Ico 0 1, walshhaar M k x  := by
@@ -151,10 +171,6 @@ theorem walshhaar_s {M k : ℕ} :  (∫ x in Set.Ico  0 0.5,  walshhaar M k x) +
     · refine MeasureTheory.BoundedCompactSupport.restrict bcs_walsh
     · apply MeasureTheory.BoundedCompactSupport.integrable
       refine MeasureTheory.BoundedCompactSupport.restrict bcs_haarscaled
-
-
-
-
 
 
 theorem wlashhaar_normhelp {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ (x : ℝ), (Ico 0 1).indicator (fun y ↦ walshhaar M k y * walshhaar M k y) x = ∫ (x : ℝ), (Ico ((2^(-M :ℤ ) * k) :ℝ ) ((2^(-M :ℤ ) * (k+1)) :ℝ ) ).indicator (2 ^ (M :ℝ  )) x := by
@@ -192,14 +208,14 @@ theorem wlashhaar_normhelp {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ (x : ℝ), (
       · simp
 
 
-
+/--
+The norm of Walsh Haar function equals `1`.
+-/
 theorem wlashhaar_norm {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∫ y in Set.Ico 0 1, (walshhaar M k y)*(walshhaar M k y)  = 1 := by
   rw[← MeasureTheory.integral_indicator (measurableSet_Ico), wlashhaar_normhelp hk]
   rw[ MeasureTheory.integral_indicator (measurableSet_Ico)]
   ring_nf
   simp
-
-
 
 
 theorem walshindicatorrightformhelp {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  → ℝ), (fun x ↦∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))=  (fun x ↦ walshhaar M k x):= by
@@ -217,7 +233,9 @@ theorem walshindicatorrightformhelp {M k : ℕ} (hk : k < 2 ^ M) : ∃ (f:ℕ  �
     exact hk
 
 
-
+/--
+Walsh Haar function can be written as linear combination of Walsh functions.
+-/
 theorem walshindicatorrightform {M k : ℕ} : ∃ (f:ℕ  → ℝ), (fun x ↦ ∑ j ∈ Finset.range (2^M), (walsh j x  * f j ))= (fun x ↦walshhaar M k x):= by
   by_cases hk : k < 2 ^ M
   · exact walshindicatorrightformhelp hk
@@ -239,11 +257,19 @@ theorem walshindicatorrightform {M k : ℕ} : ∃ (f:ℕ  → ℝ), (fun x ↦ �
         norm_cast
 
 
+/--
+Walsh Haar function is bounded compactly supported measurable function.
+-/
 theorem bcs_WalshHaar {M i : ℕ} : BoundedCompactSupport (walshhaar M i) volume := by
   apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
 
+
+/--
+Walsh Haar function is bounded compactly supported measurable function in regards of canonical measure restricted to `Ico 0 1`.
+-/
 theorem bcs_WalshHaar01 {M i : ℕ} : BoundedCompactSupport (walshhaar M i) (volume.restrict (Ico 0 1)) := by
   apply MeasureTheory.BoundedCompactSupport.restrict
   exact bcs_WalshHaar
+
 
 end WalshHaar
