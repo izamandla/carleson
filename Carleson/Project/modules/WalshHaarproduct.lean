@@ -8,6 +8,7 @@ open unitInterval DyadicStructures
 
 noncomputable section
 
+/- ## Product of Walsh and Haar function -/
 namespace WalshHaar
 
 

@@ -2,6 +2,7 @@ import Carleson.Project.modules.lemmas
 import Carleson.Project.modules.kernel
 open BinaryRepresentationSet Walsh Haar Kernel Coef WalshHaar WalshRademacher Lemmas
 open Walsh Function Set MeasureTheory
+
 /- ## Main result -/
 
 

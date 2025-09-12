@@ -1,14 +1,11 @@
 import Carleson.Project.modules.coef
 
-open InnerProductSpace MeasureTheory Set BigOperators
-open Walsh Haar BinaryRepresentationSet WalshHaar WalshRademacher Coef
-open Function Set
-open unitInterval DyadicStructures
+open InnerProductSpace MeasureTheory Set BigOperators Walsh Haar BinaryRepresentationSet WalshHaar WalshRademacher Coef Function Set unitInterval DyadicStructures
 
 noncomputable section
 
+/- ## Lemmas used in the main proof. -/
 namespace Lemmas
-
 
 
 
@@ -20,8 +17,7 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
-    --here
-    have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
+    have ha (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
         ∑ i ∈ Finset.range (2 ^ M), f a * walsh i a * coef M x_1 i * walsh x_2 x * coef M x_1 x_2  =
       ∑ x_2 ∈ Finset.range (2 ^ M),
@@ -37,8 +33,6 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
           ext i
           rw[← mul_assoc]
           linarith
-    simp_rw[this]
-    --here
     have :
     ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),
@@ -79,17 +73,17 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
             intro j hj
             apply MeasureTheory.Integrable.mul_const
             apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
-    simp_rw[← this]
+    simp_rw[ha, ← this]
     apply Finset.sum_congr (by simp)
     intro n hn
     rw[Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
             (∫ (a : ℝ) in Ico 0 1, f a * walsh x_1 a * walsh n x) *
-              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, bighelpextra1wrr (M:= M) hn]
+              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, sumcoefthird1 (M:= M) hn]
     simp only [mul_one, add_eq_right]
     apply Finset.sum_eq_zero
     intro h hj
     simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
-    rw[bighelpextra0wrr]
+    rw[sumcoefthird]
     · rw[mul_zero]
     · simp only [ne_eq]
       rw[eq_comm]
@@ -101,8 +95,6 @@ theorem lemma1_1' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f 
     apply MeasureTheory.Integrable.mul_const
     simp_rw[mul_comm (a:= f ?_)]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
-
-
 
 
 theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
@@ -113,10 +105,7 @@ theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f
   simp only [walshInnerProduct, ← MeasureTheory.integral_mul_const]
   rw[eq_comm, ← MeasureTheory.integral_finset_sum ]
   · simp_rw[← basiccoef, Finset.mul_sum, ← mul_assoc , Finset.sum_mul]
-    --simp_rw[mul_assoc (a:= f ?_ * walsh ?_ ?_ ), mul_comm (a:= coef ?_ ?_ ?_ ), ← mul_assoc, mul_assoc (a:= f ?_ * walsh ?_ ?_ * walsh ?_ ?_ )]
-
-    --here
-    have (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
+    have ha (a :ℝ): ∑ x_1 ∈ Finset.range (2 ^ M),
       ∑ x_2 ∈ Finset.range (2 ^ M),
         ∑ i ∈ Finset.range (2 ^ M), f a * walsh i a * coef M x_1 i * walsh x_2 x * coef M x_1 x_2  =
       ∑ x_2 ∈ Finset.range (2 ^ M),
@@ -132,8 +121,6 @@ theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f
           ext i
           rw[← mul_assoc]
           linarith
-    simp_rw[this]
-    --here
     have :
     ∑ x_2 ∈ Finset.range (2 ^ M),
       ∑ i ∈ Finset.range (2 ^ M),
@@ -149,13 +136,7 @@ theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f
               ext m
               rw[← MeasureTheory.integral_mul_const]
             · intro m hm
-              have : (fun a ↦ f a * walsh m a * walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 m)= (fun a ↦  ∑ x_1 ∈ Finset.range (2 ^ M), ( walsh m a  * f a ) *(walsh i x* coef M x_1 i * coef M x_1 m) ):= by
-                ext a
-                rw[mul_comm, Finset.sum_mul]
-                congr
-                ext y
-                linarith
-              simp_rw[this]
+              simp_rw[Finset.mul_sum, mul_comm (a:= f ?_) (b:= walsh ?_ ?_ ), mul_assoc (a:= walsh ?_ ?_ * f ?_ )  ]
               apply MeasureTheory.integrable_finset_sum
               intro j hj
               apply MeasureTheory.Integrable.mul_const
@@ -163,28 +144,22 @@ theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f
           · intro i hi
             apply MeasureTheory.integrable_finset_sum
             intro j hj
-            have : (fun a ↦ f a * walsh j a * walsh i x * ∑ x_1 ∈ Finset.range (2 ^ M), coef M x_1 i * coef M x_1 j) = (fun a ↦ ∑ x_1 ∈ Finset.range (2 ^ M),  ( walsh j a * f a  )* (walsh i x * coef M x_1 i * coef M x_1 j) ):= by
-              ext a
-              rw[mul_comm, Finset.sum_mul]
-              congr
-              ext y
-              linarith
-            simp_rw[this]
+            simp_rw[Finset.mul_sum, mul_comm (a:= f ?_) (b:= walsh ?_ ?_ ), mul_assoc (a:= walsh ?_ ?_ * f ?_ )  ]
             apply MeasureTheory.integrable_finset_sum
             intro j hj
             apply MeasureTheory.Integrable.mul_const
             apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_walsh01 hf'
-    simp_rw[← this]
+    simp_rw[ha, ← this]
     apply Finset.sum_congr (by simp)
     intro n hn
     rw[Finset.sum_eq_sum_diff_singleton_add hn fun x_1 ↦
             (∫ (a : ℝ) in Ico 0 1, f a * walsh x_1 a * walsh n x) *
-              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, bighelpextra1wrr (M:= M) hn]
+              ∑ x_1_1 ∈ Finset.range (2 ^ M), coef M x_1_1 n * coef M x_1_1 x_1, sumcoefthird1 (M:= M) hn]
     simp only [mul_one, add_eq_right]
     apply Finset.sum_eq_zero
     intro h hj
     simp only [Finset.mem_sdiff, Finset.mem_range, Finset.mem_singleton] at hj
-    rw[bighelpextra0wrr]
+    rw[sumcoefthird]
     · rw[mul_zero]
     · simp only [ne_eq]
       rw[eq_comm]
@@ -198,8 +173,9 @@ theorem lemma1_1'' {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f
     apply MeasureTheory.BoundedCompactSupport.integrable_mul bcs_WalshHaar01 hf'
 
 
-
-
+/--
+Lemma 3.0.2. first part
+-/
 theorem lemma1_1 {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
   ∑ k ∈ Finset.range (2 ^ M),
@@ -214,14 +190,6 @@ theorem lemma1_1 {M : ℕ} (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (
   ext y
   simp_rw[walshhaar, ← mul_assoc]
 
-
-
-
-
-
-/--
-Lemma 2
--/
 
 theorem lemma1_helphelphelp {n m : ℤ} {x : ENNReal} (hx : 1 < x) (hx2 : x ≠ ⊤) : x^n ≤ x^m ↔ n ≤ m := by
   constructor
@@ -262,8 +230,7 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
           simp only [mul_eq_zero]
           by_cases h_1 : ( 2 ^ (M : ℤ ) * x - k < 0 ∨ 2 ^ (M : ℤ ) * x - k ≥ 1)
           · rw[haarFunctionScaled_outside (-M) k x ?_]
-            · right
-              simp
+            · simp
             · rw[neg_neg]
               exact h_1
           · rw[or_iff_right h_1] at h
@@ -397,10 +364,6 @@ theorem lemma1_2helphelp {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (
           rw[hr, ← pow_two, rad_sqr hx1 hx2]
 
 
-
-
-
-
 theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (x y : ℝ) (hy1 : 0 ≤ y) (hy2 : y < 1) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ k ∈ Finset.range (2 ^ M),
       f y * walsh (2 ^ M) y * haarFunctionScaled (-M) k y * walsh (2 ^ M) x *
@@ -432,6 +395,9 @@ theorem lemma1_2help {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : 
       linarith
 
 
+/--
+Lemma 3.0.2. second part
+-/
 theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) (hx1 : 0 ≤ x) (hx2 : x < 1) :
   ∑ i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x=
   ∑ k ∈ Finset.range (2 ^ M),
@@ -448,12 +414,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
       simp only [mem_Ico] at hz
       apply lemma1_2help h1 h2 f x z hz.1 hz.2 hx1 hx2
   · intro i hi
-    have : (fun a ↦
-    f a * walsh N a * haarFunctionScaled (-↑M) (↑i) a * walsh N x * haarFunctionScaled (-↑M) (↑i) x )= (fun a ↦
-    walsh N x * haarFunctionScaled (-↑M) (↑i) x * walsh N a * haarFunctionScaled (-↑M) (↑i) a * f a ) := by
-      ext a
-      linarith
-    simp_rw[this]
+    simp_rw[mul_assoc, mul_comm (a:= f ?_), ← mul_assoc, mul_assoc (a:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_ ) (b := walsh ?_ ?_ ) (c:=  haarFunctionScaled ?_ ?_ ?_ ), mul_comm (a:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_ ) (b:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_ ), ← mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
     simp_rw[mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.const_mul
@@ -461,14 +422,7 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
   · simp only [Finset.mem_range]
     intro i hi
-    have : (fun y ↦
-    f y * walsh (2 ^ M) y * haarFunctionScaled (-↑M) (↑i) y * walsh (2 ^ M) x *
-      haarFunctionScaled (-↑M) (↑i) x) = (fun y ↦
-    walsh (2 ^ M) x *
-      haarFunctionScaled (-↑M) (↑i) x * walsh (2 ^ M) y * haarFunctionScaled (-↑M) (↑i) y * f y ) := by
-      ext a
-      linarith
-    simp_rw[this]
+    simp_rw[mul_assoc, mul_comm (a:= f ?_), ← mul_assoc, mul_assoc (a:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_ ) (b := walsh ?_ ?_ ) (c:=  haarFunctionScaled ?_ ?_ ?_), mul_comm (a:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_) (b:= walsh ?_ ?_ * haarFunctionScaled ?_ ?_ ?_), ← mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
     simp_rw[mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.const_mul
@@ -476,29 +430,25 @@ theorem lemma1_2 {M N : ℕ} (h1 : 2 ^ M ≤ N) (h2 : N < 2 ^ (M + 1)) (f : ℝ 
     apply MeasureTheory.BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
 
 
-
-
-/--
-Lemma 3
--/
-theorem lemma2helphelp {M : ℕ} {y : ℝ} {i : ℕ} (h3 : y ∈ (Set.Ico 0 1)) : walsh i y * rademacherFunction M y = walsh (2^M^^^i) y := by
+theorem lemma2helphelp1 {M : ℕ} {y : ℝ} {i : ℕ} (h3 : y ∈ (Set.Ico 0 1)) : walsh i y * rademacherFunction M y = walsh (2^M^^^i) y := by
   simp only [mem_Ico] at h3
   rw[← differentwalshRademacherRelation h3.1 h3.2 , ← prodofwalshworse h3.1 h3.2 ]
   exact Nat.xor_comm (2 ^ M) i
 
-theorem lemma2helphelpextra {M : ℕ} {y : ℝ} {i : ℕ} (h : y ∈ univ \ (Set.Ico 0 1)) : walsh i y * rademacherFunction M y = walsh (2^M^^^i) y := by
+
+theorem lemma2helphel2 {M : ℕ} {y : ℝ} {i : ℕ} (h : y ∈ univ \ (Set.Ico 0 1)) : walsh i y * rademacherFunction M y = walsh (2^M^^^i) y := by
   simp only [mem_diff, mem_univ, mem_Ico, not_and, not_lt, true_and] at h
   apply Decidable.not_or_of_imp at h
   simp only [not_le] at h
-  rw[walsh_not_in y h , walsh_not_in y h]
-  simp only [zero_mul]
+  rw[walsh_not_in y h , walsh_not_in y h, zero_mul]
 
 
 theorem lemma2helphelp' {M : ℕ} {y : ℝ} {i : ℕ} : walsh i y * rademacherFunction M y = walsh (2^M^^^i) y := by
   by_cases h : y ∈ (Set.Ico 0 1)
-  · exact lemma2helphelp h
+  · exact lemma2helphelp1 h
   · push_neg at h
-    refine lemma2helphelpextra (mem_diff_of_mem trivial h)
+    refine lemma2helphel2 (mem_diff_of_mem trivial h)
+
 
 theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
   (f : ℝ → ℝ) (hf' : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
@@ -532,17 +482,9 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
       simp only [Finset.coe_sdiff, Finset.coe_range, Iio_diff_Iio, mem_Ico] at hk
       constructor
       · rw[h2]
-        refine Nat.sub_lt_left_of_lt_add ?_ ?_
-        · exact hk.1
-        · have : 2 ^ M + (N - 2 ^ M + 1) = N + 1 := by
-            rw [Nat.add_comm, add_assoc, add_comm]
-            conv_rhs => rw[add_comm]
-            rw[add_assoc, add_left_cancel_iff, Nat.add_sub_cancel' h10]
-          rw[this]
-          exact hk.2
+        refine Nat.sub_lt_left_of_lt_add hk.1 (by omega)
       · rw[hs]
-        refine Nat.sub_add_cancel ?_
-        exact hk.1
+        refine Nat.sub_add_cancel hk.1
     · intro k hk
       rw[h2] at hk
       simp only [Finset.mem_range] at hk
@@ -559,23 +501,19 @@ theorem lemma2help {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h
       · rw[Nat.xor_comm ]
         apply about_altern_and_add' hk'
   · intro i hi
-    have : (fun y ↦ f y * walsh i y * rademacherFunction M y * walsh i x * rademacherFunction M x )= (fun y ↦ walsh i x * rademacherFunction M x *walsh i y * rademacherFunction M y *   f y ) := by
-      ext y
-      linarith
-    simp_rw[this]
+    simp_rw[mul_assoc, mul_comm (a:= f ?_), ← mul_assoc, mul_assoc (a:= walsh ?_ ?_ * rademacherFunction ?_ ?_ ) (b := walsh ?_ ?_ ) (c:=  rademacherFunction ?_ ?_ ), mul_comm (a:= walsh ?_ ?_ * rademacherFunction ?_ ?_) (b:= walsh ?_ ?_ * rademacherFunction ?_ ?_), ← mul_assoc]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
     apply MeasureTheory.BoundedCompactSupport.mul ?_ bcs_rademacher01
     apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh01
   · intro i hi
-    have : (fun y ↦ f y * walsh i y * walsh i x)= (fun y ↦ walsh i x * walsh i y *  f y ) := by
-      ext y
-      linarith
-    simp_rw[this]
+    simp_rw[mul_comm, mul_comm (a := f ?_), ← mul_assoc ]
     apply MeasureTheory.BoundedCompactSupport.integrable_mul ?_ hf'
     apply MeasureTheory.BoundedCompactSupport.const_mul bcs_walsh01
 
 
-
+/--
+Lemma 3.0.3.
+-/
 theorem lemma2 {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : N' = N - 2 ^ M)
   (f : ℝ → ℝ) (hf : MeasureTheory.Integrable f (MeasureTheory.volume.restrict (Ico 0 1))) (x : ℝ) :
   ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x =
@@ -586,19 +524,18 @@ theorem lemma2 {M N N' : ℕ} (h10 : 2 ^ M ≤ N) (h11 : N < 2 ^ (M + 1)) (h2 : 
   simp only [Pi.mul_apply]
   simp_rw[← MeasureTheory.integral_mul_const]
   rw[lemma2help h10 h11 h2 f hf]
-  apply Finset.sum_congr
-  · simp
-  · intro k hk
-    congr
-    rw [funext_iff]
-    intro y
-    conv_lhs => rw[mul_comm, ← mul_assoc]
-    simp only [mul_eq_mul_right_iff]
-    left
-    rw[mul_comm]
-    simp only [mul_eq_mul_right_iff]
-    left
-    rw[mul_comm, ← mul_assoc]
+  apply Finset.sum_congr (by simp)
+  intro k hk
+  congr
+  rw [funext_iff]
+  intro y
+  conv_lhs => rw[mul_comm, ← mul_assoc]
+  simp only [mul_eq_mul_right_iff]
+  left
+  rw[mul_comm]
+  simp only [mul_eq_mul_right_iff]
+  left
+  rw[mul_comm, ← mul_assoc]
 
 
 
@@ -606,7 +543,7 @@ theorem partition {M N : ℕ} (h1 : 2 ^ M ≤ N) (f : ℝ → ℝ) (x : ℝ) : �
   i ∈ Finset.range (N + 1), walshInnerProduct f i * walsh i x =∑
     i ∈ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x + ∑ i ∈ Finset.range (N + 1) \ Finset.range (2 ^ M), walshInnerProduct f i * walsh i x := by
   conv_rhs => rw[add_comm]
-  rw[Finset.sum_sdiff ]
+  rw[Finset.sum_sdiff]
   rw[Finset.range_subset]
   exact Nat.le_add_right_of_le h1
 

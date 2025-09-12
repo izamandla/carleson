@@ -1,23 +1,28 @@
 import Carleson.Project.modules.WalshHaarproduct
 
-
-open InnerProductSpace MeasureTheory Set BigOperators
-open Walsh Haar BinaryRepresentationSet WalshHaar WalshRademacher
-open Function Set
-open unitInterval DyadicStructures
-
+open InnerProductSpace MeasureTheory Set BigOperators Walsh Haar BinaryRepresentationSet WalshHaar WalshRademacher Function Set unitInterval DyadicStructures
 noncomputable section
 
+/- ## Coeficients used to prove relation between Walsh functions and product of Walsh and Haar -/
 namespace Coef
 
+/--
+Definition of coefficients used to show the relation between Walsh functions and product of Walsh and Haar.
+-/
 def coef (M k : ℕ) : ℕ → ℝ :=
   (walshindicatorrightform (M := M) (k := k)).choose
 
 
+/--
+Checking that definition fulfills the property.
+-/
 theorem basiccoef (M k : ℕ) {x : ℝ} : ∑ j ∈ Finset.range (2 ^ M),  walsh j x * coef M k j = walshhaar M k x := by
   apply congrFun ((walshindicatorrightform (M := M) (k := k)).choose_spec) x
 
 
+/--
+Relating coefficient to inner product.
+-/
 theorem notsobasiccoef (M k j : ℕ) (hj : j ∈ Finset.range (2 ^ M)) : coef M k j = ∫ y in Set.Ico 0 1, walshhaar M k y * walsh j y := by
   simp_rw[← basiccoef, Finset.sum_mul, mul_assoc, mul_comm, mul_assoc]
   rw[MeasureTheory.integral_finset_sum]
@@ -36,13 +41,12 @@ theorem notsobasiccoef (M k j : ℕ) (hj : j ∈ Finset.range (2 ^ M)) : coef M 
   · intro i hi
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
-    apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh01 bcs_walsh01
 
 
-
-
-
+/--
+Sum over the products of coefficients of different second variable gives `0`.
+-/
 theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 0 := by
   have h: ∫ y in Set.Ico 0 1, walshhaar M k y * walshhaar M k' y = 0 := by
     refine walshHaar_ort h0
@@ -85,8 +89,7 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
         apply MeasureTheory.Integrable.const_mul
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
-        apply BoundedCompactSupport.restrict
-        apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+        apply BoundedCompactSupport.mul bcs_walsh01 bcs_walsh01
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -94,15 +97,12 @@ theorem bighelpextra0 {M k k' : ℕ} (h0 : k ≠ k') : ∑ j ∈ Finset.range (2
     apply MeasureTheory.Integrable.const_mul
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
-    apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh01 bcs_walsh01
 
 
-
-
-
-
-
+/--
+Sum over the products of coefficients of the same second variable gives `1`.
+-/
 theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k' j = 1 := by
   rw[h0, ← wlashhaar_norm hk]
   have hf (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M), walsh j x * coef M k j = walshhaar M k x :=by
@@ -143,8 +143,7 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
         apply MeasureTheory.Integrable.const_mul
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
-        apply BoundedCompactSupport.restrict
-        apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+        apply BoundedCompactSupport.mul bcs_walsh01 bcs_walsh01
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -152,16 +151,10 @@ theorem bighelpextra1 {M k k' : ℕ} (hk : k ≤ 2 ^ M - 1) (h0 : k = k') : ∑ 
     apply MeasureTheory.Integrable.const_mul
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
-    apply BoundedCompactSupport.restrict
-    apply BoundedCompactSupport.mul bcs_walsh bcs_walsh
+    apply BoundedCompactSupport.mul bcs_walsh01 bcs_walsh01
 
 
-theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k j = 1 := by
-  exact bighelpextra1 hk rfl
-
-
-
-
+theorem bighelpextra1' {M k : ℕ} (hk : k ≤ 2 ^ M - 1) : ∑ j ∈ Finset.range (2^M), coef M k j * coef M k j = 1 := bighelpextra1 hk rfl
 
 
 theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) : (2^(-M :ℤ )) * walsh n x = ∫ (y : ℝ) in Ico (2^(-M :ℤ ) * k :ℝ ) (2^(-M :ℤ ) * (k+1) :ℝ ) , walsh n y := by
@@ -172,21 +165,16 @@ theorem aboutwalshhelp {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M)
   have h : ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (↑k + 1)), walsh n y = ∫ (y : ℝ) in Ico (2 ^ (-M :ℤ ) * k :ℝ ) (2 ^ (-M :ℤ ) * (k + 1)), p := by
     refine setIntegral_congr_fun measurableSet_Ico hp
   rw[h]
-  simp only [integral_const, MeasurableSet.univ, measureReal_restrict_apply, univ_inter,
-    Real.volume_real_Ico, smul_eq_mul, mul_eq_mul_right_iff]
   ring_nf
   simp
 
 
-
-
-
-
-
+/--
+Relation of coefficients to dyadic intervals.
+-/
 theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx : x ∈ dyadicInterval (-M : ℤ) k) : walsh n x = coef M k n  * (2 ^ ((M:ℝ )/2)) := by
   rw[← mul_right_inj' (a := (2^(-M :ℤ )) ) ]
-  · rw[aboutwalshhelp hn hk hx]
-    rw[notsobasiccoef]
+  · rw[aboutwalshhelp hn hk hx, notsobasiccoef]
     · rw[← MeasureTheory.integral_mul_const, ← MeasureTheory.integral_const_mul]
       simp_rw[mul_comm, ← mul_assoc]
       rw[← MeasureTheory.integral_indicator (measurableSet_Ico), ← MeasureTheory.integral_indicator (measurableSet_Ico)]
@@ -229,8 +217,7 @@ theorem aboutwalsh {M n k : ℕ} {x : ℝ} (hn : n < 2 ^ M) (hk : k < 2 ^ M) (hx
   · simp
 
 
-
-theorem ayayayhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
+theorem sumcoefhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx : x ∈ dyadicInterval (-M : ℤ) k) :  ∑ l ∈ Finset.range (2^M), coef M l n  * walshhaar M l x = coef M k n  * walshhaar M k x := by
   rw[Finset.sum_eq_sum_diff_singleton_add hk fun x_1 ↦ coef M x_1 n * walshhaar M x_1 x]
   simp only [add_eq_right]
   apply Finset.sum_eq_zero
@@ -251,16 +238,17 @@ theorem ayayayhelp {M n k : ℕ} {x : ℝ} (hk : k ∈ Finset.range (2 ^ M)) (hx
       norm_cast
       exact hl.2
   exfalso
-  rw[← Set.disjoint_iff_inter_eq_empty ] at h2
+  rw[← Set.disjoint_iff_inter_eq_empty] at h2
   apply Disjoint.notMem_of_mem_left h2 h1 hx
 
 
-
-theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
+/--
+Functional version of linear combination.
+-/
+theorem sumcoef {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ ∑ k ∈ Finset.range (2^M), coef M k n  * walshhaar M k x) := by
   ext x
   by_cases hx : x<0 ∨  x ≥ 1
-  · rw[walsh_zero_outside_domain n x hx]
-    rw[Finset.sum_eq_zero]
+  · rw[walsh_zero_outside_domain n x hx, Finset.sum_eq_zero]
     intro k hk
     rw[notsobasiccoef]
     · simp only [mul_eq_zero]
@@ -273,10 +261,9 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ 
       exact hn
   simp only [ge_iff_le, not_or, not_lt, not_le] at hx
   obtain ⟨  p, hp1, hp2 ⟩  := (extdiin01 hx.1 hx.2  (k := M ) (x := x))
-  rw[ayayayhelp (k:= p) hp1 hp2 ]
+  rw[sumcoefhelp (k:= p) hp1 hp2 ]
   simp only [Finset.mem_range] at hp1
-  rw[aboutwalsh hn hp1 hp2]
-  simp only [mul_eq_mul_left_iff]
+  rw[aboutwalsh hn hp1 hp2, mul_eq_mul_left_iff]
   rw[← Finset.mem_range] at hp1
   rw[walshhaarprop hp1 hx.1 hx.2 , indicator]
   rw[intervalform_dyadicInterval ] at hp2
@@ -286,18 +273,19 @@ theorem ayayay {M n : ℕ} (hn : n < 2 ^ M) : (fun x ↦ walsh n x) = (fun x↦ 
     exact h1 hp2
 
 
-
-
-theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range (2 ^ M)) (hk' : k' ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
+/--
+Sum over the products of coefficients of different third variable gives `0`.
+-/
+theorem sumcoefthird {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range (2 ^ M)) (hk' : k' ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k'  =  0 := by
   rw[← walsh_ort (id (Ne.symm h0))]
   have hf (x : ℝ ) : walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
     simp only [Finset.mem_range] at hk
-    apply congrFun (ayayay hk)
+    apply congrFun (sumcoef hk)
   have hg (x : ℝ ) : ∑ j ∈ Finset.range (2 ^ M),walshhaar M j x * coef M j k' =  walsh k' x:= by
     simp only [Finset.mem_range] at hk'
     rw[eq_comm]
     simp_rw[mul_comm]
-    apply congrFun (ayayay hk')
+    apply congrFun (sumcoef hk')
   have hr : ∫ (y : ℝ) in Ico 0 1, walsh k y * walsh k' y= ∫ (y : ℝ) in Ico 0 1,  ( ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j y) * (∑ j ∈ Finset.range (2 ^ M),walshhaar M j y * coef M j k') := by
     congr
     ext y
@@ -329,10 +317,9 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range
       unfold walshhaar
       apply MeasureTheory.Integrable.const_mul
       apply BoundedCompactSupport.integrable
-      apply BoundedCompactSupport.restrict
       apply BoundedCompactSupport.mul
-      · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
-      · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+      · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
+      · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -343,17 +330,18 @@ theorem bighelpextra0wrr {M k k' : ℕ} (h0 : k ≠ k') (hk : k ∈ Finset.range
     unfold walshhaar
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
-    apply BoundedCompactSupport.restrict
     apply BoundedCompactSupport.mul
-    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
-    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
+    · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
 
 
-theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by
-  rw[← walsh_norm' k]
+/--
+Sum of the product of coefficients of the same third variable equals to `1`.
+-/
+theorem sumcoefthird1 {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j ∈ Finset.range (2^M), coef M j k  * coef M j k  =  1 := by
   have hf (x : ℝ ) : walsh k x =  ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j x:=by
     simp only [Finset.mem_range] at hk
-    apply congrFun (ayayay hk)
+    apply congrFun (sumcoef hk)
   have hr : ∫ (y : ℝ) in Ico 0 1, walsh k y * walsh k y= ∫ (y : ℝ) in Ico 0 1,  ( ∑ j ∈ Finset.range (2^M), coef M j k  * walshhaar M j y) * (∑ j ∈ Finset.range (2 ^ M),walshhaar M j y * coef M j k) := by
     congr
     ext y
@@ -363,7 +351,7 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
     congr
     ext y
     rw[mul_comm]
-  rw[hr]
+  rw[← walsh_norm' k, hr]
   simp_rw [@Finset.sum_mul_sum, ← mul_assoc, mul_comm, ← mul_assoc]
   rw[MeasureTheory.integral_finset_sum]
   · apply Finset.sum_congr
@@ -392,10 +380,9 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
         unfold walshhaar
         apply MeasureTheory.Integrable.const_mul
         apply BoundedCompactSupport.integrable
-        apply BoundedCompactSupport.restrict
         apply BoundedCompactSupport.mul
-        · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
-        · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+        · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
+        · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
   · intro i hi
     apply MeasureTheory.integrable_finset_sum
     intro j hj
@@ -403,10 +390,9 @@ theorem bighelpextra1wrr {M k : ℕ} (hk : k ∈ Finset.range (2 ^ M)) : ∑ j �
     unfold walshhaar
     apply MeasureTheory.Integrable.const_mul
     apply BoundedCompactSupport.integrable
-    apply BoundedCompactSupport.restrict
     apply BoundedCompactSupport.mul
-    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
-    · apply BoundedCompactSupport.mul bcs_walsh bcs_haarscaled
+    · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
+    · apply BoundedCompactSupport.mul bcs_walsh01 bcs_haarscaled01
 
 
 end Coef

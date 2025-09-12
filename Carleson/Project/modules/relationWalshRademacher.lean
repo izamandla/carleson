@@ -3,13 +3,12 @@ import Carleson.Project.modules.Haar
 import Carleson.Project.modules.Walsh
 import Mathlib.Data.Nat.Bitwise
 
-open InnerProductSpace MeasureTheory Set BigOperators
-open Walsh Haar BinaryRepresentationSet
+open InnerProductSpace MeasureTheory Set BigOperators Walsh Haar BinaryRepresentationSet
 
 noncomputable section
 
+/- ## Relations between Walsh and Rademacher functions -/
 namespace WalshRademacher
-
 
 
 /--
@@ -182,10 +181,8 @@ theorem walshRademacherRelationresult {M N : ℕ} {x : ℝ} (h : M ∈ binaryRep
   exact Finset.prod_eq_mul_prod_diff_singleton h fun x_1 ↦ rademacherFunction x_1 x
 
 
-
-
 /--
-Product of two walsh functions
+Product of two walsh functions.
 -/
 theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (hk : k = M ^^^ N) : walsh k x = walsh M x * walsh N x:= by
   rw[differenceofbinaryrepset] at hk
@@ -195,29 +192,9 @@ theorem prodofwalshworse {M N k : ℕ} {x : ℝ} (hx1 : 0 ≤ x) (hx2 : x < 1) (
     apply rad_sqr hx1 hx2
 
 
-
-
-theorem walsh_int {n : ℕ} (h : n > 0) : ∫ (x : ℝ) in Ico 0 1, walsh n x = 0 := by
-  induction' n using Nat.strong_induction_on with n ih
-  by_cases h1: Odd n
-  · rw[intofodd h1]
-  · simp only [Nat.not_odd_iff_even] at h1
-    set l :=n/2 with hl
-    have hl' : 2* l = n := by
-      exact Nat.two_mul_div_two_of_even h1
-    have hl1 : l< n := by
-      refine Nat.bitwise_rec_lemma (Nat.ne_zero_of_lt h)
-    have hl2: 0< l := by
-      refine Nat.zero_lt_of_ne_zero ?_
-      by_contra hl3
-      rw[hl3] at hl'
-      linarith
-    rw[intofeven hl']
-    exact ih l hl1 hl2
-
-
-
-
+/--
+Orthogonality of Walsh functions with using defined Walsh inner product.
+-/
 theorem walsh_ort_dif {n m : ℕ} (h : m ≠ n) : walshInnerProduct (walsh n) m  = 0 := by
   set k := m^^^n with hk
   simp_rw[walshInnerProduct, ← Pi.mul_apply]
@@ -231,6 +208,9 @@ theorem walsh_ort_dif {n m : ℕ} (h : m ≠ n) : walshInnerProduct (walsh n) m 
   refine Nat.zero_lt_of_ne_zero (Nat.xor_ne_zero.mpr h)
 
 
+/--
+Orthogonality of Walsh functions.
+-/
 theorem walsh_ort {n m : ℕ} (h : m ≠ n) : ∫ (x : ℝ) in Ico 0 1, walsh n x * walsh m x = 0 := by
   set k := m^^^n with hk
   simp_rw[← Pi.mul_apply]
@@ -257,5 +237,6 @@ theorem fun_change_partial_sum (M N : ℕ) (f : ℝ → ℝ) (x : ℝ) : rademac
   · intro z hz
     simp only [Pi.mul_apply]
     linarith
+
 
 end WalshRademacher

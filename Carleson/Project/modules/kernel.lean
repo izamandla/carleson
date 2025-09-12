@@ -32,5 +32,4 @@ theorem kernel_two_pow (N : ℕ) (x y : ℝ) : kernel (2^N) x y = 1 + ∑ n ∈ 
   simp only [kernel, binaryforpower, Finset.sum_singleton]
 
 
-
 end Kernel

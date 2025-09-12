@@ -8,7 +8,7 @@ import Mathlib.MeasureTheory.Constructions.Polish.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 
-open Function Set MeasureTheory BoundedCompactSupport DyadicStructures--Classical
+open Function Set MeasureTheory BoundedCompactSupport DyadicStructures
 noncomputable section
 
 /- ## Walsh Functions and Walsh-Fourier Series -/
@@ -666,6 +666,28 @@ Relation between integrals of walsh funtions of `n` and `2n`.
 theorem intofeven {n k : ℕ} (hk : 2 * k = n) : ∫ x in Set.Ico 0 1,  walsh n x =  ∫ x in Set.Ico 0 1,  walsh k x  := by
   rw[← intsum, ← hk, ← relbetweeninteven1, ← relbetweeninteven2, changeofint_firsthalf, changeofint_secondhalf, ← mul_add, Eq.symm (two_mul (∫ (x : ℝ) in Ico 0 1, walsh k x))]
   simp
+
+
+/--
+Integral of walsh function vanishes on `Ico 0 1`.
+-/
+theorem walsh_int {n : ℕ} (h : n > 0) : ∫ (x : ℝ) in Ico 0 1, walsh n x = 0 := by
+  induction' n using Nat.strong_induction_on with n ih
+  by_cases h1: Odd n
+  · rw[intofodd h1]
+  · simp only [Nat.not_odd_iff_even] at h1
+    set l :=n/2 with hl
+    have hl' : 2* l = n := by
+      exact Nat.two_mul_div_two_of_even h1
+    have hl1 : l< n := by
+      refine Nat.bitwise_rec_lemma (Nat.ne_zero_of_lt h)
+    have hl2: 0< l := by
+      refine Nat.zero_lt_of_ne_zero ?_
+      by_contra hl3
+      rw[hl3] at hl'
+      linarith
+    rw[intofeven hl']
+    exact ih l hl1 hl2
 
 
 /--
